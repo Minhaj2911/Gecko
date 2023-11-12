@@ -3,6 +3,7 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
 from .models import User, Task
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 class LogInForm(forms.Form):
@@ -120,9 +121,7 @@ class TaskForm(forms.ModelForm):
         fields=['title', 'description','assignee', 'due_date']
 
     def clean(self):
-        """Clean the data and geberate error message for invalid past due dates."""
-        cleaned_data= super().clean()
-        due_date = cleaned_data.get('due_date')
-        if due_date and due_date < timezone.now():
-            self.add_error('due_date', 'Past dates can not be selected')
-        return cleaned_data
+        super().clean()
+        due_date = self.cleaned_data.get('due_date')
+        if due_date is not None and due_date < timezone.now():
+            self.add_error('due_date', 'Due date cannot be in the past')

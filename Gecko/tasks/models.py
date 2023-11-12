@@ -57,7 +57,7 @@ class Task(models.Model):
 
     def clean(self):
         super().clean()
-        if self.due_date < timezone.now():
+        if self.due_date is not None and self.due_date < timezone.now():
             raise ValidationError("Due date cannot be in the past")
 
 

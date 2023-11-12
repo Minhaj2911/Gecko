@@ -26,6 +26,16 @@ def home(request):
 
     return render(request, 'home.html')
 
+def create_task(request):
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = TaskForm()
+    return render(request, 'create_task.html', {'form': form})
+
 
 class LoginProhibitedMixin:
     """Mixin that redirects when a user is logged in."""
@@ -151,13 +161,3 @@ class SignUpView(LoginProhibitedMixin, FormView):
 
     def get_success_url(self):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
-
-def create_task(request):
-    if request.method == 'POST':
-        form = TaskForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('dashboard')
-    else:
-        form = TaskForm()
-    return render(request, 'create_task.html', {'form': form})

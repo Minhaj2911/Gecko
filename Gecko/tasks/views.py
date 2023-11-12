@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm
 from tasks.helpers import login_prohibited
 
 
@@ -151,3 +151,13 @@ class SignUpView(LoginProhibitedMixin, FormView):
 
     def get_success_url(self):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
+
+def create_task(request):
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = TaskForm()
+    return render(request, 'create_task.html', {'form': form})

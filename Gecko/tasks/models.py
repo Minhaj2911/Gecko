@@ -2,6 +2,9 @@ from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from libgravatar import Gravatar
+from django.utils import timezone
+from django.core.exceptions import ValidationError
+
 
 class User(AbstractUser):
     """Model used for user authentication, and team member related information."""
@@ -41,14 +44,25 @@ class User(AbstractUser):
         
         return self.gravatar(size=60)
     
-    class Task(models.Model):
-        """" Tasks can be created by team members.  """
-        title= models.CharField(max_length=50, blank=False)
-        description= models.CharField(max_length=400, blank=True)
-        assignee= models.ForeignKey(
-            "User",
-            on_delete=models.CASCADE,
-        )
-        due_date= models.DateTimeField()
+class Task(models.Model):
+    """" Tasks can be created by team members.  """
+
+    title= models.CharField(max_length=50, blank=False)
+    description= models.CharField(max_length=400, blank=True)
+    assignee= models.ForeignKey(
+        "User",
+        on_delete=models.CASCADE,
+    )
+    due_date= models.DateTimeField()
+
+    def clean(self):
+        super().clean()
+        if self.due_date < timezone.now():
+            raise ValidationError("Due date cannot be in the past")
+
+
+         
+
+
 
 

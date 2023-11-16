@@ -62,21 +62,19 @@ class TaskFormTestCase(TestCase):
         task= Task.objects.get(title= 'Project meeting')
         self.assertEqual(task.description, 'Conduct a meeting to discuss the new project design')
         self.assertEqual(task.assignee, self.user)
-        expected_due_date= timezone.now() + timezone.timedelta(days= 3)
-        self.assertEqual(task.due_date.year, expected_due_date.year)
-        self.assertEqual(task.due_date.month, expected_due_date.month)
-        self.assertEqual(task.due_date.day, expected_due_date.day)
-        self.assertEqual(task.due_date.hour, expected_due_date.hour)
+        valid_due_date= timezone.now() + timezone.timedelta(days= 3)
+        self.assert_equal_due_date(task.due_date, valid_due_date)
     
     def test_form_allows_editing_existing_form(self):
         existing_form= TaskForm(data= self.form_input)
         self.assertTrue(existing_form.is_valid())
         existing_task= existing_form.save()
+        edited_due_date= timezone.now() + timezone.timedelta(days= 4)
         edited_data= {
             'title': 'Review tasks',
             'description': 'Create checklist to review tasks',
             'assignee': self.user,
-            'due_date': timezone.now() + timezone.timedelta(days= 4)
+            'due_date': edited_due_date
         }
         updated_task= TaskForm(instance= existing_task,data= edited_data)
         self.assertTrue(updated_task.is_valid())
@@ -85,9 +83,13 @@ class TaskFormTestCase(TestCase):
         self.assertEqual(existing_task.title, 'Review tasks')
         self.assertEqual(existing_task.description, 'Create checklist to review tasks')
         self.assertEqual(existing_task.assignee, self.user)
-        self.assertEqual(existing_task.due_date.year, edited_data['due_date'].year)
-        self.assertEqual(existing_task.due_date.month, edited_data['due_date'].month)
-        self.assertEqual(existing_task.due_date.day, edited_data['due_date'].day)
-        self.assertEqual(existing_task.due_date.hour, edited_data['due_date'].hour)
+        self.assert_equal_due_date(existing_task.due_date, edited_due_date)
+
+    def assert_equal_due_date(self, due_date , expected_due_date):
+        self.assertEqual(due_date.year, expected_due_date.year)
+        self.assertEqual(due_date.month, expected_due_date.month)
+        self.assertEqual(due_date.day, expected_due_date.day)
+        self.assertEqual(due_date.hour, expected_due_date.hour)
+        self.assertEqual(due_date.minute, expected_due_date.minute)
 
 

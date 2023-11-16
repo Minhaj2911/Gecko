@@ -119,6 +119,12 @@ class TaskForm(forms.ModelForm):
 
         model= Task
         fields=['title', 'description','assignee', 'due_date']
+        widgets= {
+            'due_date': forms.DateTimeInput(
+                format= '%Y-%m-%dT%H:%M',
+                attrs={'type': 'datetime-local'}
+            )
+        }
 
     def clean(self):
         super().clean()

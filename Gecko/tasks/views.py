@@ -10,6 +10,19 @@ from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tasks.helpers import login_prohibited
+from .tokens import account_activation_token
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.core.mail import send_mail
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_text
+from .tokens import account_activation_token
+from django.contrib.auth import get_user_model
+from .forms import EditProfileForm
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+
 
 
 @login_required
@@ -18,6 +31,30 @@ def dashboard(request):
 
     current_user = request.user
     return render(request, 'dashboard.html', {'user': current_user})
+
+def edit_account(request):
+    if request.method == 'POST':
+        profile_form = EditProfileForm(request.POST, instance=request.user)
+        password_form = PasswordChangeForm(request.user, request.POST)
+
+        if 'update_profile' in request.POST and profile_form.is_valid():
+            profile_form.save()
+            messages.success(request, 'Your profile was successfully updated!')
+
+        elif 'change_password' in request.POST and password_form.is_valid():
+            user = password_form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Your password was successfully updated!')
+
+    else:
+        profile_form = EditProfileForm(instance=request.user)
+        password_form = PasswordChangeForm(request.user)
+
+    return render(request, 'edit_account.html', {
+        'profile_form': profile_form, 
+        'password_form': password_form
+    })
+
 
 
 @login_prohibited
@@ -72,10 +109,16 @@ class LogInView(LoginProhibitedMixin, View):
         form = LogInForm(request.POST)
         self.next = request.POST.get('next') or settings.REDIRECT_URL_WHEN_LOGGED_IN
         user = form.get_user()
-        if user is not None:
+        if user is not None and user.is_active:
             login(request, user)
             return redirect(self.next)
-        messages.add_message(request, messages.ERROR, "The credentials provided were invalid!")
+        
+        elif user is not None and not user.is_active:
+            messages.add_message(request, messages.ERROR, "Please verify your email to activate your account.")
+            
+        else:
+            messages.add_message(request, messages.ERROR, "The credentials provided were invalid!")
+
         return self.render()
 
     def render(self):
@@ -145,9 +188,49 @@ class SignUpView(LoginProhibitedMixin, FormView):
     redirect_when_logged_in_url = settings.REDIRECT_URL_WHEN_LOGGED_IN
 
     def form_valid(self, form):
-        self.object = form.save()
-        login(self.request, self.object)
+        self.object = form.save(commit=False)
+        self.object.is_active = False 
+        self.object.save()
+        
+        mail_subject = 'Activate your account.'
+        message = render_to_string('activation_email.html', {
+            'user': self.object,
+            'domain': 'localhost:8000',  # replace with pythonanywhere
+            'uid': urlsafe_base64_encode(force_bytes(self.object.pk)),
+            'token': account_activation_token.make_token(self.object),
+        })
+        to_email = self.object.email
+        from_email = settings.EMAIL_HOST_USER
+        send_mail(mail_subject, message, from_email, [to_email], fail_silently=False)
+
+        messages.add_message(self.request, messages.INFO, 'Please confirm your email address to complete the registration.')
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
+        return reverse('email_verification_notice') ###########################
+    
+def send_activatation_email(request, uidb64, token):
+    User = get_user_model()
+    try:
+        uid = force_text(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and account_activation_token.check_token(user, token):
+        if not user.is_active:
+            user.is_active = True
+            user.save()
+            messages.success(request, 'Your account has been activated, please log in.')
+            return redirect('log_in')
+        else:
+            messages.success(request, 'You already activated your account, please log in.')
+            return redirect('log_in')  
+    else:
+        messages.error(request, 'Activation link is invalid!')
+        return redirect('error_page')  ###############################################
+
+def request_new_email_verification()
+
+# create tests for everything added
+#Testing: Test the entire email verification process, including token expiration behavior and scenarios where a token might be reused.

@@ -138,3 +138,11 @@ REDIRECT_URL_WHEN_LOGGED_IN = 'dashboard'
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
+
+# Email configuration for user authentication
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Gmail's SMTP server
+EMAIL_PORT = 587  # Port for secure SMTP
+EMAIL_USE_TLS = True  # Enable TLS (required for Gmail)
+EMAIL_HOST_USER = 'team.gecko.authentication@gmail.com'  # Our Gmail address
+EMAIL_HOST_PASSWORD = 'TeamGecko123'  # Our Gmail password

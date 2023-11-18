@@ -1,5 +1,5 @@
 from django.core.validators import RegexValidator
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group
 from django.db import models
 from libgravatar import Gravatar
 
@@ -40,3 +40,9 @@ class User(AbstractUser):
         """Return a URL to a miniature version of the user's gravatar."""
         
         return self.gravatar(size=60)
+    
+class Team(Group):
+    team_admin = User
+    #team_members = [] # test all team members are in database and of class user
+    #name = models.CharField(max_length=50, blank=False)
+    description = models.CharField(max_length=500, blank=False)

@@ -15,6 +15,14 @@
   padding-top: 10px;
 }
 
+#cover-image {
+  background: url('images/gecko.jpg') no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+  -o-background-size: cover;
+}
+
 .h-100 {
   min-height: 100vh;
   height: 100vh;

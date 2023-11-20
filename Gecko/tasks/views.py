@@ -10,22 +10,22 @@ from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm
 from tasks.helpers import login_prohibited
-
+from .models import Task
 
 @login_required
 def dashboard(request):
     """Display the current user's dashboard."""
 
     current_user = request.user
-    return render(request, 'dashboard.html', {'user': current_user})
-
+    user_tasks = Task.objects.filter(assignee = current_user)
+    #return render(request, 'dashboard.html', {'user': current_user})
+    return render(request, 'dashboard.html', {'user_tasks': user_tasks})
 
 @login_prohibited
 def home(request):
     """Display the application's start/home screen."""
 
     return render(request, 'home.html')
-
 
 class LoginProhibitedMixin:
     """Mixin that redirects when a user is logged in."""

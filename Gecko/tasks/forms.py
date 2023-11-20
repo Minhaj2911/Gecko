@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
 from .models import User
 
+
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
 

@@ -54,6 +54,13 @@ class Task(models.Model):
         on_delete=models.CASCADE,
     )
     due_date= models.DateTimeField()
+    
+    STATUS_CHOICES = [
+        ('assigned', 'Assigned'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+    ]
+    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default='assigned')
 
     def clean(self):
         super().clean()

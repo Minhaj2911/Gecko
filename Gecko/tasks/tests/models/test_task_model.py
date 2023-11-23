@@ -21,12 +21,27 @@ class TaskTest(TestCase):
             title= 'Project meeting',
             description= 'Conduct a meeting to discuss the new project design',
             assignee= self.user,
-            due_date= timezone.now() + timezone.timedelta(days= 3)
+            due_date= timezone.now() + timezone.timedelta(days= 3),
+            status= 'assigned'
         )
     
     def test_title_cannot_be_blank(self):
         self.task.title= ''
         self._assert_task_is_invalid(self.task)
+    
+    def test_valid_default_status(self):
+        self.task.status= 'assigned'
+        self._assert_task_is_valid(self.task)
+    
+    def test_invalid_status(self):
+        self.task.status= ' '
+        self._assert_task_is_invalid(self.task)
+    
+    def test_valid_status_choice(self):
+        valid_status_choices= ['assigned', 'in_progress', 'completed']
+        for status in valid_status_choices:
+            self.task.status= status
+            self._assert_task_is_valid(self.task)
     
     def test_description_can_be_blank(self):
         self.task.description= ''

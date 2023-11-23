@@ -22,7 +22,8 @@ class TaskFormTestCase(TestCase):
             'title': 'Project meeting',
             'description': 'Conduct a meeting to discuss the new project design',
             'assignee': self.user,
-            'due_date': timezone.now() + timezone.timedelta(days= 3)
+            'due_date': timezone.now() + timezone.timedelta(days= 3),
+            'status': 'assigned'
         }
 
     def test_valid_task_form(self):
@@ -36,6 +37,7 @@ class TaskFormTestCase(TestCase):
         self.assertIn('assignee', form.fields)
         due_date_field = form.fields['due_date']
         self.assertTrue(isinstance(due_date_field, forms.DateTimeField))
+        self.assertIn('status', form.fields)
     
     def test_form_rejects_blank_title(self):
         self.form_input['title']= ''
@@ -52,6 +54,16 @@ class TaskFormTestCase(TestCase):
         form= TaskForm(data= self.form_input)
         self.assertFalse(form.is_valid())
     
+    def test_form_rejects_invalid_status(self):
+        self.form_input['status']= ' '
+        form= TaskForm(data= self.form_input)
+        self.assertFalse(form.is_valid())
+    
+    def test_form_accepts_valid_status(self):
+        self.form_input['status']= 'completed'
+        form= TaskForm(data= self.form_input)
+        self.assertTrue(form.is_valid())
+    
     def test_form_must_save_correctly(self):
         form= TaskForm(data= self.form_input)
         self.assertTrue(form.is_valid())
@@ -64,6 +76,7 @@ class TaskFormTestCase(TestCase):
         self.assertEqual(task.assignee, self.user)
         valid_due_date= timezone.now() + timezone.timedelta(days= 3)
         self.assert_equal_due_date(task.due_date, valid_due_date)
+        self.assertEqual(task.status, self.form_input['status'])
     
     def test_form_allows_editing_existing_form(self):
         existing_form= TaskForm(data= self.form_input)
@@ -74,7 +87,8 @@ class TaskFormTestCase(TestCase):
             'title': 'Review tasks',
             'description': 'Create checklist to review tasks',
             'assignee': self.user,
-            'due_date': edited_due_date
+            'due_date': edited_due_date,
+            'status': 'completed'
         }
         updated_task= TaskForm(instance= existing_task,data= edited_data)
         self.assertTrue(updated_task.is_valid())
@@ -84,6 +98,7 @@ class TaskFormTestCase(TestCase):
         self.assertEqual(existing_task.description, 'Create checklist to review tasks')
         self.assertEqual(existing_task.assignee, self.user)
         self.assert_equal_due_date(existing_task.due_date, edited_due_date)
+        self.assertEqual(existing_task.status, 'completed')
 
     def assert_equal_due_date(self, due_date , expected_due_date):
         self.assertEqual(due_date.year, expected_due_date.year)

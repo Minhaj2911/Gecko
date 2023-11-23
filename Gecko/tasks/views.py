@@ -21,7 +21,7 @@ def dashboard(request):
     #return render(request, 'dashboard.html', {'user': current_user})
     return render(request, 'dashboard.html', {'user_tasks': user_tasks})
 
-@login_prohibited
+#@login_prohibited
 def home(request):
     """Display the application's start/home screen."""
 

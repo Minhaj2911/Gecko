@@ -1,27 +1,28 @@
-{% extends 'base.html' %}
-{% block body %}
-  <div id="cover-image">
-    <div class="container vh-100">
+{% extends 'base_content.html' %}
+{% block content %}
+    <div class="container">
       <div class="row h-100">
-        <div class="col-sm-12 col-md-12 col-lg-5 my-auto">
-          <div class="card cover-card offset-sm-0 offset-md-0 offset-lg-0">
-            <h1 class="cover-heading">Task Manager</h1>
-            <p class="cover-text">A task manager application by Team Gecko</p>
-            <p>
-              <a href='{% url 'sign_up' %}' class="btn btn-lg btn-secondary">
-                Sign up
-              </a>
-            </p>
-            <p>
-              <a href='{% url 'log_in' %}' class="btn btn-lg btn-secondary">
-                Log in
-              </a>
-            </p>
+        {% if not user.is_authenticated%}
+          <div class="col-sm-12 col-md-12 col-lg-5 my-auto">
+            <div class="card cover-card offset-sm-0 offset-md-0 offset-lg-0 mb-3">
+              <h1 class="cover-heading">Task Manager</h1>
+              <p class="cover-text">A task manager application by Team Gecko</p>
+              <p>
+                <a href='{% url 'sign_up' %}' class="btn btn-lg btn-secondary">
+                  Sign up
+                </a>
+              </p>
+              <p>
+                <a href='{% url 'log_in' %}' class="btn btn-lg btn-secondary">
+                  Log in
+                </a>
+              </p>
+            </div>
           </div>
-        </div>
         <div class="col-sm-0 col-md-0 col-lg-1 my-auto"></div>
+      {% endif %}
         <div class="col-sm-12 col-md-12 col-lg-6 my-auto">
-          <div class="card cover-card offset-sm-0 offset-md-0 offset-lg-0">
+          <div class="card cover-card offset-sm-0 offset-md-0 offset-lg-0 mb-3">
             <h1 class="cover-heading">Description</h1>
             <p class="cover-text">Core Features</p>
             <p>
@@ -41,5 +42,5 @@
         </div>
       </div>
     </div>
-  </div>
+
 {% endblock %}

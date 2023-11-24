@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TeamCreationForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TeamForm
 from tasks.helpers import login_prohibited
 
 
@@ -152,11 +152,12 @@ class SignUpView(LoginProhibitedMixin, FormView):
     def get_success_url(self):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
     
-class TeamCreationView(FormView):
-    form_class = TeamCreationForm
+class TeamCreationView(LoginRequiredMixin, FormView):
+    form_class = TeamForm
     template_name = "team_creation.html"
 
-    def form_valid(self, form):
-        self.object = form.save()
-        login(self.request, self.object)
-        return super().form_valid(form)
+    def get_success_url(self):
+        """Return redirect URL after successful update."""
+        messages.add_message(self.request, messages.SUCCESS, "Team Created!")
+        return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
+

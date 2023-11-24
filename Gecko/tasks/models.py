@@ -2,6 +2,8 @@ from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractUser, Group
 from django.db import models
 from libgravatar import Gravatar
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 class User(AbstractUser):
     """Model used for user authentication, and team member related information."""
@@ -42,7 +44,20 @@ class User(AbstractUser):
         return self.gravatar(size=60)
     
 class Team(Group):
-    team_admin = User
-    #team_members = [] # test all team members are in database and of class user
+    """Teams can be created by a user"""
     #name = models.CharField(max_length=50, blank=False)
-    description = models.CharField(max_length=500, blank=False)
+    description = models.CharField(max_length=500, blank=True)
+    admin = models.ForeignKey(
+            "User",
+            on_delete=models.CASCADE,
+        )
+    members = models.ManyToManyField(User, related_name='teams')
+    #team_members = [] # test all team members are in database and of class user
+
+    # def clean(self):
+    # super().clean()
+    # for member in team_members:
+    #     if "member is not None and member is not in database"):
+    #         raise ValidationError("invalid team member" + member)
+    #     id "member is repeated"
+    #       remove from team members

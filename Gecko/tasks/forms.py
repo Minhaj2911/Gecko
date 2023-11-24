@@ -3,8 +3,9 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
-from .models import User, Team
+from .models import User, Team, Task
 from searchableselect.widgets import SearchableSelect
+from django.utils import timezone
 
 
 class LogInForm(forms.Form):
@@ -112,12 +113,11 @@ class SignUpForm(NewPasswordMixin, forms.ModelForm):
         )
         return user
     
+
 class TeamForm(forms.ModelForm):
     """ Form enabling a user to create a team """
-    
     class Meta:
         """Form options."""
-
         model= Team
         fields=['name', 'description','members'] # add team_members
         widgets={
@@ -136,4 +136,24 @@ class TeamForm(forms.ModelForm):
     # def clean(self):
     #     """Clean the data and geberate error message for invalid team members."""
     #     
-        
+
+class TaskForm(forms.ModelForm):
+    """ Form enabling team members to create and assign tasks. """
+
+    class Meta:
+        """Form options."""
+        model= Task
+        fields=['title', 'description','assignee', 'due_date', 'status']
+        widgets= {
+            'due_date': forms.DateTimeInput(
+                format= '%Y-%m-%dT%H:%M',
+                attrs={'type': 'datetime-local'}
+            )
+        }
+
+    def clean(self):
+        super().clean()
+        due_date = self.cleaned_data.get('due_date')
+        if due_date is not None and due_date < timezone.now():
+            self.add_error('due_date', 'Due date cannot be in the past')
+

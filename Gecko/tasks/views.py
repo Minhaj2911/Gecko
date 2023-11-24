@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TeamForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm
 from tasks.helpers import login_prohibited
 
 
@@ -25,6 +25,16 @@ def home(request):
     """Display the application's start/home screen."""
 
     return render(request, 'home.html')
+
+def create_task(request):
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = TaskForm()
+    return render(request, 'create_task.html', {'form': form})
 
 
 class LoginProhibitedMixin:

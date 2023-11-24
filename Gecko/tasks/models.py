@@ -42,7 +42,31 @@ class User(AbstractUser):
         """Return a URL to a miniature version of the user's gravatar."""
         
         return self.gravatar(size=60)
+
+class Task(models.Model):
+    """" Tasks can be created by team members.  """
+
+    title= models.CharField(max_length=50, blank=False)
+    description= models.CharField(max_length=400, blank=True)
+    assignee= models.ForeignKey(
+        "User",
+        on_delete=models.CASCADE,
+    )
+    due_date= models.DateTimeField()
     
+    STATUS_CHOICES = [
+        ('assigned', 'Assigned'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+    ]
+    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default='assigned')
+
+    def clean(self):
+        super().clean()
+        if self.due_date is not None and self.due_date < timezone.now():
+            raise ValidationError("Due date cannot be in the past")
+
+
 class Team(Group):
     """Teams can be created by a user"""
     #name = models.CharField(max_length=50, blank=False)

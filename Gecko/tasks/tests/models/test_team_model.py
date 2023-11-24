@@ -18,10 +18,10 @@ class TeamTest(TestCase):
         )
 
         self.team= Team.objects.create(
-            team_name= 'Gecko',
+            name= 'Gecko',
             description= 'Scientific reasearch into Geckos',
-            team_admin= self.user
-            #team members=
+            admin= self.user
+            #members= 
         )
     
     def test_team_name_cannot_be_blank(self):
@@ -36,7 +36,7 @@ class TeamTest(TestCase):
         self.team.team_name= 'x' * 50
         self._assert_team_is_valid(self.team)
 
-    def test_team_name_must_not_contain_50_characters(self):
+    def test_team_name_must_not_contain_51_characters(self):
         self.team.team_name= 'x' * 51
         self._assert_team_is_invalid(self.team)
 

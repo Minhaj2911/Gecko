@@ -4,7 +4,8 @@ from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from .models import User, Team
-#from multi_email_field.forms import MultiEmailField
+from searchableselect.widgets import SearchableSelect
+
 
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
@@ -119,15 +120,18 @@ class TeamForm(forms.ModelForm):
 
         model= Team
         fields=['name', 'description','members'] # add team_members
-        widgets={'description': forms.Textarea()}
+        widgets={
+            'description': forms.Textarea()}#,
+            #'members' :SearchableSelect(model='User', search_field='name', many=True, limit=10)}
 
-    # def save(self):
-    #     super().save(commit=False)
-    #     team = Team.objects.create_team(
-    #         name = self.cleaned_data.get('team_name'),
-    #         team_admin = self.request.user,
-    #         description = self.cleaned_data.get('description'),
-    #     )
+    def save(self):
+        super().save(commit=False)
+        team = Team.objects.create_team(
+            name = self.cleaned_data.get('team_name'),
+            team_admin = self.request.user,
+            description = self.cleaned_data.get('description'),
+            members = self.cleaned_data.get('members')
+        )
 
     # def clean(self):
     #     """Clean the data and geberate error message for invalid team members."""

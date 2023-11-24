@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    #'multi-email-field',
+    'searchableselect',
     'widget_tweaks',
     'tasks',
 ]

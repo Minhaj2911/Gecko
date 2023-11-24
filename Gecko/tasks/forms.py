@@ -2,7 +2,9 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
-from .models import User
+from .models import User, Task
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 
 class LogInForm(forms.Form):
@@ -109,3 +111,24 @@ class SignUpForm(NewPasswordMixin, forms.ModelForm):
             password=self.cleaned_data.get('new_password'),
         )
         return user
+    
+class TaskForm(forms.ModelForm):
+    """ Form enabling team members to create and assign tasks. """
+    
+    class Meta:
+        """Form options."""
+
+        model= Task
+        fields=['title', 'description','assignee', 'due_date', 'status']
+        widgets= {
+            'due_date': forms.DateTimeInput(
+                format= '%Y-%m-%dT%H:%M',
+                attrs={'type': 'datetime-local'}
+            )
+        }
+
+    def clean(self):
+        super().clean()
+        due_date = self.cleaned_data.get('due_date')
+        if due_date is not None and due_date < timezone.now():
+            self.add_error('due_date', 'Due date cannot be in the past')

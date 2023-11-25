@@ -20,7 +20,6 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
 
-
     class Meta:
         """Model options."""
 
@@ -67,16 +66,19 @@ class Task(models.Model):
             raise ValidationError("Due date cannot be in the past")
 
 
-class Team(Group):
+class Team(models.Model):
     """Teams can be created by a user"""
-    #name = models.CharField(max_length=50, blank=False)
+    name = models.CharField(max_length=50, blank=False)
     description = models.CharField(max_length=500, blank=True)
     admin = models.ForeignKey(
             "User",
             on_delete=models.CASCADE,
         )
     members = models.ManyToManyField(User, related_name='teams')
-    #team_members = [] # test all team members are in database and of class user
+
+    def get_members(self):
+        return ",".join([str(m) for m in self.members.all()])
+    #members = # test all team members are in database and of class user
 
     # def clean(self):
     # super().clean()

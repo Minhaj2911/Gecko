@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Task, User
+from .models import Task, User, Team
 
 # Register your models here.
 @admin.register(User)
@@ -17,4 +17,12 @@ class TaskAdmin(admin.ModelAdmin):
 
     list_display = [
         'title', 'description', 'assignee', 'due_date'
+    ]
+
+@admin.register(Team)
+class TeamAdmin(admin.ModelAdmin):
+    """Configuration of the admin interface for tasks."""
+
+    list_display = [
+        'name', 'description', 'admin' , 'get_members' #, 'members' #error wont allow members as it is a many to many field
     ]

@@ -30,6 +30,7 @@ urlpatterns = [
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
     path('create_task/', views.create_task, name='create_task'),
     path('create_team/', views.TeamCreationView.as_view(), name='create_team'),
+    # path('create_team/', views.create_team, name='create_team'),
     #re_path('^searchableselect/', include('searchableselect.urls')),
     
 ]

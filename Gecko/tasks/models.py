@@ -65,7 +65,7 @@ class Task(models.Model):
         if self.due_date is not None and self.due_date < timezone.now():
             raise ValidationError("Due date cannot be in the past")
 
-
+# convert to subclass of Group?????
 class Team(models.Model):
     """Teams can be created by a user"""
     name = models.CharField(max_length=50, blank=False)
@@ -77,13 +77,14 @@ class Team(models.Model):
     members = models.ManyToManyField(User, related_name='teams')
 
     def get_members(self):
-        return ",".join([str(m) for m in self.members.all()])
-    #members = # test all team members are in database and of class user
+        return str(self.admin)+ "," + ",".join([str(m) for m in self.members.all()])
+   
+    def set_admin(self,user):
+        self.admin = user
 
+
+    # the error was here
     # def clean(self):
-    # super().clean()
-    # for member in team_members:
-    #     if "member is not None and member is not in database"):
-    #         raise ValidationError("invalid team member" + member)
-    #     id "member is repeated"
-    #       remove from team members
+    #     super().clean()
+    #     if self.admin and self.admin in self.members.all():
+    #         raise ValidationError("the team's admin cannot both be admin and a normal member")

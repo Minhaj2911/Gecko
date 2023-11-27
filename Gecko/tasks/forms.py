@@ -119,23 +119,31 @@ class TeamForm(forms.ModelForm):
     class Meta:
         """Form options."""
         model= Team
-        fields=['name', 'description','members'] # add team_members
+        fields=['name', 'description', 'members'] # add admin
         widgets={
             'description': forms.Textarea()}#,
             #'members' :SearchableSelect(model='User', search_field='name', many=True, limit=10)}
 
-    def save(self):
+    def save(self,request):
         super().save(commit=False)
-        team = Team.objects.create_team(
-            name = self.cleaned_data.get('team_name'),
-            team_admin = self.request.user,
-            description = self.cleaned_data.get('description'),
-            members = self.cleaned_data.get('members')
+        team = Team.objects.create(
+            name = self.cleaned_data.get('name'),
+            admin = request.user,
+            description = self.cleaned_data.get('description')
         )
+        team.members.set(self.cleaned_data.get('members'))
+        return team
 
-    # def clean(self):
-    #     """Clean the data and geberate error message for invalid team members."""
-    #     
+    def clean(self):
+        super().clean()
+        """Clean the data and geberate error message for invalid admin."""
+        admin = self.cleaned_data.get('admin')
+        members = self.cleaned_data.get('members')
+        if not members and members == []:
+            self.add_error('members', 'members cannot be empty') 
+        if admin is None and admin in members:
+            self.add_error('admin', 'the teams admin cannot both be admin and a normal member')
+        
 
 class TaskForm(forms.ModelForm):
     """ Form enabling team members to create and assign tasks. """

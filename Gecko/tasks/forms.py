@@ -132,6 +132,8 @@ class TeamForm(forms.ModelForm):
             description = self.cleaned_data.get('description')
         )
         team.members.set(self.cleaned_data.get('members'))
+        if request.user not in team.members.all():
+            team.members.add(request.user)
         return team
 
     def clean(self):

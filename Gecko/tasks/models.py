@@ -77,7 +77,7 @@ class Team(models.Model):
     members = models.ManyToManyField(User, related_name='teams')
 
     def get_members(self):
-        return str(self.admin)+ "," + ",".join([str(m) for m in self.members.all()])
+        return ",".join([str(m) for m in self.members.all()]) ## str(self.admin)+ "," + 
    
     def set_admin(self,user):
         self.admin = user

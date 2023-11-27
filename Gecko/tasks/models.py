@@ -42,4 +42,5 @@ class User(AbstractUser):
         return self.gravatar(size=60)
     
     def __str__(self):
+        """Defines the string representation of a User instance."""
         return self.username

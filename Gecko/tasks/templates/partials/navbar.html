@@ -9,6 +9,7 @@
     {% if user.is_authenticated %}
       {% include 'partials/menu.html' %}
       <li><a href="{% url 'edit_profile' %}">Edit Profile</a></li>
+      <li><a href="{% url 'change_password' %}">Change Password</a></li>
     {% endif %}
   </div>
 </nav>

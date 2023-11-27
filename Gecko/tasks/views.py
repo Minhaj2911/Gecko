@@ -16,13 +16,9 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_decode
-from django.utils.encoding import force_text
-from .tokens import account_activation_token
+from django.utils.encoding import force_str
 from django.contrib.auth import get_user_model
-from .forms import EditProfileForm
-from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth import update_session_auth_hash
-
+from .forms import ResendActivationEmailForm
 
 
 @login_required
@@ -31,30 +27,6 @@ def dashboard(request):
 
     current_user = request.user
     return render(request, 'dashboard.html', {'user': current_user})
-
-def edit_account(request):
-    if request.method == 'POST':
-        profile_form = EditProfileForm(request.POST, instance=request.user)
-        password_form = PasswordChangeForm(request.user, request.POST)
-
-        if 'update_profile' in request.POST and profile_form.is_valid():
-            profile_form.save()
-            messages.success(request, 'Your profile was successfully updated!')
-
-        elif 'change_password' in request.POST and password_form.is_valid():
-            user = password_form.save()
-            update_session_auth_hash(request, user)
-            messages.success(request, 'Your password was successfully updated!')
-
-    else:
-        profile_form = EditProfileForm(instance=request.user)
-        password_form = PasswordChangeForm(request.user)
-
-    return render(request, 'edit_account.html', {
-        'profile_form': profile_form, 
-        'password_form': password_form
-    })
-
 
 
 @login_prohibited
@@ -104,8 +76,11 @@ class LogInView(LoginProhibitedMixin, View):
         return self.render()
 
     def post(self, request):
-        """Handle log in attempt."""
-
+        """
+        Handle the login attempt. If successful, redirect the user.
+        If the user is not active, prompt for email verification.
+        """
+        
         form = LogInForm(request.POST)
         self.next = request.POST.get('next') or settings.REDIRECT_URL_WHEN_LOGGED_IN
         user = form.get_user()
@@ -181,17 +156,18 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class SignUpView(LoginProhibitedMixin, FormView):
-    """Display the sign up screen and handle sign ups."""
+    """Display the sign up screen and handle sign ups.
+    Sends an activation email for email verification."""
 
     form_class = SignUpForm
     template_name = "sign_up.html"
     redirect_when_logged_in_url = settings.REDIRECT_URL_WHEN_LOGGED_IN
 
     def form_valid(self, form):
-        self.object = form.save(commit=False)
-        self.object.is_active = False 
-        self.object.save()
+        """Process the valid sign-up form. 
+        Creates a user and sends an activation email."""
         
+        user = form.save()
         mail_subject = 'Activate your account.'
         message = render_to_string('activation_email.html', {
             'user': self.object,
@@ -199,20 +175,24 @@ class SignUpView(LoginProhibitedMixin, FormView):
             'uid': urlsafe_base64_encode(force_bytes(self.object.pk)),
             'token': account_activation_token.make_token(self.object),
         })
+        
         to_email = self.object.email
         from_email = settings.EMAIL_HOST_USER
         send_mail(mail_subject, message, from_email, [to_email], fail_silently=False)
-
         messages.add_message(self.request, messages.INFO, 'Please confirm your email address to complete the registration.')
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('email_verification_notice') ###########################
+        """Redirect to the email verification notice page after successful registration."""
+        return reverse('email_verification_notice')
     
-def send_activatation_email(request, uidb64, token):
+def send_activation_email(request, uidb64, token):
+    """Handle the user account activation request.
+    Activates the user's account if the token is valid and the user is not already active."""
+    
     User = get_user_model()
     try:
-        uid = force_text(urlsafe_base64_decode(uidb64))
+        uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
@@ -224,13 +204,43 @@ def send_activatation_email(request, uidb64, token):
             messages.success(request, 'Your account has been activated, please log in.')
             return redirect('log_in')
         else:
-            messages.success(request, 'You already activated your account, please log in.')
-            return redirect('log_in')  
+            messages.info(request, 'You already activated your account, please log in.')
+            return redirect('log_in')
     else:
-        messages.error(request, 'Activation link is invalid!')
-        return redirect('error_page')  ###############################################
+        messages.error(request, 'The activation link is invalid or has expired. Please request a new activation email.')
+        return redirect('resend_activation_email')
+    
 
-def request_new_email_verification()
+class ResendActivationEmailView(FormView):
+    """Handle requests to resend the activation email.
+    Verifies if the user exists and is inactive before sending a new activation email."""
+    
+    template_name = 'resend_activation_email.html'
+    form_class = ResendActivationEmailForm
 
-# create tests for everything added
-#Testing: Test the entire email verification process, including token expiration behavior and scenarios where a token might be reused.
+    def form_valid(self, form):
+        """Process a valid form and resend the activation email if the user is inactive."""
+        
+        email = form.cleaned_data['email']
+        User = get_user_model()
+        user = User.objects.filter(email=email, is_active=False).first()
+        
+        if user:
+            # Construct and send the activation email
+            mail_subject = 'Activate your account.'
+            message = render_to_string('activation_email.html', {
+                'user': user,
+                'domain': 'localhost:8000',  # Replace with your actual domain when deploying
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': account_activation_token.make_token(user),
+            })
+            send_mail(mail_subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
+            messages.success(self.request, 'If an account exists with this email, we have sent a new activation link.')
+            return super().form_valid(form)
+        else:
+            messages.error(self.request, "No inactive account found with the provided email.")
+            return self.render_to_response(self.get_context_data(form=form))
+
+    def get_success_url(self):
+        """Return the URL to redirect to after processing a valid form."""
+        return reverse('log_in')

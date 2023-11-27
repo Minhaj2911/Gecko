@@ -5,6 +5,7 @@ from django.urls import reverse
 from tasks.forms import SignUpForm
 from tasks.models import User
 from tasks.tests.helpers import LogInTester
+from django.core import mail
 
 class SignUpViewTestCase(TestCase, LogInTester):
     """Tests of the sign up view."""
@@ -79,3 +80,29 @@ class SignUpViewTestCase(TestCase, LogInTester):
         redirect_url = reverse('dashboard')
         self.assertRedirects(response, redirect_url, status_code=302, target_status_code=200)
         self.assertTemplateUsed(response, 'dashboard.html')
+        
+    def test_no_email_sent_on_unsuccessful_sign_up(self):
+        self.form_input['email'] = 'invalid_email'  # Making the form invalid
+        response = self.client.post(self.url, self.form_input)
+        self.assertEqual(len(mail.outbox), 0)  # No emails should be sent
+        
+    def test_email_sent_on_successful_sign_up(self):
+        response = self.client.post(self.url, self.form_input)
+        self.assertEqual(len(mail.outbox), 1)  # One email should be sent
+        self.assertIn('Activate your account', mail.outbox[0].subject)
+        
+    def test_account_inactive_after_sign_up(self):
+        response = self.client.post(self.url, self.form_input)
+        user = User.objects.get(username='@janedoe')
+        self.assertFalse(user.is_active)
+        
+    def test_activation_email_content(self):
+        response = self.client.post(self.url, self.form_input)
+        email_body = mail.outbox[0].body
+        self.assertIn('Activate your account', email_body)
+        self.assertIn('localhost:8000', email_body)  # Confirm the presence of the activation link
+        
+    def test_redirect_to_email_verification_notice(self):
+        response = self.client.post(self.url, self.form_input)
+        verification_notice_url = reverse('email_verification_notice')
+        self.assertRedirects(response, verification_notice_url)

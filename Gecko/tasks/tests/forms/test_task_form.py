@@ -1,6 +1,6 @@
 """Unit tests of the task form."""
 from django.test import TestCase
-from tasks.models import User, Task
+from tasks.models import User, Task, Team
 from tasks.forms import TaskForm
 from django.utils import timezone
 from datetime import timedelta, datetime
@@ -9,7 +9,6 @@ from django import forms
 class TaskFormTestCase(TestCase):
     """Unit tests of the task form."""
 
-    ##user should be replaced with a team member from a group
     def setUp(self):
         super(TestCase, self).setUp()
         self.user = User.objects.create_user(
@@ -18,9 +17,18 @@ class TaskFormTestCase(TestCase):
             last_name='Doe',
             email='johndoe@example.org'
         )
+        self.team= Team.objects.create(
+            name= 'Gecko',
+            description= 'Gecko research project',
+            admin= self.user
+
+         )
+        self.team.members.add(self.user)
+
         self.form_input = {
             'title': 'Project meeting',
             'description': 'Conduct a meeting to discuss the new project design',
+            'team': self.team,
             'assignee': self.user,
             'due_date': timezone.now() + timezone.timedelta(days= 3),
             'status': 'assigned'
@@ -34,6 +42,7 @@ class TaskFormTestCase(TestCase):
         form= TaskForm()
         self.assertIn('title', form.fields)
         self.assertIn('description', form.fields)
+        self.assertIn('team', form.fields)
         self.assertIn('assignee', form.fields)
         due_date_field = form.fields['due_date']
         self.assertTrue(isinstance(due_date_field, forms.DateTimeField))
@@ -49,10 +58,17 @@ class TaskFormTestCase(TestCase):
         form= TaskForm(data= self.form_input)
         self.assertFalse(form.is_valid())
     
-    def test_form_rejects_no_assignee(self):
-        self.form_input['assignee']= None
+    def test_form_rejects_non_member_assignee(self):
+        different_user= User.objects.create_user(
+            username= '@jane123', 
+            first_name='Jane',
+            last_name='Smith',
+            email='jane123smith@example.org'
+            )
+        self.form_input['assignee']= different_user
         form= TaskForm(data= self.form_input)
         self.assertFalse(form.is_valid())
+        self.assertIn('assignee', form.errors)
     
     def test_form_rejects_invalid_status(self):
         self.form_input['status']= ' '
@@ -73,6 +89,7 @@ class TaskFormTestCase(TestCase):
         self.assertEqual(after_count, before_count+1)
         task= Task.objects.get(title= 'Project meeting')
         self.assertEqual(task.description, 'Conduct a meeting to discuss the new project design')
+        self.assertEqual(task.team, self.team)
         self.assertEqual(task.assignee, self.user)
         valid_due_date= timezone.now() + timezone.timedelta(days= 3)
         self.assert_equal_due_date(task.due_date, valid_due_date)
@@ -87,6 +104,7 @@ class TaskFormTestCase(TestCase):
             'title': 'Review tasks',
             'description': 'Create checklist to review tasks',
             'assignee': self.user,
+            'team': self.team,
             'due_date': edited_due_date,
             'status': 'completed'
         }
@@ -97,6 +115,7 @@ class TaskFormTestCase(TestCase):
         self.assertEqual(existing_task.title, 'Review tasks')
         self.assertEqual(existing_task.description, 'Create checklist to review tasks')
         self.assertEqual(existing_task.assignee, self.user)
+        self.assertEqual(existing_task.team, self.team)
         self.assert_equal_due_date(existing_task.due_date, edited_due_date)
         self.assertEqual(existing_task.status, 'completed')
 

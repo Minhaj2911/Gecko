@@ -26,7 +26,11 @@ def home(request):
 
     return render(request, 'home.html')
 
+@login_required
 def create_task(request):
+    user= request.user
+    users_teams= Team.objects.filter(members= user)
+    team_members= User.objects.filter(teams__in= users_teams).distinct()
     if request.method == 'POST':
         form = TaskForm(request.POST)
         if form.is_valid():
@@ -34,6 +38,7 @@ def create_task(request):
             return redirect('dashboard')
     else:
         form = TaskForm()
+        form.fields['assignee'].queryset= team_members
     return render(request, 'create_task.html', {'form': form})
 
 

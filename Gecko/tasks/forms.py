@@ -118,7 +118,7 @@ class TaskForm(forms.ModelForm):
         """Form options."""
 
         model= Task
-        fields=['title', 'description','assignee', 'due_date', 'status']
+        fields=['title', 'description','team', 'assignee', 'due_date', 'status']
         widgets= {
             'due_date': forms.DateTimeInput(
                 format= '%Y-%m-%dT%H:%M',
@@ -129,5 +129,10 @@ class TaskForm(forms.ModelForm):
     def clean(self):
         super().clean()
         due_date = self.cleaned_data.get('due_date')
+        team= self.cleaned_data.get('team')
+        assignee= self.cleaned_data.get('assignee')
+
         if due_date is not None and due_date < timezone.now():
             self.add_error('due_date', 'Due date cannot be in the past')
+        if assignee and team and assignee not in team.members.all():
+            self.add_error('assignee', 'Assignee has to be a team member of this team')

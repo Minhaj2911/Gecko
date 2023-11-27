@@ -57,7 +57,7 @@ class Team(models.Model):
 
     def get_members(self):
         return ",".join([str(m) for m in self.members.all()])
-        
+
 class Task(models.Model):
     """" Tasks can be created by team members.  """
 
@@ -67,6 +67,7 @@ class Task(models.Model):
         Team,
         on_delete= models.CASCADE,
         related_name='teams',
+        null= True,
     )
     assignee= models.ForeignKey(
         "User",
@@ -86,7 +87,7 @@ class Task(models.Model):
         super().clean()
         if self.due_date is not None and self.due_date < timezone.now():
             raise ValidationError("Due date cannot be in the past")
-        if self.assignee not in self.team.members.all():
+        if self.assignee and self.team and self.assignee not in self.team.members.all():
             raise ValidationError("Assignee has to be a team member of this team")
     
 

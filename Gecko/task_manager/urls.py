@@ -20,12 +20,15 @@ from tasks import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.home, name='home'),
+    path('home/', views.home, name='home'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('log_in/', views.LogInView.as_view(), name='log_in'),
     path('log_out/', views.log_out, name='log_out'),
     path('password/', views.PasswordView.as_view(), name='password'),
     path('profile/', views.ProfileUpdateView.as_view(), name='profile'),
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
+    path('email-verification-notice/', views.email_verification_notice, name='email_verification_notice'),
+    path('activatation_email/<uidb64>/<token>/', views.send_activation_email, name='send_activation_email'), 
+    path('resend_activation_email/', views.ResendActivationEmailView.as_view(), name='resend_activation_email'),
     path('create_task/', views.create_task, name='create_task'),
 ]

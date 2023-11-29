@@ -8,6 +8,7 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     {% if user.is_authenticated %}
+      {% include 'menu.html' %}
       <a class="navbar-brand" href="{% url 'dashboard' %}">
         Dashboard
       </a>

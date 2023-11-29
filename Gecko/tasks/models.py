@@ -44,6 +44,10 @@ class User(AbstractUser):
         
         return self.gravatar(size=60)
     
+    def __str__(self):
+        """Defines the string representation of a User instance."""
+        return self.username
+    
 class Task(models.Model):
     """" Tasks can be created by team members.  """
 
@@ -66,10 +70,4 @@ class Task(models.Model):
         super().clean()
         if self.due_date is not None and self.due_date < timezone.now():
             raise ValidationError("Due date cannot be in the past")
-
-
-         
-
-
-
 

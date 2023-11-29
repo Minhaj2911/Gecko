@@ -13,7 +13,7 @@ class HomeViewTestCase(TestCase):
         self.user = User.objects.get(username='@johndoe')
 
     def test_home_url(self):
-        self.assertEqual(self.url,'/')
+        self.assertEqual(self.url,'/home/')
 
     def test_get_home(self):
         response = self.client.get(self.url)

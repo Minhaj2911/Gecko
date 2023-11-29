@@ -5,6 +5,7 @@ from django.core.validators import RegexValidator
 from .models import User, Task
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.contrib.auth.forms import UserChangeForm
 
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
@@ -110,6 +111,11 @@ class SignUpForm(NewPasswordMixin, forms.ModelForm):
             password=self.cleaned_data.get('new_password'),
         )
         return user
+
+class ResendActivationEmailForm(forms.Form):
+    """ A form for requesting a resend of the activation email."""
+    
+    email = forms.EmailField(label='Your email')
     
 class TaskForm(forms.ModelForm):
     """ Form enabling team members to create and assign tasks. """

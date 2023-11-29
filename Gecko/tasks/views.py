@@ -84,13 +84,13 @@ class LogInView(LoginProhibitedMixin, View):
         form = LogInForm(request.POST)
         self.next = request.POST.get('next') or settings.REDIRECT_URL_WHEN_LOGGED_IN
         user = form.get_user()
-        if user is not None and user.is_active:
-            login(request, user)
-            return redirect(self.next)
-        
-        elif user is not None and not user.is_active:
-            messages.add_message(request, messages.ERROR, "Please verify your email to activate your account.")
-            
+        if user is not None:
+            if not user.is_active:
+                messages.add_message(request, messages.ERROR, "Please verify your email to activate your account.")
+                return self.render() 
+            elif user.is_active:
+                login(request, user)
+                return redirect(self.next)
         else:
             messages.add_message(request, messages.ERROR, "The credentials provided were invalid!")
 
@@ -167,7 +167,9 @@ class SignUpView(LoginProhibitedMixin, FormView):
         """Process the valid sign-up form. 
         Creates a user and sends an activation email."""
         
-        user = form.save()
+        self.object = form.save()
+        self.object.is_active = False
+        self.object.save()
         mail_subject = 'Activate your account.'
         message = render_to_string('activation_email.html', {
             'user': self.object,
@@ -185,6 +187,10 @@ class SignUpView(LoginProhibitedMixin, FormView):
     def get_success_url(self):
         """Redirect to the email verification notice page after successful registration."""
         return reverse('email_verification_notice')
+    
+def email_verification_notice(request):
+    """Display a page to notify the user that an email verification has been sent."""
+    return render(request, 'email_verification_notice.html')
     
 def send_activation_email(request, uidb64, token):
     """Handle the user account activation request.

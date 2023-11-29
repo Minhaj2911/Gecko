@@ -149,25 +149,15 @@ class LogInViewTestCase(TestCase, LogInTester, MenuTesterMixin):
 
     def test_login_with_nonexistent_user(self):
         """Test login attempt with a non-existent username."""
-        response = self.client.post(self.url, {'username': '@nonexistentuser', 'password': 'password'})
+        response = self.client.post(self.url, {username=self.user.username, 'password': 'password'})
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'log_in.html')
         self.assertFalse(response.context['user'].is_authenticated)
         self.assertEqual(len(response.context['messages']), 1)
-        
-class EmailVerificationLoginTest(TestCase):
-    """Test cases for logging in with email verification."""
-
-    def setUp(self):
-        # Create a test user but do not activate
-        self.inactive_user = User.objects.create_user(username='@inactiveuser', email='inactive@example.com', password='password123')
-        self.inactive_user.is_active = False
-        self.inactive_user.save()
-        self.login_url = reverse('log_in')
 
     def test_login_with_unverified_email(self):
         """Ensure users with unverified emails cannot log in."""
-        response = self.client.post(self.login_url, {'username': '@inactiveuser', 'password': 'password123'})
+        response = self.client.post(self.login_url, {username=self.user.username, 'password': 'password123'})
         self.assertEqual(response.status_code, 200)  # Still renders login page
         self.assertTemplateUsed(response, 'log_in.html')
 

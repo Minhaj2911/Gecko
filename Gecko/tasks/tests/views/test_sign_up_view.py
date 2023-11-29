@@ -38,9 +38,9 @@ class SignUpViewTestCase(TestCase, LogInTester):
     def test_get_sign_up_redirects_when_logged_in(self):
         self.client.login(username=self.user.username, password="Password123")
         response = self.client.get(self.url, follow=True)
-        redirect_url = reverse('dashboard')
+        redirect_url = reverse('email_verification_notice')
         self.assertRedirects(response, redirect_url, status_code=302, target_status_code=200)
-        self.assertTemplateUsed(response, 'dashboard.html')
+        self.assertTemplateUsed(response, 'email_verification_notice.html')
 
     def test_unsuccesful_sign_up(self):
         self.form_input['username'] = 'BAD_USERNAME'
@@ -60,16 +60,16 @@ class SignUpViewTestCase(TestCase, LogInTester):
         response = self.client.post(self.url, self.form_input, follow=True)
         after_count = User.objects.count()
         self.assertEqual(after_count, before_count+1)
-        response_url = reverse('dashboard')
+        response_url = reverse('email_verification_notice')
         self.assertRedirects(response, response_url, status_code=302, target_status_code=200)
-        self.assertTemplateUsed(response, 'dashboard.html')
+        self.assertTemplateUsed(response, 'email_verification_notice.html')
         user = User.objects.get(username='@janedoe')
         self.assertEqual(user.first_name, 'Jane')
         self.assertEqual(user.last_name, 'Doe')
         self.assertEqual(user.email, 'janedoe@example.org')
         is_password_correct = check_password('Password123', user.password)
         self.assertTrue(is_password_correct)
-        self.assertTrue(self._is_logged_in())
+        self.assertFalse(self._is_logged_in())
 
     def test_post_sign_up_redirects_when_logged_in(self):
         self.client.login(username=self.user.username, password="Password123")
@@ -99,8 +99,8 @@ class SignUpViewTestCase(TestCase, LogInTester):
     def test_activation_email_content(self):
         response = self.client.post(self.url, self.form_input)
         email_body = mail.outbox[0].body
-        self.assertIn('Activate your account', email_body)
-        self.assertIn('localhost:8000', email_body)  # Confirm the presence of the activation link
+        self.assertIn('Thank you for signing up. Please click the link below to activate your account:', email_body)
+        self.assertIn('localhost:8000', email_body)  # change to pythonanywhere
         
     def test_redirect_to_email_verification_notice(self):
         response = self.client.post(self.url, self.form_input)

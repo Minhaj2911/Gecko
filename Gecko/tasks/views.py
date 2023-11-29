@@ -37,10 +37,11 @@ def change_task_status(request, pk):
     task = Task.objects.get(pk=pk)
 
     if request.method == 'POST':
-        form = TaskStatusForm(request.POST)
+        form = TaskStatusForm(request.POST, instance=task)
         if form.is_valid():
-            form.save()
-            return redirect('dashboard')
+            status = form.cleaned_data['status']
+            task.save()
+            return redirect('task_dashboard')
     else:
         form = TaskStatusForm(instance=task)    
 

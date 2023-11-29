@@ -4,9 +4,6 @@
   <div class="row">
     <div class="col-12">
       <h1>Welcome to your dashboard {{ user.username }}</h1>
-      {% for task in user_tasks %}
-      <ol>{{ task.title }}: {{ task.description }} - {{ task.due_date }}</ol>
-      {% endfor %}
     </div>
   </div>
 </div>

@@ -132,3 +132,16 @@ class TaskForm(forms.ModelForm):
         due_date = self.cleaned_data.get('due_date')
         if due_date is not None and due_date < timezone.now():
             self.add_error('due_date', 'Due date cannot be in the past')
+
+
+class TaskStatusForm(forms.ModelForm):
+    """ Form enabling team members to update the status of the assigned tasks. """
+    
+    class Meta:
+        """Form options."""
+
+        model= Task
+        fields=['status']
+        widgets= {
+            'status': forms.Select(attrs={'class': 'form-control'}),
+        }

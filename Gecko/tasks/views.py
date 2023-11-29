@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TaskStatusForm
 from tasks.helpers import login_prohibited
 from .models import Task
 
@@ -17,15 +17,34 @@ def dashboard(request):
     """Display the current user's dashboard."""
 
     current_user = request.user
+    return render(request, 'dashboard.html', {'user': current_user})
+
+@login_required
+def task_dashboard(request):
+    """Display the current user's task dashboard."""
+
+    current_user = request.user
     user_tasks = Task.objects.filter(assignee = current_user)
-    #return render(request, 'dashboard.html', {'user': current_user})
-    return render(request, 'dashboard.html', {'user_tasks': user_tasks})
+    return render(request, 'task_dashboard.html', {'user_tasks': user_tasks})
 
 #@login_prohibited
 def home(request):
     """Display the application's start/home screen."""
 
     return render(request, 'home.html')
+
+def change_task_status(request, pk):
+    task = Task.objects.get(pk=pk)
+
+    if request.method == 'POST':
+        form = TaskStatusForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = TaskStatusForm(instance=task)    
+
+    return render(request, 'change_status.html', {'form': form, 'task': task})
 
 def create_task(request):
     if request.method == 'POST':

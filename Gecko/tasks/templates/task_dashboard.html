@@ -4,6 +4,11 @@
   <div class="row">
     <div class="col-12">
       <h1>Welcome to your task dashboard {{ user.username }}</h1>
+      <form action="{% url 'create_task'%}" method="post">
+        {% csrf_token %}
+        {{ form.as_p}}
+        <button type="submit">Create task</button>
+      </form>
       {% for task in user_tasks %}
       <ol>{{ task.title }}: {{ task.description }} - {{ task.due_date }} - {{task.status}}</ol>
       <form action="{% url 'change_task_status' pk=task.id %}" method="post">

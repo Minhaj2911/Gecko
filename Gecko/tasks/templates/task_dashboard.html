@@ -9,6 +9,7 @@
         {{ form.as_p}}
         <button type="submit">Create task</button>
       </form>
+      {% if user_tasks%}
       {% for task in user_tasks %}
       <ol>{{ task.title }}: {{ task.description }} - {{ task.due_date }} - {{task.status}}</ol>
       <form action="{% url 'change_task_status' pk=task.id %}" method="post">
@@ -17,6 +18,9 @@
         <button type="submit">Update status</button>
       </form>
       {% endfor %}
+      {% else %}
+      <h3>You don't have any tasks yet..</h3>
+      {% endif %}
     </div>
   </div>
 </div>

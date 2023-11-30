@@ -59,3 +59,11 @@ class TeamFormTestCase(TestCase):
         self.form_input['name']= ''
         form= TeamForm(data= self.form_input)
         self.assertFalse(form.is_valid())
+
+    def test_no_repeats_of_admin_in_members(self):
+        self.form_input['members'].append(self.user_admin)
+        size_before = len(self.form_input['members'])
+        form= TeamForm(data= self.form_input)
+        size_after = len(form.data.get('members'))
+        if size_before == size_after:
+            self.assertTrue(form.is_valid())

@@ -73,8 +73,9 @@ class Team(models.Model):
     admin = models.ForeignKey(
             "User",
             on_delete=models.CASCADE,
+            blank = False
         )
-    members = models.ManyToManyField(User, related_name='teams')
+    members = models.ManyToManyField(User, related_name='teams',blank = False)
 
     def get_members(self):
         return ",".join([str(m) for m in self.members.all()]) ## str(self.admin)+ "," + 
@@ -84,7 +85,12 @@ class Team(models.Model):
 
 
     # the error was here
-    # def clean(self):
-    #     super().clean()
-    #     if self.admin and self.admin in self.members.all():
-    #         raise ValidationError("the team's admin cannot both be admin and a normal member")
+    def clean(self):
+        super().clean()
+
+        # if self.admin and self.admin not in self.members.all():
+        #     raise ValidationError("the team's admin must be in the members field")
+        # if self.members.count() == 0:
+        #     raise ValidationError("members cannot be empty")
+
+

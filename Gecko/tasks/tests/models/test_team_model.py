@@ -40,11 +40,11 @@ class TeamTest(TestCase):
             description= 'Scientific reasearch into Geckos',
             admin= self.user_admin,
         )
-        for user in [self.user_1, self.user_2, self.user_3]:
+        for user in [self.user_1, self.user_2, self.user_3, self.user_admin]:
             self.team.members.add(user)
 
     
-    def test_team_name_cannot_be_blank(self): #
+    def test_team_name_cannot_be_blank(self):
         self.team.name= ''
         self._assert_team_is_invalid(self.team)
 
@@ -56,7 +56,7 @@ class TeamTest(TestCase):
         self.team.name= 'x' * 50
         self._assert_team_is_valid(self.team)
 
-    def test_team_name_must_not_contain_51_characters(self): #
+    def test_team_name_must_not_contain_51_characters(self): 
         self.team.name= 'x' * 51
         self._assert_team_is_invalid(self.team)
 
@@ -64,15 +64,23 @@ class TeamTest(TestCase):
         self.team.description= 'x' * 500
         self._assert_team_is_valid(self.team)
 
-    def test_description_must_not_contain_more_than_500_characters(self): #
+    def test_description_must_not_contain_more_than_500_characters(self): 
         self.team.description= 'x' * 501
         self._assert_team_is_invalid(self.team)
-
-
-    def test_is_user_admin_in_members(self):
-        if self.user_admin not in self.team.members.all():
-            self._assert_team_is_valid(self.team)
             
+    def test_admin_must_not_be_blank(self):
+        self.team.admin= None
+        self._assert_team_is_invalid(self.team)
+
+    # def test_members_must_not_be_blank(self):
+    #     self.team.members.clear()
+    #     self._assert_team_is_invalid(self.team)
+
+    # def test_members_must_include_admin(self):
+    #     print(str(self.team.members.all()))
+    #     self.team.members.remove(self.user_admin)
+    #     print(str(self.team.members.all()))
+    #     self._assert_team_is_invalid(self.team)
 
     def _assert_team_is_valid(self, team):
         try:

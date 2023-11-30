@@ -143,8 +143,6 @@ class TeamForm(forms.ModelForm):
         members = self.cleaned_data.get('members')
         if not members and members == []:
             self.add_error('members', 'members cannot be empty') 
-        if admin is None and admin in members:
-            self.add_error('admin', 'the teams admin cannot both be admin and a normal member')
         
 
 class TaskForm(forms.ModelForm):

@@ -168,22 +168,19 @@ class TeamCreationView(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
         self.object = form.save(self.request)
+        messages.add_message(self.request, messages.SUCCESS, "Team Created!")
         return super().form_valid(form)
 
     def get_success_url(self):
         """Return redirect URL after successful update."""
-        messages.add_message(self.request, messages.SUCCESS, "Team Created!")
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
 
+    def form_invalid(self, form):
+        messages.add_message(self.request, messages.WARNING , "Unsuccessful: Team Not Created")
+        return super().form_invalid(form)
 
+########
 
-# def create_team(request):
-#     if request.method == 'POST':
-#         form = TeamForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             # messages.add_message(request, messages.SUCCESS, "Team Created!")
-#             return redirect('dashboard')
-#     else:
-#         form = TeamForm()
-#     return render(request, 'create_team.html', {'form': form})
+# @login_required
+# def remove_member_from_team(request):
+    

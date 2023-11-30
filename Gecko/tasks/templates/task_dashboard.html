@@ -11,15 +11,16 @@
       </form>
       {% if user_tasks%}
       {% for task in user_tasks %}
-      <ol>{{ task.title }}: {{ task.description }} - {{ task.due_date }} - {{task.status}}</ol>
+      <ol>{{ task.title }}: {{ task.description }} - {{ task.due_date }} - {{ task.status }} - 
       <form action="{% url 'change_task_status' pk=task.id %}" method="post">
         {% csrf_token %}
         {{ form.as_p}}
         <button type="submit">Update status</button>
       </form>
       {% endfor %}
+      </ol>
       {% else %}
-      <h3>You don't have any tasks yet..</h3>
+      <h3>You don't have any tasks yet...</h3>
       {% endif %}
     </div>
   </div>

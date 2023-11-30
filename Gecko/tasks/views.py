@@ -34,6 +34,7 @@ def home(request):
     return render(request, 'home.html')
 
 def change_task_status(request, pk):
+    """Change a particular task's status from the Tasks dashboard."""
     task = Task.objects.get(pk=pk)
 
     if request.method == 'POST':

@@ -142,6 +142,12 @@ class TaskStatusForm(forms.ModelForm):
 
         model= Task
         fields=['status']
-        widgets= {
-            'status': forms.Select(attrs={'class': 'form-control'}),
-        }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        task = self.instance
+
+        if task.due_date is not None and task.due_date < timezone.now():
+            raise ValidationError("Cannot change the status of a task that is overdue.")
+
+        return cleaned_data

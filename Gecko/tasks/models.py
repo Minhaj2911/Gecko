@@ -19,6 +19,7 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
+    teams = models.ManyToManyField('Team', related_name='teams', blank=True )
 
     class Meta:
         """Model options."""
@@ -41,6 +42,10 @@ class User(AbstractUser):
         """Return a URL to a miniature version of the user's gravatar."""
         
         return self.gravatar(size=60)
+    
+    def get_teams(self):
+        return ",".join([str(m) for m in self.teams.all()]) 
+   
 
 class Task(models.Model):
     """" Tasks can be created by team members.  """
@@ -68,14 +73,14 @@ class Task(models.Model):
 # convert to subclass of Group?????
 class Team(models.Model):
     """Teams can be created by a user"""
-    name = models.CharField(max_length=50, blank=False)
+    name = models.CharField(max_length=50, blank=False, unique=True)
     description = models.CharField(max_length=500, blank=True)
     admin = models.ForeignKey(
             "User",
             on_delete=models.CASCADE,
             blank = False
         )
-    members = models.ManyToManyField(User, related_name='teams',blank = False)
+    members = models.ManyToManyField(User, related_name='members',blank = False)
 
     def get_members(self):
         return ",".join([str(m) for m in self.members.all()]) ## str(self.admin)+ "," + 

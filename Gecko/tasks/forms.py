@@ -132,8 +132,14 @@ class TeamForm(forms.ModelForm):
             description = self.cleaned_data.get('description')
         )
         team.members.set(self.cleaned_data.get('members'))
+        
+        # may not be required as duplcates may not be created
         if request.user not in team.members.all():
             team.members.add(request.user)
+        
+        for member in team.members.all():
+            member.teams.add(team)
+        
         return team
 
     def clean(self):

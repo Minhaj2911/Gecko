@@ -27,6 +27,19 @@ def task_dashboard(request):
     user_tasks = Task.objects.filter(assignee = current_user)
     return render(request, 'task_dashboard.html', {'user_tasks': user_tasks})
 
+def task_description(request, pk):
+    """Display the current task's description."""
+
+    current_user = request.user
+    
+    try:
+        task = Task.objects.get(assignee=current_user, pk=pk)
+
+    except Task.DoesNotExist:
+        task = None
+
+    return render(request, 'task_description.html', {'task': task})
+
 #@login_prohibited
 def home(request):
     """Display the application's start/home screen."""
@@ -34,13 +47,13 @@ def home(request):
     return render(request, 'home.html')
 
 def change_task_status(request, pk):
-    """Change a particular task's status from the Tasks dashboard."""
+    """Change a particular task's status from the task description."""
     task = Task.objects.get(pk=pk)
 
     if request.method == 'POST':
         form = TaskStatusForm(request.POST, instance=task)
         if form.is_valid():
-            status = form.cleaned_data['status']
+            task.status = form.cleaned_data['status']
             task.save()
             return redirect('task_dashboard')
     else:

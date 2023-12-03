@@ -4,24 +4,34 @@
   <div class="row">
     <div class="col-12">
       <h1>Welcome to your task dashboard {{ user.username }}</h1>
-      <form action="{% url 'create_task'%}" method="post">
-        {% csrf_token %}
-        {{ form.as_p}}
-        <button type="submit">Create task</button>
-      </form>
-      {% if user_tasks%}
-      <table class="table">
-      {% for task in user_tasks %}
-      <tr>
-        <td><a href="{% url 'task_description' pk=task.id %}">{{ task.title }}</a></td>
-        <td>{{ task.due_date }}</td>
-        <td>{{ task.status }}</td>
-      </tr>
-      {% endfor %}
-      </table>
-      {% else %}
-      <h3>You don't have any tasks yet...</h3>
-      {% endif %}
+      <div class="d-flex justify-content-end mb-3">
+        <form action="{% url 'create_task'%}" method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit" class="btn btn-success">
+            Create task <i class="bi bi-bookmark-plus"></i>
+          </button>
+        </form>
+      </div>
+      <div class="row">
+        {% if user_tasks%}
+          {% for task in user_tasks %}
+            <div class="col-md-4">
+              <div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
+                <div class="card-body">
+                  <h5 class="card-title">{{ task.title }}</h5>
+                  <p class="card-text">Due: {{ task.due_date }}</p>
+                  <p class="card-text">Status: {{ task.status }}</p>
+                  <a href="{% url 'task_description' pk=task.id %}" button type="button" class="btn btn-secondary"><i class="bi bi-justify-left"></i> View Details</a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="col-12">
+            <h3>You don't have any tasks yet...</h3>
+          </div>
+        {% endif %}
     </div>
   </div>
 </div>

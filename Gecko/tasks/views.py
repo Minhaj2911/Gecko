@@ -10,14 +10,15 @@ from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm
 from tasks.helpers import login_prohibited
-
+from .models import Team
 
 @login_required
 def dashboard(request):
-    """Display the current user's dashboard."""
+    """Display the current user's team dashboard."""
 
     current_user = request.user
-    return render(request, 'dashboard.html', {'user': current_user})
+    user_teams = Team.objects.filter(members=current_user)
+    return render(request, 'dashboard.html', {'user_teams': user_teams})
 
 
 #@login_prohibited

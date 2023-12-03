@@ -4,6 +4,9 @@
   <div class="row">
     <div class="col-12">
       <h1>Welcome to your dashboard {{ user.username }}</h1>
+      {% for team in user_teams %}
+      <ol> {{team.name}} - {{team.description}} - {{team.admin}} - {{team.members}}</ol>
+      {% endfor %}
     </div>
   </div>
 </div>

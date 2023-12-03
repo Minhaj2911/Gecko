@@ -151,6 +151,18 @@ class TeamForm(forms.ModelForm):
             self.add_error('members', 'members cannot be empty') 
         
 
+class TeamUpdateForm(forms.ModelForm):
+    """ Form enabling a team admin to update a team """
+    class Meta:
+        """Form options."""
+        model= Team
+        fields=['name', 'description', 'admin', 'members'] # add admin 'members_to_remove', 'members_to_add',
+        widgets={
+            'description': forms.Textarea()}#,
+            #'members' :SearchableSelect(model='User', search_field='name', many=True, limit=10)}
+
+
+
 class TaskForm(forms.ModelForm):
     """ Form enabling team members to create and assign tasks. """
 

@@ -8,8 +8,9 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, TeamUpdateForm
 from tasks.helpers import login_prohibited
+from tasks.mixins import TeamRequiredMixin
 
 
 @login_required
@@ -178,6 +179,23 @@ class TeamCreationView(LoginRequiredMixin, FormView):
     def form_invalid(self, form):
         messages.add_message(self.request, messages.WARNING , "Unsuccessful: Team Not Created")
         return super().form_invalid(form)
+    
+class TeamUpdateView(TeamRequiredMixin ,LoginRequiredMixin, UpdateView):
+    """Display team profile editing screen, and handle profile modifications. only available for team admin"""
+
+    model = TeamUpdateForm
+    template_name = "update_team.html"
+    form_class = TeamUpdateForm
+
+    def get_object(self):
+        """Return the object (team) to be updated."""
+        team = self.request.u
+        return team
+
+    def get_success_url(self):
+        """Return redirect URL after successful update."""
+        messages.add_message(self.request, messages.SUCCESS, "Team updated!")
+        return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
 
 ########
 

@@ -1,0 +1,17 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <div class="card cover-card offset-sm-0 offset-md-0 offset-lg-0 mb-3">
+        <h1>Edit Team</h1>
+        <form action="{% url 'edit_team' %}" method="post">
+          {% csrf_token %}
+          {% include 'partials/bootstrap_form.html' with form=form %}
+          <input type="submit" value="Update" class="btn btn-primary">
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

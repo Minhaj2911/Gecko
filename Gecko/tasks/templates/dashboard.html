@@ -4,9 +4,35 @@
   <div class="row">
     <div class="col-12">
       <h1>Welcome to your dashboard {{ user.username }}</h1>
-      {% for team in user_teams %}
-      <ol> {{team.name}} - {{team.description}} - {{team.admin}} - {{team.members}}</ol>
-      {% endfor %}
+      <div class="d-flex justify-content-end mb-3">
+        <form action="{%url 'create_team' %}" method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit" class="btn btn-success">
+            Create team <i class="bi bi-bookmark-plus"></i>
+          </button>
+        </form>
+      </div>
+      <div class="row">
+        {% if user_teams%}
+          {% for team in user_teams %}
+            <div class="col-md-4">
+              <div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
+                <div class="card-body">
+                  <h5 class="card-title">{{ team.name }}</h5>
+                  <p class="card-text">{{ team.description }}</p>
+                  <p class="card-text">Admin: {{ team.admin }}</p>
+                  <a href="" button type="button" class="btn btn-secondary"><i class="bi bi-justify-left"></i> View Details</a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="col-12">
+            <h3>You don't have any teams yet...</h3>
+          </div>
+        {% endif %}
+      </div>
     </div>
   </div>
 </div>

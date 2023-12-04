@@ -8,8 +8,9 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, TeamSelectForm
 from tasks.helpers import login_prohibited
+from tasks.models import Team, Task, User
 
 
 @login_required
@@ -28,18 +29,32 @@ def home(request):
 
 @login_required
 def create_task(request):
+    """Display user task creation view, and handle team selection."""
     user= request.user
-    users_teams= Team.objects.filter(members= user)
-    team_members= User.objects.filter(teams__in= users_teams).distinct()
+    teamSelectionForm= TeamSelectForm(user=user)
+    createTaskForm= TaskForm(user=user)
+
     if request.method == 'POST':
-        form = TaskForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('dashboard')
-    else:
-        form = TaskForm()
-        form.fields['assignee'].queryset= team_members
-    return render(request, 'create_task.html', {'form': form})
+        if 'select_team' in request.POST:
+            teamSelectionForm= TeamSelectForm(data=request.POST, user=user)
+            if teamSelectionForm.is_valid():
+                selected_team= teamSelectionForm.cleaned_data['team'].id
+                team_members= User.objects.filter(teams__id=selected_team).distinct()
+                createTaskForm.fields['assignee'].queryset= team_members
+                createTaskForm= TaskForm(team_id=selected_team)
+                # form.save()
+                # return redirect('dashboard')
+        
+        elif 'create_task' in request.POST:
+            createTaskForm = TaskForm(request.POST, user=user)
+            if createTaskForm.is_valid():
+                createTaskForm.save()
+                return redirect('dashboard')
+    
+        else:
+            createTaskForm.fields['assignee'].queryset= User.objects.none()
+            
+    return render(request, 'create_task.html', {'teamSelectionForm': teamSelectionForm, 'createTaskForm': createTaskForm})
 
 
 class LoginProhibitedMixin:

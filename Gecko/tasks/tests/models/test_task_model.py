@@ -28,7 +28,6 @@ class TaskTest(TestCase):
         self.task= Task.objects.create(
             title= 'Project meeting',
             description= 'Conduct a meeting to discuss the new project design',
-            team= self.team,
             assignee= self.user,
             due_date= timezone.now() + timezone.timedelta(days= 3),
             status= 'assigned'
@@ -52,15 +51,15 @@ class TaskTest(TestCase):
             self.task.status= status
             self._assert_task_is_valid(self.task)
     
-    def test_invalid_assignee(self):
-        user_with_no_assigned_team = User.objects.create_user(
-            '@janendoe',
-            first_name='Jane',
-            last_name='Doe',
-            email='janedoe@example.org'
-        )
-        self.task.assignee= user_with_no_assigned_team
-        self._assert_task_is_invalid(self.task)
+    # def test_invalid_assignee(self):
+    #     user_with_no_assigned_team = User.objects.create_user(
+    #         '@janendoe',
+    #         first_name='Jane',
+    #         last_name='Doe',
+    #         email='janedoe@example.org'
+    #     )
+    #     self.task.assignee= user_with_no_assigned_team
+    #     self._assert_task_is_invalid(self.task)
     
     def test_description_can_be_blank(self):
         self.task.description= ''

@@ -46,7 +46,7 @@ class TaskTest(TestCase):
         self._assert_task_is_invalid(self.task)
     
     def test_valid_status_choice(self):
-        valid_status_choices= ['assigned', 'in_progress', 'completed']
+        valid_status_choices= ['assigned', 'in progress', 'completed']
         for status in valid_status_choices:
             self.task.status= status
             self._assert_task_is_valid(self.task)

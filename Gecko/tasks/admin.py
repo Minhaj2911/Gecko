@@ -8,6 +8,7 @@ class UserAdmin(admin.ModelAdmin):
 
     list_display = [
         'username', 'first_name', 'last_name', 'email'
+        #   ,'get_teams'
     ]
 
 
@@ -19,12 +20,12 @@ class TaskAdmin(admin.ModelAdmin):
         'title', 'description', 'assignee', 'due_date'
     ]
 
-# Temporarly configure team admin
+
+
 @admin.register(Team)
 class TeamAdmin(admin.ModelAdmin):
-    """Configuration of the admin interface for teams."""
+    """Configuration of the admin interface for tasks."""
 
     list_display = [
-        'name', 'description', 'admin', 'get_members'
+        'name', 'description', 'admin' , 'get_members' #, 'members' #error wont allow members as it is a many to many field
     ]
-

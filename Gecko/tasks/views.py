@@ -181,3 +181,26 @@ class SignUpView(LoginProhibitedMixin, FormView):
 
     def get_success_url(self):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
+    
+class TeamCreationView(LoginRequiredMixin, FormView):
+    form_class = TeamForm
+    template_name = "create_team.html"
+
+    def form_valid(self, form):
+        self.object = form.save(self.request)
+        messages.add_message(self.request, messages.SUCCESS, "Team Created!")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        """Return redirect URL after successful update."""
+        return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
+
+    def form_invalid(self, form):
+        messages.add_message(self.request, messages.WARNING , "Unsuccessful: Team Not Created")
+        return super().form_invalid(form)
+
+########
+
+# @login_required
+# def remove_member_from_team(request):
+    

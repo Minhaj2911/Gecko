@@ -2,8 +2,9 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
-from .models import User, Task
+from .models import User, Team, Task
 from django.utils import timezone
+
 
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
@@ -116,12 +117,49 @@ class ResendActivationEmailForm(forms.Form):
     
     email = forms.EmailField(label='Your email')
     
-class TaskForm(forms.ModelForm):
-    """ Form enabling team members to create and assign tasks. """
-    
+
+class TeamForm(forms.ModelForm):
+    """ Form enabling a user to create a team """
     class Meta:
         """Form options."""
+        model= Team
+        fields=['name', 'description', 'members'] # add admin
+        widgets={
+            'description': forms.Textarea()}#,
+            #'members' :SearchableSelect(model='User', search_field='name', many=True, limit=10)}
 
+    def save(self,request):
+        super().save(commit=False)
+        team = Team.objects.create(
+            name = self.cleaned_data.get('name'),
+            admin = request.user,
+            description = self.cleaned_data.get('description')
+        )
+        team.members.set(self.cleaned_data.get('members'))
+        
+        # may not be required as duplcates may not be created
+        if request.user not in team.members.all():
+            team.members.add(request.user)
+        
+        for member in team.members.all():
+            member.teams.add(team)
+        
+        return team
+
+    def clean(self):
+        super().clean()
+        """Clean the data and geberate error message for invalid admin."""
+        admin = self.cleaned_data.get('admin')
+        members = self.cleaned_data.get('members')
+        if not members and members == []:
+            self.add_error('members', 'members cannot be empty') 
+        
+
+class TaskForm(forms.ModelForm):
+    """ Form enabling team members to create and assign tasks. """
+
+    class Meta:
+        """Form options."""
         model= Task
         fields=['title', 'description','assignee', 'due_date', 'status']
         widgets= {
@@ -136,3 +174,4 @@ class TaskForm(forms.ModelForm):
         due_date = self.cleaned_data.get('due_date')
         if due_date is not None and due_date < timezone.now():
             self.add_error('due_date', 'Due date cannot be in the past')
+

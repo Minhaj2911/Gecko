@@ -1,10 +1,9 @@
 from django.core.validators import RegexValidator
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group
 from django.db import models
 from libgravatar import Gravatar
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-
 
 class User(AbstractUser):
     """Model used for user authentication, and team member related information."""
@@ -20,7 +19,7 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
-
+    teams = models.ManyToManyField('Team', related_name='teams', blank=True )
 
     class Meta:
         """Model options."""
@@ -44,6 +43,10 @@ class User(AbstractUser):
         
         return self.gravatar(size=60)
     
+    def get_teams(self):
+        return ",".join([str(m) for m in self.teams.all()]) 
+
+# for sam to go over
     def __str__(self):
         """Defines the string representation of a User instance."""
         return self.username
@@ -70,4 +73,25 @@ class Task(models.Model):
         super().clean()
         if self.due_date is not None and self.due_date < timezone.now():
             raise ValidationError("Due date cannot be in the past")
+
+class Team(models.Model):
+    """Teams can be created by a user"""
+    name = models.CharField(max_length=50, blank=False, unique=True)
+    description = models.CharField(max_length=500, blank=True)
+    admin = models.ForeignKey(
+            "User",
+            on_delete=models.CASCADE,
+            blank = False
+        )
+    members = models.ManyToManyField(User, related_name='members',blank = False)
+
+    def get_members(self):
+        return ",".join([str(m) for m in self.members.all()]) 
+   
+    def set_admin(self,user):
+        self.admin = user
+        
+    def clean(self):
+        super().clean()
+
 

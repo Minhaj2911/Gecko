@@ -35,7 +35,7 @@ class SignUpViewTestCase(TestCase, LogInTester):
         self.assertTrue(isinstance(form, SignUpForm))
         self.assertFalse(form.is_bound)
 
-    def test_get_sign_up_redirects_when_logged_in(self):
+    def test_get_sign_up_redirects(self):
         self.client.login(username=self.user.username, password="Password123")
         response = self.client.get(self.url, follow=True)
         redirect_url = reverse('email_verification_notice')
@@ -71,15 +71,15 @@ class SignUpViewTestCase(TestCase, LogInTester):
         self.assertTrue(is_password_correct)
         self.assertFalse(self._is_logged_in())
 
-    def test_post_sign_up_redirects_when_logged_in(self):
+    def test_post_sign_up_redirects(self):
         self.client.login(username=self.user.username, password="Password123")
         before_count = User.objects.count()
         response = self.client.post(self.url, self.form_input, follow=True)
         after_count = User.objects.count()
         self.assertEqual(after_count, before_count)
-        redirect_url = reverse('dashboard')
+        redirect_url = reverse('email_verification_notice')
         self.assertRedirects(response, redirect_url, status_code=302, target_status_code=200)
-        self.assertTemplateUsed(response, 'dashboard.html')
+        self.assertTemplateUsed(response, 'email_verification_notice.html')
         
     def test_no_email_sent_on_unsuccessful_sign_up(self):
         self.form_input['email'] = 'invalid_email'  # Making the form invalid

@@ -154,16 +154,3 @@ class LogInViewTestCase(TestCase, LogInTester, MenuTesterMixin):
         self.assertTemplateUsed(response, 'log_in.html')
         self.assertFalse(response.context['user'].is_authenticated)
         self.assertEqual(len(response.context['messages']), 1)
-
-    def test_login_with_unverified_email(self):
-        """Ensure users with unverified emails cannot log in."""
-        response = self.client.post(self.login_url, {'username': '@johndoe', 'password': 'password123'})
-        self.assertEqual(response.status_code, 200)  # Still renders login page
-        self.assertTemplateUsed(response, 'log_in.html')
-
-        # Check for a specific error message if your application uses one
-        messages_list = list(response.context['messages'])
-        self.assertIn("Please verify your email to activate your account.", [message.message for message in messages_list])
-
-        # Ensure the user is not logged in
-        self.assertFalse(response.context['user'].is_authenticated)

@@ -94,17 +94,15 @@ class LogInView(LoginProhibitedMixin, View):
         form = LogInForm(request.POST)
         self.next = request.POST.get('next') or settings.REDIRECT_URL_WHEN_LOGGED_IN
         user = form.get_user()
-        if user is not None:
-            if not user.is_active:
-                messages.add_message(request, messages.ERROR, "Please verify your email to activate your account.")
-                return self.render() 
-            elif user.is_active:
-                login(request, user)
-                return redirect(self.next)
+        if user and user.is_active:
+            login(request, user)
+            return redirect(self.next)
+        elif user and not user.is_active:
+            messages.add_message(request, messages.ERROR, "Please verify your email to activate your account.") 
+            return self.render()
         else:
             messages.add_message(request, messages.ERROR, "The credentials provided were invalid!")
-
-        return self.render()
+            return self.render()
 
     def render(self):
         """Render log in template with blank log in form."""
@@ -171,7 +169,7 @@ class SignUpView(LoginProhibitedMixin, FormView):
 
     form_class = SignUpForm
     template_name = "sign_up.html"
-    redirect_when_logged_in_url = settings.REDIRECT_URL_WHEN_LOGGED_IN
+    redirect_when_logged_in_url = 'email_verification_notice'
 
     def form_valid(self, form):
         """Process the valid sign-up form. 

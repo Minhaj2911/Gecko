@@ -1,9 +1,13 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<form method="post">
-    <h1>Update the status of {{ task.title }}</h1>
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Update Status</button>
-</form>
+<div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">Update the status of {{ task.title }}</h5>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-secondary">Update Status</button>
+        </form>
+    </div>
+  </div>
 {% endblock %}

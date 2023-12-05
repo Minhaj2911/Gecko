@@ -1,10 +1,10 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<h2>{{ task.title }} description</h2>
-<p>{{ task.description }}</p>
-<form action="{% url 'change_task_status' pk=task.id %}" method="post">
-    {% csrf_token %}
-    {{ form.as_p}}
-    <button type="submit">Change status</button>
-</form>
+<div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">{{ task.title }} description</h5>
+      <p class="card-text">{{ task.description }}</p>
+      <a href="{% url 'change_task_status' pk=task.id %}" button type="button" class="btn btn-secondary">Change status</a>
+    </div>
+  </div>
 {% endblock %}

@@ -145,9 +145,6 @@ class TaskStatusForm(forms.ModelForm):
     
     def clean(self):
         cleaned_data = super().clean()
-        task = self.instance
-
-        if task.due_date is not None and task.due_date < timezone.now():
-            raise ValidationError("Cannot change the status of a task that is overdue.")
+        self.instance.existing_task = True
 
         return cleaned_data

@@ -15,8 +15,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include, re_path
 from tasks import views
+# import searchableselect.urls 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,4 +32,8 @@ urlpatterns = [
     path('activatation_email/<uidb64>/<token>/', views.send_activation_email, name='send_activation_email'), 
     path('resend_activation_email/', views.ResendActivationEmailView.as_view(), name='resend_activation_email'),
     path('create_task/', views.create_task, name='create_task'),
+    path('create_team/', views.TeamCreationView.as_view(), name='create_team'),
+    # path('create_team/', views.create_team, name='create_team'),
+    #re_path('^searchableselect/', include('searchableselect.urls')),
+    
 ]

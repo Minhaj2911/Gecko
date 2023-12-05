@@ -57,6 +57,12 @@ class Task(models.Model):
         on_delete=models.CASCADE,
     )
     due_date= models.DateTimeField()
+
+    Team = models.ForeignKey(
+        "Team",
+        on_delete=models.CASCADE,
+        blank=True,
+    )
     
     STATUS_CHOICES = [
         ('assigned', 'Assigned'),
@@ -81,9 +87,13 @@ class Team(models.Model):
             blank = False
         )
     members = models.ManyToManyField(User, related_name='members',blank = False)
+    tasks = models.ManyToManyField(Task, related_name='tasks',blank = True)
 
     def get_members(self):
-        return ",".join([str(m) for m in self.members.all()]) ## str(self.admin)+ "," + 
+        return ",".join([str(m) for m in self.members.all()]) 
+    
+    def get_tasks(self):
+        return ",".join([str(m) for m in self.tasks.all()])  
    
     def set_admin(self,user):
         self.admin = user

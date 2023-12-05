@@ -17,7 +17,7 @@ class TaskAdmin(admin.ModelAdmin):
     """Configuration of the admin interface for tasks."""
 
     list_display = [
-        'title', 'description', 'assignee', 'due_date'
+        'title', 'description', 'assignee', 'due_date', 'Team'
     ]
 
 # admin.site.unregister(Group)
@@ -27,5 +27,5 @@ class TeamAdmin(admin.ModelAdmin):
     """Configuration of the admin interface for tasks."""
 
     list_display = [
-        'name', 'description', 'admin' , 'get_members' #, 'members' #error wont allow members as it is a many to many field
+        'name', 'description', 'admin' , 'get_members', 'get_tasks' #, 'members' #error wont allow members as it is a many to many field
     ]

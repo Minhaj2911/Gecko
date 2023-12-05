@@ -4,7 +4,6 @@ from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from .models import User, Team, Task
-from searchableselect.widgets import SearchableSelect
 from django.utils import timezone
 
 
@@ -119,10 +118,9 @@ class TeamForm(forms.ModelForm):
     class Meta:
         """Form options."""
         model= Team
-        fields=['name', 'description', 'members'] # add admin
+        fields=['name', 'description']# , 'members'] # add admin
         widgets={
-            'description': forms.Textarea()}#,
-            #'members' :SearchableSelect(model='User', search_field='name', many=True, limit=10)}
+            'description': forms.Textarea()}
 
     def save(self,request):
         super().save(commit=False)
@@ -131,14 +129,15 @@ class TeamForm(forms.ModelForm):
             admin = request.user,
             description = self.cleaned_data.get('description')
         )
-        team.members.set(self.cleaned_data.get('members'))
+        team.members.add(request.user)
+        # team.members.set(self.cleaned_data.get('members'))
         
-        # may not be required as duplcates may not be created
-        if request.user not in team.members.all():
-            team.members.add(request.user)
+        # # may not be required as duplcates may not be created
+        # if request.user not in team.members.all():
+        #     team.members.add(request.user)
         
-        for member in team.members.all():
-            member.teams.add(team)
+        # for member in team.members.all():
+        #     member.teams.add(team)
         
         return team
 
@@ -149,6 +148,18 @@ class TeamForm(forms.ModelForm):
         members = self.cleaned_data.get('members')
         if not members and members == []:
             self.add_error('members', 'members cannot be empty') 
+        
+class InviteTeamMembersForm(forms.Form):
+    class Meta:
+        """Form options."""
+        model= Team
+        fields=['members']
+        # widgets= 
+    
+    def save(self):
+        for member in self.cleaned_data.get('members'):
+            # send invites to team members
+            pass
         
 
 class TaskForm(forms.ModelForm):

@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, InviteTeamMembersForm
 from tasks.helpers import login_prohibited
 
 
@@ -177,6 +177,25 @@ class TeamCreationView(LoginRequiredMixin, FormView):
 
     def form_invalid(self, form):
         messages.add_message(self.request, messages.WARNING , "Unsuccessful: Team Not Created")
+        return super().form_invalid(form)
+
+
+class InviteTeamMembersView(LoginRequiredMixin, FormView):
+    form_class = InviteTeamMembersForm
+    template_name = "invite_team_members.html"
+    redirect_when_logged_in_url = settings.REDIRECT_URL_WHEN_LOGGED_IN
+
+    def form_valid(self, form):
+        self.object = form.save(self.request)
+        messages.add_message(self.request, messages.SUCCESS, "Invites Sent")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        """Return redirect URL after successful update."""
+        return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
+
+    def form_invalid(self, form):
+        messages.add_message(self.request, messages.WARNING , "Unsuccessful: Invites not sent")
         return super().form_invalid(form)
 
 ########

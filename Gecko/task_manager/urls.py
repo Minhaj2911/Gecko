@@ -17,7 +17,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include, re_path
 from tasks import views
-# import searchableselect.urls 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,7 +29,7 @@ urlpatterns = [
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
     path('create_task/', views.create_task, name='create_task'),
     path('create_team/', views.TeamCreationView.as_view(), name='create_team'),
-    # path('create_team/', views.create_team, name='create_team'),
-    #re_path('^searchableselect/', include('searchableselect.urls')),
+    path('<team_id>/invite_team_members/', views.InviteTeamMembersView.as_view(), name='invite_team_members'), # idk if <> will work
+    
     
 ]

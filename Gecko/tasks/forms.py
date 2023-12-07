@@ -15,13 +15,14 @@ class LogInForm(forms.Form):
 
     def get_user(self):
         """Returns authenticated user if possible."""
-
-        user = None
+        
         if self.is_valid():
             username = self.cleaned_data.get('username')
             password = self.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
-        return user
+            if user is not None and user.is_active:
+                return user
+        return None
 
 
 class UserForm(forms.ModelForm):
@@ -112,6 +113,11 @@ class SignUpForm(NewPasswordMixin, forms.ModelForm):
         )
         return user
 
+class ResendActivationEmailForm(forms.Form):
+    """ A form for requesting a resend of the activation email."""
+    
+    email = forms.EmailField(label='Your email')
+    
 
 class TeamForm(forms.ModelForm):
     """ Form enabling a user to create a team """

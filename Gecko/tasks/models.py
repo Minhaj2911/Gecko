@@ -43,7 +43,15 @@ class User(AbstractUser):
         """Return a URL to a miniature version of the user's gravatar."""
         
         return self.gravatar(size=60)
+    
+    def get_teams(self):
+        return ",".join([str(m) for m in self.teams.all()]) 
 
+# for sam to go over
+    def __str__(self):
+        """Defines the string representation of a User instance."""
+        return self.username
+    
 class Task(models.Model):
     """" Tasks can be created by team members.  """
 
@@ -76,7 +84,6 @@ class Task(models.Model):
       
     
 
-# convert to subclass of Group?????
 class Team(models.Model):
     """Teams can be created by a user"""
     name = models.CharField(max_length=50, blank=False, unique=True)
@@ -89,19 +96,13 @@ class Team(models.Model):
     members = models.ManyToManyField(User, related_name='members',blank = False)
 
     def get_members(self):
-        return ",".join([str(m) for m in self.members.all()]) ## str(self.admin)+ "," + 
+        return ",".join([str(m) for m in self.members.all()]) 
    
     def set_admin(self,user):
         self.admin = user
-
-
-    # the error was here
+        
     def clean(self):
         super().clean()
-
-        # if self.admin and self.admin not in self.members.all():
-        #     raise ValidationError("the team's admin must be in the members field")
-        # if self.members.count() == 0:
-        #     raise ValidationError("members cannot be empty")
+    
 
 

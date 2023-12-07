@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Resend Activation Email</h2>
+  <form method="post" action="{% url 'resend_activation_email' %}">
+    {% csrf_token %}
+    {{ form.email.label_tag }} {{ form.email }}
+    <button type="submit">Resend</button>
+  </form>
+  {% if messages %}
+    {% for message in messages %}
+      <p>{{ message }}</p>
+    {% endfor %}
+  {% endif %}
+{% endblock %}

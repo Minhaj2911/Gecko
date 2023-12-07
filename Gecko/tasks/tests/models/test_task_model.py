@@ -9,7 +9,6 @@ class TaskTest(TestCase):
 
     def setUp(self):
 
-        ##user should be replaced with a team member from a group
         self.user = User.objects.create_user(
             '@johndoe',
             first_name='John',
@@ -51,15 +50,9 @@ class TaskTest(TestCase):
             self.task.status= status
             self._assert_task_is_valid(self.task)
     
-    # def test_invalid_assignee(self):
-    #     user_with_no_assigned_team = User.objects.create_user(
-    #         '@janendoe',
-    #         first_name='Jane',
-    #         last_name='Doe',
-    #         email='janedoe@example.org'
-    #     )
-    #     self.task.assignee= user_with_no_assigned_team
-    #     self._assert_task_is_invalid(self.task)
+    def test_valid_assignee(self):
+        self.task.assignee= self.user
+        self._assert_task_is_valid(self.task)
     
     def test_description_can_be_blank(self):
         self.task.description= ''

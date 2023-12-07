@@ -5,21 +5,23 @@
     <div style="max-width: 600px; margin: 20px auto; padding: 10px; background-color: beige; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);">
         <form method="post" action="">
         {% csrf_token %}
-        {{ teamSelectionForm.as_p}}
+        {{ team_form.as_p}}
         <div style="text-align: right;">
             <button type="submit" name="select_team">Select Team</button> 
             </div>
         </form>
     </div>
 
-    <div style="max-width: 600px; margin: 20px auto; padding: 10px; background-color: beige;  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);">
-        <form method="post" action="" style="margin: auto;">
-            {% csrf_token %}
-            {{ createTaskForm.as_p}}
-            <input type="hidden" name="team_id" value="{{ teamSelectionForm.cleaned_data.team.id }}">
-            <div style="text-align: right;">
-                <button type="submit" name="create_task">Save Task</button> 
+    {% if team_id %}
+        <div style="max-width: 600px; margin: 20px auto; padding: 10px; background-color: beige;  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);">
+            <form method="post" action="" style="margin: auto;">
+                {% csrf_token %}
+                {{ task_form.as_p}}
+                <input type="hidden" name="team_id" value="{{ team_id }}">
+                <div style="text-align: right;">
+                    <button type="submit" name="create_task">Save Task</button> 
                 </div>
             </form>
         </div>
+    {% endif %}
 {% endblock %}

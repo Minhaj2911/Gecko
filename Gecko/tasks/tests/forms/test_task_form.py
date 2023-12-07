@@ -56,17 +56,22 @@ class TaskFormTestCase(TestCase):
         form= TaskForm(data= self.form_input)
         self.assertFalse(form.is_valid())
     
-    # def test_form_rejects_non_member_assignee(self):
-    #     different_user= User.objects.create_user(
-    #         username= '@jane123', 
-    #         first_name='Jane',
-    #         last_name='Smith',
-    #         email='jane123smith@example.org'
-    #         )
-    #     self.form_input['assignee']= different_user
-    #     form= TaskForm(data= self.form_input)
-    #     self.assertFalse(form.is_valid())
-    #     self.assertIn('assignee', form.errors)
+    def test_form_rejects_non_member_assignee(self):
+        non_team_member_user= User.objects.create_user(
+            username= '@jane123', 
+            first_name='Jane',
+            last_name='Smith',
+            email='jane123smith@example.org'
+            )
+        invalid_form_input = {
+            'title': 'Project meeting',
+            'description': 'Conduct a meeting to discuss the new project design',
+            'assignee': non_team_member_user.id,
+            'due_date': timezone.now() + timezone.timedelta(days= 3),
+            'status': 'assigned'
+        }
+        form= TaskForm(data= invalid_form_input, user=self.user)
+        self.assertFalse(form.is_valid())
     
     def test_form_rejects_invalid_status(self):
         self.form_input['status']= ' '

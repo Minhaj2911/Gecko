@@ -184,13 +184,15 @@ class TaskForm(forms.ModelForm):
             self.add_error('due_date', 'Due date cannot be in the past')
 
 class TeamSelectForm(forms.Form):
+    """ Form enabling users to select a team in order to create and assign tasks. """
     team= forms.ModelChoiceField(
         queryset= Team.objects.none(),
         label= "Select Team",
         empty_label=None
     )  
 
-    def __init__(self, user= None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        user= kwargs.pop('user', None)
         super(TeamSelectForm, self).__init__(*args, **kwargs)
         if user:
             self.fields['team'].queryset = Team.objects.filter(members=user)

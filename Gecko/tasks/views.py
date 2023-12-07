@@ -27,36 +27,38 @@ def home(request):
 
     return render(request, 'home.html')
 
-@login_required
-def create_task(request):
-    """Display user task creation view, and handle team selection."""
-    user= request.user
-    teamSelectionForm= TeamSelectForm(user=user)
-    createTaskForm= TaskForm(user=user)
-
-    if request.method == 'POST':
-        if 'select_team' in request.POST:
-            teamSelectionForm= TeamSelectForm(data=request.POST, user=user)
-            if teamSelectionForm.is_valid():
-                selected_team= teamSelectionForm.cleaned_data['team'].id
-                team_members= User.objects.filter(teams__id=selected_team).distinct()
-                createTaskForm.fields['assignee'].queryset= team_members
-                createTaskForm= TaskForm(team_id=selected_team)
-                # form.save()
-                # return redirect('dashboard')
-        
-        elif 'create_task' in request.POST:
-            createTaskForm = TaskForm(request.POST, user=user)
-            if createTaskForm.is_valid():
-                createTaskForm.save()
-                return redirect('dashboard')
+class TaskCreateView(LoginRequiredMixin, View):
+    template_name = 'create_task.html'
     
-        else:
-            createTaskForm.fields['assignee'].queryset= User.objects.none()
-            
-    return render(request, 'create_task.html', {'teamSelectionForm': teamSelectionForm, 'createTaskForm': createTaskForm})
+    def get(self, request):
+        team_form = TeamSelectForm(user=request.user)
+        task_form = TaskForm()
+        return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form})
 
+    def post(self, request):
+        task_form = TaskForm()
+        team_form = TeamSelectForm(user=request.user)
+        
+        if 'select_team' in request.POST:
+            kwargs= {'user': request.user}
+            team_form = TeamSelectForm(request.POST, **kwargs)
 
+            if team_form.is_valid():
+                team = team_form.cleaned_data['team']
+                request.session['selected_team_id']= team.id
+                task_form = TaskForm(team_id=team.id)
+                return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form, 'team_id': team.id})
+
+        elif 'create_task' in request.POST:
+            team_id = request.session.get('selected_team_id')
+            task_form = TaskForm(request.POST, team_id=team_id)
+
+            if task_form.is_valid():
+                task_form.save()
+                return redirect('dashboard')  
+        
+        return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form})
+    
 class LoginProhibitedMixin:
     """Mixin that redirects when a user is logged in."""
 

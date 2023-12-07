@@ -1,0 +1,10 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<h2>{{ task.title }} description</h2>
+<p>{{ task.description }}</p>
+<form action="{% url 'change_task_status' pk=task.id %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p}}
+    <button type="submit">Change status</button>
+</form>
+{% endblock %}

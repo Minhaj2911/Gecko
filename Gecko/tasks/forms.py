@@ -7,6 +7,7 @@ from .models import User, Team, Task
 from django.utils import timezone
 
 
+
 class LogInForm(forms.Form):
     """Form enabling registered users to log in."""
 
@@ -182,3 +183,21 @@ class TaskForm(forms.ModelForm):
         if due_date is not None and due_date < timezone.now():
             self.add_error('due_date', 'Due date cannot be in the past')
 
+
+class TaskStatusForm(forms.ModelForm):
+    """ Form enabling team members to update the status of the assigned tasks. """
+    
+    class Meta:
+        """Form options."""
+
+        model= Task
+        fields=['status']
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        task = self.instance
+
+        if task.due_date is not None and task.due_date < timezone.now():
+            raise ValidationError("Cannot change the status of a task that is overdue.")
+
+        return cleaned_data

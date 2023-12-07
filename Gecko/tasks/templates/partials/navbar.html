@@ -14,6 +14,9 @@
       <a class="navbar-brand" href="{%url 'create_team' %}"> <!-- change to own team dashbpard  -->
         Teams
       </a>
+      <a class="navbar-brand" href="{% url 'task_dashboard' %}"> <!-- add reference page  -->
+        Tasks
+      </a>
     {% endif %}
     {% include 'partials/menu.html' %}
   </div>

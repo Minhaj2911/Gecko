@@ -8,9 +8,9 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, InviteTeamMembersForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TaskStatusForm, TeamForm, InviteTeamMembersForm
 from tasks.helpers import login_prohibited
-
+from .models import Task
 
 @login_required
 def dashboard(request):
@@ -19,6 +19,26 @@ def dashboard(request):
     current_user = request.user
     return render(request, 'dashboard.html', {'user': current_user})
 
+@login_required
+def task_dashboard(request):
+    """Display the current user's task dashboard."""
+
+    current_user = request.user
+    user_tasks = Task.objects.filter(assignee = current_user)
+    return render(request, 'task_dashboard.html', {'user_tasks': user_tasks})
+
+def task_description(request, pk):
+    """Display the current task's description."""
+
+    current_user = request.user
+    
+    try:
+        task = Task.objects.get(assignee=current_user, pk=pk)
+
+    except Task.DoesNotExist:
+        task = None
+
+    return render(request, 'task_description.html', {'task': task})
 
 #@login_prohibited
 def home(request):
@@ -26,12 +46,27 @@ def home(request):
 
     return render(request, 'home.html')
 
+def change_task_status(request, pk):
+    """Change a particular task's status from the task description."""
+    task = Task.objects.get(pk=pk)
+
+    if request.method == 'POST':
+        form = TaskStatusForm(request.POST, instance=task)
+        if form.is_valid():
+            task.status = form.cleaned_data['status']
+            task.save()
+            return redirect('task_dashboard')
+    else:
+        form = TaskStatusForm(instance=task)    
+
+    return render(request, 'change_status.html', {'form': form, 'task': task})
+
 def create_task(request):
     if request.method == 'POST':
         form = TaskForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('dashboard')
+            return redirect('task_dashboard')
     else:
         form = TaskForm()
     return render(request, 'create_task.html', {'form': form})

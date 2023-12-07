@@ -28,6 +28,9 @@ urlpatterns = [
     path('profile/', views.ProfileUpdateView.as_view(), name='profile'),
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
     path('create_task/', views.create_task, name='create_task'),
+    path('task_dashboard/', views.task_dashboard, name='task_dashboard'),
+    path('task_description/<int:pk>', views.task_description, name='task_description'),
+    path('change_status/<int:pk>/', views.change_task_status, name='change_task_status'),
     path('create_team/', views.TeamCreationView.as_view(), name='create_team'),
     path('<team_id>/invite_team_members/', views.InviteTeamMembersView.as_view(), name='invite_team_members'), # idk if <> will work
     

@@ -61,7 +61,7 @@ class Task(models.Model):
         ('completed', 'Completed'),
     ]
     status = models.CharField(max_length=12, choices=STATUS_CHOICES, default='assigned')
-    
+    #remove lines related to existing_task before merging
     def __init__(self, *args: any, **kwargs):
         super().__init__(*args, **kwargs)
         self.existing_task = False

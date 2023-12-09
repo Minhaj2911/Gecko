@@ -61,11 +61,16 @@ class Task(models.Model):
         ('completed', 'Completed'),
     ]
     status = models.CharField(max_length=12, choices=STATUS_CHOICES, default='assigned')
+    
+    def __init__(self, *args: any, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.existing_task = False
 
     def clean(self):
         super().clean()
-        if self.due_date is not None and self.due_date < timezone.now():
+        if not self.existing_task and self.due_date is not None and self.due_date < timezone.now():
             raise ValidationError("Due date cannot be in the past")
+        
 
 
          

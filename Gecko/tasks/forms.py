@@ -144,7 +144,8 @@ class TaskStatusForm(forms.ModelForm):
         fields=['status']
     
     def clean(self):
-        cleaned_data = super().clean()
-        self.instance.existing_task = True
-
-        return cleaned_data
+        super().clean()
+        if self.instance:
+            self.instance.existing_task = True
+        else:
+            self.instance.existing_task = False

@@ -36,10 +36,24 @@ class TaskStatusFormTestCase(TestCase):
         form= TaskStatusForm(data=self.form_input)
         self.assertTrue(form.is_valid())
     
-    #not sure about this
-    def test_task_status_form_initialization(self):
+    
+    def test_task_status_form_modifies_existing_task(self):
+        form = TaskStatusForm(instance=self.task, data=self.form_input)
+        form.is_valid()
+        self.assertTrue(self.task.existing_task)
+    
+
+    def test_task_status_form_modifies_non_existent_task(self):
         form = TaskStatusForm(data=self.form_input)
-        self.assertFalse(form.instance.existing_task)
+        form.is_valid()
+        self.assertFalse(self.task.existing_task)
+    # def test_task_status_form_initialization(self):
+    #     form = TaskStatusForm(instance=self.form_input)
+    #     self.assertTrue(form.instance.existing_task) 
+
+    # form = TaskStatusForm(instance=self.task)
+    #     form.clean()
+    #     self.assertTrue(form.instance.existing_task)
 
     def test_status_form_must_save_correctly(self):
         form = TaskStatusForm(instance=self.task, data=self.form_input)

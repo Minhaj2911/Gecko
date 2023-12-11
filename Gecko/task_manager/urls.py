@@ -37,7 +37,8 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path('create_team/', views.TeamCreationView.as_view(), name='create_team'),
-    path('team_tasks/', views.team_tasks, name='team_tasks'), #add pk
+    #path('team_tasks/', views.team_tasks, name='team_tasks'), #add pk
     # path('create_team/', views.create_team, name='create_team'),
     #re_path('^searchableselect/', include('searchableselect.urls')),
+    path('team/<int:pk>/tasks/', views.team_tasks, name='team_tasks'),
 ]

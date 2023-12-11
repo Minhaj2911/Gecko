@@ -22,7 +22,7 @@
                   <h5 class="card-title">{{ team.name }}</h5>
                   <p class="card-text">{{ team.description }}</p>
                   <p class="card-text">Admin: {{ team.admin }}</p>
-                  <a href="{% url 'team_tasks' %}" button type="button" class="btn btn-secondary"><i class="bi bi-justify-left"></i> View Details</a>
+                  <a href="{% url 'team_tasks' pk=team.id %}" button type="button" class="btn btn-secondary"><i class="bi bi-justify-left"></i> View Details</a>
                 </div>
               </div>
             </div>

@@ -1,7 +1,20 @@
 {% extends 'base_content.html' %}
 {% block content %}
-{% for team in user_teams %}
-      <ol> {{team.name}} - {{team.description}} - {{team.admin}} - {{team.members}}</ol>
-{% endfor %}
-<!--change this to display the tasks of the current team-->
+  <h2>Tasks for {{ team.name }}</h2>
+
+  {% if tasks %}
+    <ul>
+      {% for task in tasks %}
+        <li>
+          <strong>{{ task.title }}</strong><br>
+          Description: {{ task.description }}<br>
+          Assignee: {{ task.assignee.username }}<br>
+          Due Date: {{ task.due_date }}<br>
+          Status: {{ task.status }}<br>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No tasks for this team.</p>
+  {% endif %}
 {% endblock %}

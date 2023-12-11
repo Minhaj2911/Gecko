@@ -203,12 +203,6 @@ class TeamSelectForm(forms.Form):
         if user:
             self.fields['team'].queryset = Team.objects.filter(members=user)
             
-
-
-
-
-
-
 class TaskStatusForm(forms.ModelForm):
     """ Form enabling team members to update the status of the assigned tasks. """
     

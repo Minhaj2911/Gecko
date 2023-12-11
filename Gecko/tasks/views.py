@@ -50,6 +50,20 @@ def task_description(request, pk):
 
     return render(request, 'task_description.html', {'task': task})
 
+def change_task_status(request, pk):
+    """Change a particular task's status from the task description."""
+    task = Task.objects.get(pk=pk)
+
+    if request.method == 'POST':
+        form = TaskStatusForm(request.POST, instance=task)
+        if form.is_valid():
+            task.status = form.cleaned_data['status']
+            task.save()
+            return redirect('task_dashboard')
+    else:
+        form = TaskStatusForm(instance=task)    
+
+    return render(request, 'change_status.html', {'form': form, 'task': task})
 
 @login_prohibited
 def home(request):

@@ -81,8 +81,6 @@ class Task(models.Model):
         super().clean()
         if not self.existing_task and self.due_date is not None and self.due_date < timezone.now():
             raise ValidationError("Due date cannot be in the past")
-      
-    
 
 class Team(models.Model):
     """Teams can be created by a user"""

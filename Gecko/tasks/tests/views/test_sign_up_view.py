@@ -5,6 +5,7 @@ from django.urls import reverse
 from tasks.forms import SignUpForm
 from tasks.models import User
 from tasks.tests.helpers import LogInTester
+from django.core import mail
 
 class SignUpViewTestCase(TestCase, LogInTester):
     """Tests of the sign up view."""
@@ -34,12 +35,12 @@ class SignUpViewTestCase(TestCase, LogInTester):
         self.assertTrue(isinstance(form, SignUpForm))
         self.assertFalse(form.is_bound)
 
-    def test_get_sign_up_redirects_when_logged_in(self):
+    def test_get_sign_up_redirects(self):
         self.client.login(username=self.user.username, password="Password123")
         response = self.client.get(self.url, follow=True)
-        redirect_url = reverse('dashboard')
+        redirect_url = reverse('email_verification_notice')
         self.assertRedirects(response, redirect_url, status_code=302, target_status_code=200)
-        self.assertTemplateUsed(response, 'dashboard.html')
+        self.assertTemplateUsed(response, 'email_verification_notice.html')
 
     def test_unsuccesful_sign_up(self):
         self.form_input['username'] = 'BAD_USERNAME'
@@ -59,23 +60,49 @@ class SignUpViewTestCase(TestCase, LogInTester):
         response = self.client.post(self.url, self.form_input, follow=True)
         after_count = User.objects.count()
         self.assertEqual(after_count, before_count+1)
-        response_url = reverse('dashboard')
+        response_url = reverse('email_verification_notice')
         self.assertRedirects(response, response_url, status_code=302, target_status_code=200)
-        self.assertTemplateUsed(response, 'dashboard.html')
+        self.assertTemplateUsed(response, 'email_verification_notice.html')
         user = User.objects.get(username='@janedoe')
         self.assertEqual(user.first_name, 'Jane')
         self.assertEqual(user.last_name, 'Doe')
         self.assertEqual(user.email, 'janedoe@example.org')
         is_password_correct = check_password('Password123', user.password)
         self.assertTrue(is_password_correct)
-        self.assertTrue(self._is_logged_in())
+        self.assertFalse(self._is_logged_in())
 
-    def test_post_sign_up_redirects_when_logged_in(self):
+    def test_post_sign_up_redirects(self):
         self.client.login(username=self.user.username, password="Password123")
         before_count = User.objects.count()
         response = self.client.post(self.url, self.form_input, follow=True)
         after_count = User.objects.count()
         self.assertEqual(after_count, before_count)
-        redirect_url = reverse('dashboard')
+        redirect_url = reverse('email_verification_notice')
         self.assertRedirects(response, redirect_url, status_code=302, target_status_code=200)
-        self.assertTemplateUsed(response, 'dashboard.html')
+        self.assertTemplateUsed(response, 'email_verification_notice.html')
+        
+    def test_no_email_sent_on_unsuccessful_sign_up(self):
+        self.form_input['email'] = 'invalid_email'  # Making the form invalid
+        response = self.client.post(self.url, self.form_input)
+        self.assertEqual(len(mail.outbox), 0)  # No emails should be sent
+        
+    def test_email_sent_on_successful_sign_up(self):
+        response = self.client.post(self.url, self.form_input)
+        self.assertEqual(len(mail.outbox), 1)  # One email should be sent
+        self.assertIn('Activate your account', mail.outbox[0].subject)
+        
+    def test_account_inactive_after_sign_up(self):
+        response = self.client.post(self.url, self.form_input)
+        user = User.objects.get(username='@janedoe')
+        self.assertFalse(user.is_active)
+        
+    def test_activation_email_content(self):
+        response = self.client.post(self.url, self.form_input)
+        email_body = mail.outbox[0].body
+        self.assertIn('Thank you for signing up. Please click the link below to activate your account:', email_body)
+        self.assertIn('localhost:8000', email_body)  # change to pythonanywhere
+        
+    def test_redirect_to_email_verification_notice(self):
+        response = self.client.post(self.url, self.form_input)
+        verification_notice_url = reverse('email_verification_notice')
+        self.assertRedirects(response, verification_notice_url)

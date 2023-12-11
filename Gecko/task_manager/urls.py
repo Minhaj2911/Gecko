@@ -15,9 +15,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include, re_path
+from django.urls import path
 from tasks import views
-# import searchableselect.urls 
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,10 +28,13 @@ urlpatterns = [
     path('password/', views.PasswordView.as_view(), name='password'),
     path('profile/', views.ProfileUpdateView.as_view(), name='profile'),
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
-    path('create_task/', views.create_task, name='create_task'),
+    path('create_task/', views.TaskCreateView.as_view(), name='create_task'),
+    path('email-verification-notice/', views.email_verification_notice, name='email_verification_notice'),
+    path('activate/<uidb64>/<token>/', views.send_activation_email, name='activation_email'), 
+    path('resend_activation_email/', views.ResendActivationEmailView.as_view(), name='resend_activation_email'),
+    path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path('create_team/', views.TeamCreationView.as_view(), name='create_team'),
-    path('team_tasks/', views.team_tasks, name='team_tasks'), #add pk
-    # path('create_team/', views.create_team, name='create_team'),
-    #re_path('^searchableselect/', include('searchableselect.urls')),
-    
 ]

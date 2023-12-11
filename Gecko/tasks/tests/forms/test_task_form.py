@@ -1,6 +1,6 @@
 """Unit tests of the task form."""
 from django.test import TestCase
-from tasks.models import User, Task
+from tasks.models import User, Task, Team
 from tasks.forms import TaskForm
 from django.utils import timezone
 from datetime import timedelta, datetime
@@ -9,7 +9,6 @@ from django import forms
 class TaskFormTestCase(TestCase):
     """Unit tests of the task form."""
 
-    ##user should be replaced with a team member from a group
     def setUp(self):
         super(TestCase, self).setUp()
         self.user = User.objects.create_user(
@@ -18,6 +17,14 @@ class TaskFormTestCase(TestCase):
             last_name='Doe',
             email='johndoe@example.org'
         )
+        self.team= Team.objects.create(
+            name= 'Gecko',
+            description= 'Gecko research project',
+            admin= self.user
+
+         )
+        self.team.members.add(self.user)
+
         self.form_input = {
             'title': 'Project meeting',
             'description': 'Conduct a meeting to discuss the new project design',
@@ -49,9 +56,21 @@ class TaskFormTestCase(TestCase):
         form= TaskForm(data= self.form_input)
         self.assertFalse(form.is_valid())
     
-    def test_form_rejects_no_assignee(self):
-        self.form_input['assignee']= None
-        form= TaskForm(data= self.form_input)
+    def test_form_rejects_non_member_assignee(self):
+        non_team_member_user= User.objects.create_user(
+            username= '@jane123', 
+            first_name='Jane',
+            last_name='Smith',
+            email='jane123smith@example.org'
+            )
+        invalid_form_input = {
+            'title': 'Project meeting',
+            'description': 'Conduct a meeting to discuss the new project design',
+            'assignee': non_team_member_user.id,
+            'due_date': timezone.now() + timezone.timedelta(days= 3),
+            'status': 'assigned'
+        }
+        form= TaskForm(data= invalid_form_input, user=self.user)
         self.assertFalse(form.is_valid())
     
     def test_form_rejects_invalid_status(self):

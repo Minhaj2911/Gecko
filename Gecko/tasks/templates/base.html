@@ -1,4 +1,6 @@
 {% load static %}
+{% static "images/Task-Manager-Background.png" as bg_image_url %}
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -10,7 +12,7 @@
     <title>Task Manager</title>
   </head>
   <body>
-    <div id="cover-image">
+    <div id="cover-image" style="background: url('{{ bg_image_url }}') no-repeat center center fixed; -webkit-background-size: cover; -moz-background-size: cover; background-size: cover; -o-background-size: cover;">
     {% block body %}
     {% endblock %}
     </div>

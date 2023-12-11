@@ -37,6 +37,16 @@ def home(request):
 
     return render(request, 'home.html')
 
+def team_tasks(request):
+    #add pk and then change the url in dashboard.html
+    """Get the tasks of the current team"""
+    #this only shows the team object, once the team and task models are
+    #modified to be assigned to teams, change the method to correctly display
+    #tasks within the teams
+    current_user = request.user
+    user_teams = Team.objects.filter(members=current_user)
+    return render(request, 'team_tasks.html', {'user_teams': user_teams})
+
 class TaskCreateView(LoginRequiredMixin, View):
     template_name = 'create_task.html'
     

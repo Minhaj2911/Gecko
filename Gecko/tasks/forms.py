@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import RegexValidator
-from .models import User, Task
+from .models import User, Task, Team
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
@@ -15,13 +15,14 @@ class LogInForm(forms.Form):
 
     def get_user(self):
         """Returns authenticated user if possible."""
-
-        user = None
+        
         if self.is_valid():
             username = self.cleaned_data.get('username')
             password = self.cleaned_data.get('password')
             user = authenticate(username=username, password=password)
-        return user
+            if user is not None and user.is_active:
+                return user
+        return None
 
 
 class UserForm(forms.ModelForm):
@@ -111,15 +112,57 @@ class SignUpForm(NewPasswordMixin, forms.ModelForm):
             password=self.cleaned_data.get('new_password'),
         )
         return user
+
+class ResendActivationEmailForm(forms.Form):
+    """ A form for requesting a resend of the activation email."""
     
-class TaskForm(forms.ModelForm):
-    """ Form enabling team members to create and assign tasks. """
+    email = forms.EmailField(label='Your email')
     
+
+class TeamForm(forms.ModelForm):
+    """ Form enabling a user to create a team """
     class Meta:
         """Form options."""
+        model= Team
+        fields=['name', 'description', 'members'] # add admin
+        widgets={
+            'description': forms.Textarea()}
+           
 
+    def save(self,request):
+        super().save(commit=False)
+        team = Team.objects.create(
+            name = self.cleaned_data.get('name'),
+            admin = request.user,
+            description = self.cleaned_data.get('description')
+        )
+        team.members.set(self.cleaned_data.get('members'))
+        
+        # may not be required as duplcates may not be created
+        if request.user not in team.members.all():
+            team.members.add(request.user)
+        
+        for member in team.members.all():
+            member.teams.add(team)
+        
+        return team
+
+    def clean(self):
+        super().clean()
+        """Clean the data and geberate error message for invalid admin."""
+        admin = self.cleaned_data.get('admin')
+        members = self.cleaned_data.get('members')
+        if not members and members == []:
+            self.add_error('members', 'members cannot be empty') 
+        
+
+class TaskForm(forms.ModelForm):
+    """ Form enabling team members to create and assign tasks. """
+
+    class Meta:
+        """Form options."""
         model= Task
-        fields=['title', 'description','assignee', 'due_date', 'status']
+        fields=['title', 'description', 'assignee', 'due_date', 'status']
         widgets= {
             'due_date': forms.DateTimeInput(
                 format= '%Y-%m-%dT%H:%M',
@@ -127,11 +170,43 @@ class TaskForm(forms.ModelForm):
             )
         }
 
+    def __init__(self, *args, **kwargs):
+        user= kwargs.pop('user', None)
+        team_id = kwargs.pop('team_id', None)
+        super(TaskForm, self).__init__(*args, **kwargs)
+        if team_id:
+             team = Team.objects.get(id= team_id)
+             self.fields['assignee'].queryset = team.members.all()
+        elif user:
+            teams= user.teams.all()
+            members= User.objects.filter(teams__in= teams).distinct()
+            self.fields['assignee'].queryset = members
+
     def clean(self):
         super().clean()
         due_date = self.cleaned_data.get('due_date')
+
         if due_date is not None and due_date < timezone.now():
             self.add_error('due_date', 'Due date cannot be in the past')
+
+class TeamSelectForm(forms.Form):
+    """ Form enabling users to select a team in order to create and assign tasks. """
+    team= forms.ModelChoiceField(
+        queryset= Team.objects.none(),
+        label= "Select Team",
+        empty_label=None
+    )  
+
+    def __init__(self, *args, **kwargs):
+        user= kwargs.pop('user', None)
+        super(TeamSelectForm, self).__init__(*args, **kwargs)
+        if user:
+            self.fields['team'].queryset = Team.objects.filter(members=user)
+            
+
+
+
+
 
 
 class TaskStatusForm(forms.ModelForm):

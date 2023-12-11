@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-&$dln5wpgorppuw&(gintxm573v2ks+zq4o$(4*lapguixf^+2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['chilaks371.pythonanywhere.com','127.0.0.1']
+ALLOWED_HOSTS = ['chilaks371.pythonanywhere.com','127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -143,3 +143,11 @@ REDIRECT_URL_WHEN_LOGGED_IN = 'dashboard'
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
+
+# Email configuration for user authentication
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Gmail's SMTP server
+EMAIL_PORT = 587  # Port for secure SMTP
+EMAIL_USE_TLS = True  # Enable TLS (required for Gmail)
+EMAIL_HOST_USER = 'team.gecko.authentication@gmail.com'  # Our Gmail address
+EMAIL_HOST_PASSWORD = 'TeamGecko123'  # Our Gmail password

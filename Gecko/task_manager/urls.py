@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from tasks import views
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,7 +28,15 @@ urlpatterns = [
     path('password/', views.PasswordView.as_view(), name='password'),
     path('profile/', views.ProfileUpdateView.as_view(), name='profile'),
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
-    path('create_task/', views.create_task, name='create_task'),
+    path('create_task/', views.TaskCreateView.as_view(), name='create_task'),
+    path('email-verification-notice/', views.email_verification_notice, name='email_verification_notice'),
+    path('activate/<uidb64>/<token>/', views.send_activation_email, name='activation_email'), 
+    path('resend_activation_email/', views.ResendActivationEmailView.as_view(), name='resend_activation_email'),
+    path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
+    path('create_team/', views.TeamCreationView.as_view(), name='create_team'),
     path('task_dashboard/', views.task_dashboard, name='task_dashboard'),
     path('task_description/<int:pk>', views.task_description, name='task_description'),
     path('change_task_status/<int:pk>/', views.change_task_status, name='change_task_status'),

@@ -49,10 +49,10 @@ def home(request):
 
 def team_tasks(request, pk):
     # Check if the user is a member of the team
-    current_user = request.user
+    #current_user = request.user
     #team = Team.objects.get(id=pk)
     # Retrieve all tasks for the team
-    tasks = Task.objects.filter(assignee=current_user,pk=pk)
+    #tasks = Task.objects.filter(assignee=current_user,pk=pk)
     #team_tasks = Task.objects.filter(assignee=current_user,pk=pk)
 
     # context = {
@@ -60,7 +60,11 @@ def team_tasks(request, pk):
     #     'tasks': tasks,
     # }
 
+    #return render(request, 'team_tasks.html', {'tasks': tasks})
+    #def team_tasks(request, team_id):
+    tasks = Task.objects.filter(pk=pk)
     return render(request, 'team_tasks.html', {'tasks': tasks})
+
 
 class TaskCreateView(LoginRequiredMixin, View):
     template_name = 'create_task.html'

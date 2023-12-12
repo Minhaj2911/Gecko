@@ -40,5 +40,5 @@ urlpatterns = [
     #path('team_tasks/', views.team_tasks, name='team_tasks'), #add pk
     # path('create_team/', views.create_team, name='create_team'),
     #re_path('^searchableselect/', include('searchableselect.urls')),
-    path('team/<int:pk>/tasks/', views.team_tasks, name='team_tasks'),
+    path('team_tasks/<int:pk>/', views.team_tasks, name='team_tasks'),
 ]

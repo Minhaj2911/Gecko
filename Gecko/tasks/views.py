@@ -34,8 +34,15 @@ def task_dashboard(request):
     """Display the current user's task dashboard."""
 
     current_user = request.user
-    user_tasks = Task.objects.filter(assignee = current_user)
-    return render(request, 'task_dashboard.html', {'user_tasks': user_tasks})
+    search_task= request.GET.get('search_input')
+
+    if search_task:
+        user_tasks = Task.objects.filter(assignee = current_user).filter(title__icontain= search_task) | Task.objects.filter(assignee = current_user).filter(description__icontain= search_task)
+
+    else:
+        user_tasks= Task.objects.filter(assignee = current_user)
+
+    return render(request, 'task_dashboard.html', {'user_tasks': user_tasks, 'user': current_user})
 
 def task_description(request, pk):
     """Display the current task's description."""

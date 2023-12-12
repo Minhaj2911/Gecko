@@ -1,0 +1,13 @@
+.search-input {
+    width: 100%;     
+    max-width: 1000px; 
+}
+
+.search-button {
+    padding: 5px 10px;          
+    background-color: #1b4a1d; 
+    color: rgb(255, 255, 255);              
+    border: none;            
+    font-size: 0.8em;        
+    width: 100px;  
+}

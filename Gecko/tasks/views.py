@@ -37,7 +37,7 @@ def task_dashboard(request):
     search_task= request.GET.get('search_input')
 
     if search_task:
-        user_tasks = Task.objects.filter(assignee = current_user).filter(title__icontain= search_task) | Task.objects.filter(assignee = current_user).filter(description__icontain= search_task)
+        user_tasks = Task.objects.filter(assignee = current_user).filter(title__icontains= search_task) | Task.objects.filter(assignee = current_user).filter(description__icontains= search_task)
 
     else:
         user_tasks= Task.objects.filter(assignee = current_user)

@@ -238,17 +238,27 @@ class InviteTeamMembersView(LoginRequiredMixin, FormView):
 # @login_required
 # def remove_member_from_team(request):
 
-class InvitesView(LoginRequiredMixin):
+class InvitesView(LoginRequiredMixin, View):
     def team_invites(request):
         #user_invites = User.objects.get(username = request.user).invites.all()
         user_invites = request.user.invites.all()
         return render(request, 'invites.html', {'user_invites': user_invites})
     
-    def join_team(request, pk):
-        pass
+    def join_team(request, team):
+        team = Team.objects.get(name=team)
 
-    
-    def reject_invite(request, pk):
-        pass
+        request.user.teams.add(team)
+        request.user.invites.remove(team)
+        team.members.add(request.user)
+        messages.add_message(request, messages.SUCCESS , f"Joined Team {team} successfully")
+        return InvitesView.team_invites(request)
+        
+
+    def reject_invite(request, team):
+        team = Team.objects.get(name=team)
+        # add a rejection message of some kind to the team admin
+        request.user.invites.remove(team)
+        messages.add_message(request, messages.SUCCESS , f"Rejected Team {team} successfully")
+        return InvitesView.team_invites(request)
         
 

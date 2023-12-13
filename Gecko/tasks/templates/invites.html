@@ -6,9 +6,19 @@
       {% if user_invites %}
         <h1>Invites</h1>
         {% for invite in user_invites%}
-          <div class="card cover-card offset-sm-0 offset-md-0 offset-lg-0 mb-3">
-            
-          </div>
+          <div class="col-md-4">
+              <div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
+                <div class="card-body">
+                  <h5 class="card-title">{{ invite.name }}</h5>
+                  <p class="card-text">{{ invite.description }}</p>
+                  <p class="card-text">Admin: {{ invite.admin }}</p>
+                  <div class="row">
+                    <a href="{% url 'join_team' pk=team.id %}" button type="button" class="btn btn-secondary"><i class="bi bi-justify-left"></i> Join</a> <!--errors-->
+                    <a href="{% url 'reject_invite' pk=team.id %}" button type="button" class="btn btn-secondary"><i class="bi bi-justify-left"></i> Reject</a>
+                  </div>
+                </div>
+              </div>
+            </div>
         {% endfor %}
       {% else%}
         <h1>You have no invites yet</h1>
@@ -18,3 +28,4 @@
   </div>
 </div>
 {% endblock %}
+<!-- <a href="{% url 'team_tasks' pk=team.id %}" button type="button" class="btn btn-secondary"><i class="bi bi-justify-left"></i> View Details</a> -->

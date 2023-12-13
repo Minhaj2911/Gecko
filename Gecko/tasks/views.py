@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, TeamSelectForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, TeamSelectForm, InviteTeamMembersForm
 from tasks.helpers import login_prohibited
 from tasks.models import Team, Task, User
 from .tokens import account_activation_token
@@ -31,7 +31,7 @@ def dashboard(request):
     return render(request, 'dashboard.html', {'user_teams': user_teams})
 
 
-@login_prohibited
+#@login_prohibited
 def home(request):
     """Display the application's start/home screen."""
 
@@ -311,8 +311,54 @@ class TeamCreationView(LoginRequiredMixin, FormView):
         messages.add_message(self.request, messages.WARNING , "Unsuccessful: Team Not Created")
         return super().form_invalid(form)
 
-########
+class InviteTeamMembersView(LoginRequiredMixin, FormView):
+    form_class = InviteTeamMembersForm
+    template_name = "invite_team_members.html"
+    redirect_when_logged_in_url = settings.REDIRECT_URL_WHEN_LOGGED_IN
 
-# @login_required
-# def remove_member_from_team(request):
+    def get(self, request, *args, **kwargs):
+        team = self.kwargs.get('team')
+        self.team = Team.objects.get(name=team)
+        return super().get(request, *args, **kwargs)
     
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['team'] = self.team
+        return kwargs
+
+    def form_valid(self, form):
+        self.object = form.save(self.request)
+        messages.add_message(self.request, messages.SUCCESS, "Invites Sent")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        """Return redirect URL after successful update."""
+        return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
+
+    def form_invalid(self, form):
+        messages.add_message(self.request, messages.WARNING , "Unsuccessful: Invites not sent")
+        return super().form_invalid(form)
+
+
+class InvitesView(LoginRequiredMixin, View):
+    def team_invites(request):
+        #user_invites = User.objects.get(username = request.user).invites.all()
+        user_invites = request.user.invites.all()
+        return render(request, 'invites.html', {'user_invites': user_invites})
+    
+    def join_team(request, team):
+        team = Team.objects.get(name=team)
+
+        request.user.teams.add(team)
+        request.user.invites.remove(team)
+        team.members.add(request.user)
+        messages.add_message(request, messages.SUCCESS , f"Joined Team {team} successfully")
+        return InvitesView.team_invites(request)
+        
+
+    def reject_invite(request, team):
+        team = Team.objects.get(name=team)
+        # add a rejection message of some kind to the team admin
+        request.user.invites.remove(team)
+        messages.add_message(request, messages.SUCCESS , f"Rejected Team {team} successfully")
+        return InvitesView.team_invites(request)

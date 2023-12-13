@@ -21,6 +21,7 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
     teams = models.ManyToManyField('Team', related_name='teams', blank=True )
+    invites = models.ManyToManyField('Team', related_name='invites', blank=True )
 
     class Meta:
         """Model options."""
@@ -46,6 +47,9 @@ class User(AbstractUser):
     
     def get_teams(self):
         return ",".join([str(m) for m in self.teams.all()]) 
+    
+    def get_invites(self):
+        return ",".join([str(m) for m in self.invites.all()]) 
 
 # for sam to go over
     def __str__(self):
@@ -101,9 +105,13 @@ class Team(models.Model):
             blank = False
         )
     members = models.ManyToManyField(User, related_name='members',blank = False)
+    tasks = models.ManyToManyField(Task, related_name='tasks',blank = True)
 
     def get_members(self):
         return ",".join([str(m) for m in self.members.all()]) 
+    
+    def get_tasks(self):
+        return ",".join([str(m) for m in self.tasks.all()]) 
    
     def set_admin(self,user):
         self.admin = user

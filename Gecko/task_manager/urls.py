@@ -37,7 +37,10 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path('create_team/', views.TeamCreationView.as_view(), name='create_team'),
-    # path('create_team/', views.create_team, name='create_team'),
-    #re_path('^searchableselect/', include('searchableselect.urls')),
+    path('invite_team_members/<str:team>/', views.InviteTeamMembersView.as_view(), name='invite_team_members'), # idk if <> will work
+    path('invites/', views.InvitesView.team_invites, name='invites'),
+    path('invites/join_team/<str:team>/', views.InvitesView.join_team, name='join_team'),
+    path('invites/reject_invite/<str:team>/', views.InvitesView.reject_invite, name='reject_invite'),
     path('team_tasks/<int:pk>/', views.team_tasks, name='team_tasks'),
+    
 ]

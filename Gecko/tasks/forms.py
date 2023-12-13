@@ -124,10 +124,9 @@ class TeamForm(forms.ModelForm):
     class Meta:
         """Form options."""
         model= Team
-        fields=['name', 'description', 'members'] # add admin
+        fields=['name', 'description' , 'members'] # add admin
         widgets={
             'description': forms.Textarea()}
-           
 
     def save(self,request):
         super().save(commit=False)
@@ -136,14 +135,11 @@ class TeamForm(forms.ModelForm):
             admin = request.user,
             description = self.cleaned_data.get('description')
         )
-        team.members.set(self.cleaned_data.get('members'))
-        
-        # may not be required as duplcates may not be created
-        if request.user not in team.members.all():
-            team.members.add(request.user)
-        
-        for member in team.members.all():
-            member.teams.add(team)
+        team.members.add(request.user)
+
+        for member in self.cleaned_data.get('members').all():
+            if member != request.user:
+                member.invites.add(team)
         
         return team
 
@@ -154,6 +150,22 @@ class TeamForm(forms.ModelForm):
         members = self.cleaned_data.get('members')
         if not members and members == []:
             self.add_error('members', 'members cannot be empty') 
+        
+class InviteTeamMembersForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        team = kwargs.pop('team', None)
+        super().__init__(*args, **kwargs)
+        self.team = team
+
+    class Meta:
+        """Form options."""
+        model= Team
+        fields=['members']
+        # widgets= 
+    
+    def save(self):
+        for member in self.cleaned_data.get('members').all():
+            member.invites.add(self.team)
         
 
 class TaskForm(forms.ModelForm):

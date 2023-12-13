@@ -38,17 +38,13 @@ def home(request):
     return render(request, 'home.html')
 
 def team_tasks(request, pk):
-        current_user = request.user
-        print(current_user)
-        
         try:
-            team = Team.objects.get(members=current_user, pk=pk)
-            print(team)
-            tasks = Task.objects.filter(team_tasks = team) # make this bit work
-            print(Task.objects.all())
+            team = Team.objects.get(pk=pk)
+            tasks = Task.objects.filter(team_tasks = team)
         except Team.DoesNotExist:
             tasks = None
-        return render(request, 'team_tasks.html', {'tasks': tasks})
+            team = None
+        return render(request, 'team_tasks.html', {'team': team, 'tasks': tasks})
 
 class TaskCreateView(LoginRequiredMixin, View):
     template_name = 'create_task.html'
@@ -77,6 +73,8 @@ class TaskCreateView(LoginRequiredMixin, View):
             task_form = TaskForm(request.POST, team_id=team_id)
 
             if task_form.is_valid():
+                task = task_form.save(commit=False)
+                task.team_tasks = Team.objects.get(id=team_id)
                 task_form.save()
                 return redirect('dashboard')  
         

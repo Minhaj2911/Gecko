@@ -33,6 +33,6 @@ urlpatterns = [
     path('change_status/<int:pk>/', views.change_task_status, name='change_task_status'),
     path('create_team/', views.TeamCreationView.as_view(), name='create_team'),
     path('<team_id>/invite_team_members/', views.InviteTeamMembersView.as_view(), name='invite_team_members'), # idk if <> will work
-    
+    path('invites/', views.team_invites, name='invites'),
     
 ]

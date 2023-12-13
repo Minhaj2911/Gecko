@@ -119,7 +119,7 @@ class TeamForm(forms.ModelForm):
     class Meta:
         """Form options."""
         model= Team
-        fields=['name', 'description']# , 'members'] # add admin
+        fields=['name', 'description' , 'members'] # add admin
         widgets={
             'description': forms.Textarea()}
 
@@ -139,6 +139,10 @@ class TeamForm(forms.ModelForm):
         
         # for member in team.members.all():
         #     member.teams.add(team)
+
+        for member in self.cleaned_data.get('members').all():
+            if member != request.user:
+                member.invites.add(team)
         
         return team
 

@@ -20,6 +20,7 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
     teams = models.ManyToManyField('Team', related_name='teams', blank=True )
+    invites = models.ManyToManyField('Team', related_name='invites', blank=True )
 
     class Meta:
         """Model options."""
@@ -87,8 +88,7 @@ class Team(models.Model):
             blank = False
         )
     members = models.ManyToManyField(User, related_name='members',blank = False)
-    tasks = models.ManyToManyField(Task, related_name='tasks',blank = True)
-
+     
     def get_members(self):
         return ",".join([str(m) for m in self.members.all()]) 
     
@@ -97,6 +97,9 @@ class Team(models.Model):
    
     def set_admin(self,user):
         self.admin = user
+
+    def __str__(self):
+        return self.name
 
 
     # the error was here

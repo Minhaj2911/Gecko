@@ -37,34 +37,18 @@ def home(request):
 
     return render(request, 'home.html')
 
-# def team_tasks(request):
-#     #add pk and then change the url in dashboard.html
-#     """Get the tasks of the current team"""
-#     #this only shows the team object, once the team and task models are
-#     #modified to be assigned to teams, change the method to correctly display
-#     #tasks within the teams
-#     current_user = request.user
-#     user_teams = Team.objects.filter(members=current_user)
-#     return render(request, 'team_tasks.html', {'user_teams': user_teams})
-
 def team_tasks(request, pk):
-    # Check if the user is a member of the team
-    #current_user = request.user
-    #team = Team.objects.get(id=pk)
-    # Retrieve all tasks for the team
-    #tasks = Task.objects.filter(assignee=current_user,pk=pk)
-    #team_tasks = Task.objects.filter(assignee=current_user,pk=pk)
-
-    # context = {
-    #     'team': team,
-    #     'tasks': tasks,
-    # }
-
-    #return render(request, 'team_tasks.html', {'tasks': tasks})
-    #def team_tasks(request, team_id):
-    tasks = Task.objects.filter(pk=pk)
-    return render(request, 'team_tasks.html', {'tasks': tasks})
-
+        current_user = request.user
+        print(current_user)
+        
+        try:
+            team = Team.objects.get(members=current_user, pk=pk)
+            print(team)
+            tasks = Task.objects.filter(team_tasks = team) # make this bit work
+            print(Task.objects.all())
+        except Team.DoesNotExist:
+            tasks = None
+        return render(request, 'team_tasks.html', {'tasks': tasks})
 
 class TaskCreateView(LoginRequiredMixin, View):
     template_name = 'create_task.html'

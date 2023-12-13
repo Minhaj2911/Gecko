@@ -65,6 +65,13 @@ class Task(models.Model):
     )
     due_date= models.DateTimeField()
     
+    team_tasks= models.ForeignKey(
+        "Team",
+        on_delete=models.CASCADE,
+        blank= True,
+        null= True,
+        related_name='team_tasks'
+        )
     
     STATUS_CHOICES = [
         ('assigned', 'Assigned'),
@@ -94,7 +101,6 @@ class Team(models.Model):
             blank = False
         )
     members = models.ManyToManyField(User, related_name='members',blank = False)
-    #team_tasks = models.ManyToManyField(Task, related_name='teams',blank = False)
 
     def get_members(self):
         return ",".join([str(m) for m in self.members.all()]) 

@@ -47,6 +47,9 @@ class User(AbstractUser):
     def get_teams(self):
         return ",".join([str(m) for m in self.teams.all()]) 
    
+    def get_invites(self):
+        return ",".join([str(m) for m in self.invites.all()]) 
+    
 
 class Task(models.Model):
     """" Tasks can be created by team members.  """
@@ -88,7 +91,9 @@ class Team(models.Model):
             blank = False
         )
     members = models.ManyToManyField(User, related_name='members',blank = False)
-     
+    tasks = models.ManyToManyField(Task, related_name='tasks',blank = True)
+    
+
     def get_members(self):
         return ",".join([str(m) for m in self.members.all()]) 
     

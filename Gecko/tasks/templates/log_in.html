@@ -10,9 +10,7 @@
           <input type="hidden" name="next" value="{{ next }}">
           {% include 'partials/bootstrap_form.html' with form=form %}
           <input type="submit" value="Log in" class="btn btn-primary">
-          <p>
-            Didn't receive an activation email? 
-            <a href="{% url 'resend_activation_email' %}">Click here to resend it</a>.
+          <p></p>
             <a href="{% url 'password_reset' %}">Forgot Password?</a>
           </p>
         </form>

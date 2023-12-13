@@ -38,9 +38,10 @@ def home(request):
     return render(request, 'home.html')
 
 def team_tasks(request, pk):
+        """Display the current team's tasks."""
         try:
             team = Team.objects.get(pk=pk)
-            tasks = Task.objects.filter(team_tasks = team)
+            tasks = Task.objects.filter(team_of_task = team)
         except Team.DoesNotExist:
             tasks = None
             team = None
@@ -74,7 +75,7 @@ class TaskCreateView(LoginRequiredMixin, View):
 
             if task_form.is_valid():
                 task = task_form.save(commit=False)
-                task.team_tasks = Team.objects.get(id=team_id)
+                task.team_of_task = Team.objects.get(id=team_id)
                 task_form.save()
                 return redirect('dashboard')  
         

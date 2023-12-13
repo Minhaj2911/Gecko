@@ -65,12 +65,12 @@ class Task(models.Model):
     )
     due_date= models.DateTimeField()
     
-    team_tasks= models.ForeignKey(
+    team_of_task= models.ForeignKey(
         "Team",
         on_delete=models.CASCADE,
         blank= True,
         null= True,
-        related_name='team_tasks'
+        related_name='team_of_task'
         )
     
     STATUS_CHOICES = [

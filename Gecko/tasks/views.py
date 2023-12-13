@@ -220,6 +220,16 @@ class InviteTeamMembersView(LoginRequiredMixin, FormView):
     template_name = "invite_team_members.html"
     redirect_when_logged_in_url = settings.REDIRECT_URL_WHEN_LOGGED_IN
 
+    def get(self, request, *args, **kwargs):
+        team = self.kwargs.get('team')
+        self.team = Team.objects.get(name=team)
+        return super().get(request, *args, **kwargs)
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['team'] = self.team
+        return kwargs
+
     def form_valid(self, form):
         self.object = form.save(self.request)
         messages.add_message(self.request, messages.SUCCESS, "Invites Sent")
@@ -233,10 +243,6 @@ class InviteTeamMembersView(LoginRequiredMixin, FormView):
         messages.add_message(self.request, messages.WARNING , "Unsuccessful: Invites not sent")
         return super().form_invalid(form)
 
-########
-
-# @login_required
-# def remove_member_from_team(request):
 
 class InvitesView(LoginRequiredMixin, View):
     def team_invites(request):

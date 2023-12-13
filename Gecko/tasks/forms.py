@@ -155,6 +155,11 @@ class TeamForm(forms.ModelForm):
             self.add_error('members', 'members cannot be empty') 
         
 class InviteTeamMembersForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        team = kwargs.pop('team', None)
+        super().__init__(*args, **kwargs)
+        self.team = team
+
     class Meta:
         """Form options."""
         model= Team
@@ -162,9 +167,8 @@ class InviteTeamMembersForm(forms.Form):
         # widgets= 
     
     def save(self):
-        for member in self.cleaned_data.get('members'):
-            # send invites to team members
-            pass
+        for member in self.cleaned_data.get('members').all():
+            member.invites.add(self.team)
         
 
 class TaskForm(forms.ModelForm):

@@ -37,10 +37,10 @@ def home(request):
 
     return render(request, 'home.html')
 
-def team_tasks(request, pk):
+def team_tasks(request, team):
         """Display the current team's tasks."""
         try:
-            team = Team.objects.get(pk=pk)
+            team = Team.objects.get(name=team)
             tasks = Task.objects.filter(team_of_task = team)
         except Team.DoesNotExist:
             tasks = None

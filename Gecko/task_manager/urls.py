@@ -41,6 +41,6 @@ urlpatterns = [
     path('invites/', views.InvitesView.team_invites, name='invites'),
     path('invites/join_team/<str:team>/', views.InvitesView.join_team, name='join_team'),
     path('invites/reject_invite/<str:team>/', views.InvitesView.reject_invite, name='reject_invite'),
-    path('team_tasks/<int:pk>/', views.team_tasks, name='team_tasks'),
+    path('team_tasks/<str:team>/', views.team_tasks, name='team_tasks'),
     
 ]

@@ -127,7 +127,7 @@ h3.profile-title {
 .content a {
   color: #cecfcf;
   font-family: 'Fredoka', sans-serif;
-  padding: 5px 10px;
+  padding: 5px 10px; 
   transition: transform 0.3s ease;
 }
 .content a:hover {
@@ -140,7 +140,7 @@ h3.profile-title {
  */
 
 .navbar {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.1); 
   border-bottom: 1px solid rgba(255, 255, 255, 0.3); 
 }
 
@@ -158,15 +158,17 @@ h3.profile-title {
   transform: scale(1.2);
 }
 
-a.nav-item {
+a.zoom-item {
   text-decoration: none;
   color: #cecfcf;
   font-family: 'Fredoka', sans-serif;
   padding: 5px 10px;
+  transition: transform 0.3s ease;
 }
 
-a.nav-item:hover {
+a.zoom-item:hover {
   color: #6d9393;
+  transform: scale(1.2);
 }
 
 /*
@@ -194,7 +196,7 @@ a.nav-item:hover {
 }
 
 .dropdown-item:hover {
-  background-color: #e3cc9c;
+  background-color: #e3cc9c; 
   color: #1a0f06; 
 }
 
@@ -224,9 +226,25 @@ a.nav-item:hover {
   background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 20px;
-  border-radius: 15px;
+  border-radius: 15px; 
   max-width: 300px;
   margin-top: 200px;
   margin-left: 250px;
 
+}
+
+.container3 {
+  background-color: rgb(255 255 255 / 86%); 
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  max-width: 30rem;
+  padding-top: 30px;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-bottom: 40px;
+  border-radius: 15%;
+  margin-left: -400px;
+}
+
+.btn-primary {
+  background-color: black;
 }

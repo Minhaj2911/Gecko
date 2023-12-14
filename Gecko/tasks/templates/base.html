@@ -13,7 +13,7 @@
   </head>
   <body>
     {% if not user.is_authenticated %}
-      <div id="cover-image" style="background: url('{{ bg_image_url }}') no-repeat center center fixed; -webkit-background-size: cover; -moz-background-size: cover; background-size: cover; -o-background-size: cover;">
+            <div id="cover-image" style="background: url('{{ bg_image_url }}') no-repeat center center fixed; -webkit-background-size: cover; -moz-background-size: cover; background-size: cover; -o-background-size: cover;">
     {% endif %}
     {% block body %}
     {% endblock %}

@@ -21,31 +21,31 @@ from django.utils.encoding import force_str
 from django.contrib.auth import get_user_model
 from .forms import ResendActivationEmailForm
 
-
-@login_required
-def dashboard(request):
-    """Display the current user's team dashboard."""
-
-    current_user = request.user
-    user_teams = Team.objects.filter(members=current_user)
-    return render(request, 'dashboard.html', {'user_teams': user_teams})
-
-
 @login_prohibited
 def home(request):
     """Display the application's start/home screen."""
 
     return render(request, 'home.html')
 
-def team_tasks(request, pk):
-    """Display the current team's tasks."""
-    try:
-        team = Team.objects.get(pk=pk)
-        tasks = Task.objects.filter(team_of_task = team)
-    except Team.DoesNotExist:
-        tasks = None
-        team = None
-    return render(request, 'team_tasks.html', {'team': team, 'tasks': tasks})
+class TeamDashboardView(LoginRequiredMixin, View):
+    """Display the current user's team dashboard and team tasks."""
+    
+    def dashboard(request):
+        """Display the current user's team dashboard."""
+
+        current_user = request.user
+        user_teams = Team.objects.filter(members=current_user)
+        return render(request, 'dashboard.html', {'user_teams': user_teams})
+    
+    def team_tasks(request, pk):
+        """Display the current team's tasks."""
+        try:
+            team = Team.objects.get(pk=pk)
+            tasks = Task.objects.filter(team_of_task = team)
+        except Team.DoesNotExist:
+            tasks = None
+            team = None
+        return render(request, 'team_tasks.html', {'team': team, 'tasks': tasks})
     
 class TaskCreateView(LoginRequiredMixin, View):
     template_name = 'create_task.html'

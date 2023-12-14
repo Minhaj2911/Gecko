@@ -38,15 +38,15 @@ def home(request):
     return render(request, 'home.html')
 
 def team_tasks(request, pk):
-        """Display the current team's tasks."""
-        try:
-            team = Team.objects.get(pk=pk)
-            tasks = Task.objects.filter(team_of_task = team)
-        except Team.DoesNotExist:
-            tasks = None
-            team = None
-        return render(request, 'team_tasks.html', {'team': team, 'tasks': tasks})
-
+    """Display the current team's tasks."""
+    try:
+        team = Team.objects.get(pk=pk)
+        tasks = Task.objects.filter(team_of_task = team)
+    except Team.DoesNotExist:
+        tasks = None
+        team = None
+    return render(request, 'team_tasks.html', {'team': team, 'tasks': tasks})
+    
 class TaskCreateView(LoginRequiredMixin, View):
     template_name = 'create_task.html'
     

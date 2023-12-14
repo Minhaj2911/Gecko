@@ -31,6 +31,11 @@
                   <h5 class="card-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ team.name }}</h5>
                   <p class="card-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ team.description }}</p>
                   <p class="card-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Admin: {{ team.admin }}</p>
+                  <p class="card-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Members:
+                    {% for member in team.members.all %}
+                    {{member.username}}
+                    {% endfor %}
+                  </p>
                   <a href="{% url 'team_tasks' pk=team.id %}" button type="button" class="btn btn-secondary"><i class="bi bi-justify-left"></i> View Details</a>
                 </div>
               </div>

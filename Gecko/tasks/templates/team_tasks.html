@@ -6,6 +6,11 @@
       <h1>{{ team.name }}</h1>
       <p>{{ team.description}}</p>
       <p>{{ team.admin}}</p>
+      <p>Members:
+        {% for member in team.members.all %}
+        {{member.username}}
+        {% endfor %}
+      </p>
       <div class="row">
         {% if tasks %}
           {% for task in tasks %}

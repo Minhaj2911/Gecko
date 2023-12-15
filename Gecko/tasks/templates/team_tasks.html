@@ -1,20 +1,52 @@
 {% extends 'base_content.html' %}
 {% block content %}
-  <h2>Tasks for {{ team.name }}</h2>
+<div class="container vh-100"><!--remove vh-100 if vh > 100-->
+  <div class="row">
+    <div class="col-12">
+      <h1>{{ team.name }}</h1>
+      <p>{{ team.description}}</p>
+      <p>{{ team.admin}}</p>
+      <p>Members:
+        {% for member in team.members.all %}
+        {{member.username}}
+        {% endfor %}
+      </p>
+      
+      <div class="d-flex justify-content-end mb-3">
+        <form action="{%url 'invite_team_members' team=team %}" method="get">
+          <button type="submit" class="btn btn-success mr-10">
+            Invite Team Members <i class="bi bi-bookmark-plus"></i>
+          </button>
+        </form>
+      </div>
+      <div class="d-flex justify-content-end mb-3">
+        <form action="{%url 'create_task' team=team %}" method="get">
+          <button type="submit" class="btn btn-success ">
+            Create task <i class="bi bi-bookmark-plus"></i>
+          </button>
+        </form>
+      </div>
 
-  {% if tasks %}
-    <ul>
-      {% for task in tasks %}
-        <li>
-          <strong>{{ task.title }}</strong><br>
-          Description: {{ task.description }}<br>
-          Assignee: {{ task.assignee.username }}<br>
-          Due Date: {{ task.due_date }}<br>
-          Status: {{ task.status }}<br>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>No tasks yet...</p>
-  {% endif %}
+      <div class="row">
+        {% if tasks %}
+          {% for task in tasks %}
+            <div class="col-md-4">
+              <div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
+                <div class="card-header bg-transparent border-light">{{ task.title }}</div>
+                <div class="card-body">
+                  <p class="card-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ task.description }}</p>
+                  <p class="card-text">Assignee: {{ task.assignee }}</p>
+                  <p class="card-text">Due: {{ task.due_date }}</p>
+                  <p class="card-text">Status: {{ task.status }}</p>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+            <h3>No tasks yet...</h3>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

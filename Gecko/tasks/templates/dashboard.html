@@ -13,15 +13,7 @@
           </button>
         </form>
       </div>
-      <div class="d-flex justify-content-end mb-3">
-        <form action="{%url 'create_task' %}" method="post">
-          {% csrf_token %}
-          {{ form.as_p }}
-          <button type="submit" class="btn btn-success">
-            Create task <i class="bi bi-bookmark-plus"></i>
-          </button>
-        </form>
-      </div>
+      
       <div class="row">
         {% if user_teams%}
           {% for team in user_teams %}
@@ -31,18 +23,30 @@
                   <h5 class="card-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ team.name }}</h5>
                   <p class="card-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ team.description }}</p>
                   <p class="card-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Admin: {{ team.admin }}</p>
+                  <p class="card-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Members:
+                    {% for member in team.members.all %}
+                    {{member.username}}
+                    {% endfor %}
+                  </p>
                   <a href="{% url 'team_tasks' team=team %}" button type="button" class="btn btn-secondary"><i class="bi bi-justify-left"></i> View Details</a>
                 </div>
               </div>
             </div>
           {% endfor %}
         {% else %}
-          <div class="col-12">
             <h3>You don't have any teams yet...</h3>
-          </div>
         {% endif %}
       </div>
     </div>
   </div>
 </div>
 {% endblock %}
+<!-- <div class="d-flex justify-content-end mb-3">
+  <form action="{%url 'create_task' %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">
+      Create task <i class="bi bi-bookmark-plus"></i>
+    </button>
+  </form>
+</div> -->

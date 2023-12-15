@@ -1,3 +1,4 @@
+from typing import Any
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, logout
@@ -37,50 +38,7 @@ def home(request):
 
     return render(request, 'home.html')
 
-def team_tasks(request, team):
-        """Display the current team's tasks."""
-        try:
-            team = Team.objects.get(name=team)
-            tasks = Task.objects.filter(team_of_task = team)
-        except Team.DoesNotExist:
-            tasks = None
-            team = None
-        return render(request, 'team_tasks.html', {'team': team, 'tasks': tasks})
 
-class TaskCreateView(LoginRequiredMixin, View):
-    template_name = 'create_task.html'
-    
-    def get(self, request):
-        team_form = TeamSelectForm(user=request.user)
-        task_form = TaskForm()
-        return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form})
-
-    def post(self, request):
-        task_form = TaskForm()
-        team_form = TeamSelectForm(user=request.user)
-        
-        if 'select_team' in request.POST:
-            kwargs= {'user': request.user}
-            team_form = TeamSelectForm(request.POST, **kwargs)
-
-            if team_form.is_valid():
-                team = team_form.cleaned_data['team']
-                request.session['selected_team_id']= team.id
-                task_form = TaskForm(team_id=team.id)
-                return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form, 'team_id': team.id})
-
-        elif 'create_task' in request.POST:
-            team_id = request.session.get('selected_team_id')
-            task_form = TaskForm(request.POST, team_id=team_id)
-
-            if task_form.is_valid():
-                task = task_form.save(commit=False)
-                task.team_of_task = Team.objects.get(id=team_id)
-                task_form.save()
-                return redirect('dashboard')  
-        
-        return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form})
-    
 class LoginProhibitedMixin:
     """Mixin that redirects when a user is logged in."""
 
@@ -315,19 +273,29 @@ class InviteTeamMembersView(LoginRequiredMixin, FormView):
     form_class = InviteTeamMembersForm
     template_name = "invite_team_members.html"
     redirect_when_logged_in_url = settings.REDIRECT_URL_WHEN_LOGGED_IN
+    team = None
+
+    
 
     def get(self, request, *args, **kwargs):
         team = self.kwargs.get('team')
-        self.team = Team.objects.get(name=team)
-        return super().get(request, *args, **kwargs)
+        InviteTeamMembersView.team = Team.objects.get(name=team)
+        return render(request, self.template_name, {
+                          'team': InviteTeamMembersView.team, 
+                          'invite_form': InviteTeamMembersForm() #team=InviteTeamMembersView.team
+                          })
     
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['team'] = self.team
-        return kwargs
+    # task_form = TaskForm(team=TaskCreateView.team)
+    #     return render(request, self.template_name, {'task_form': task_form, 'team': TaskCreateView.team})
+    
+    
+    # def get_form_kwargs(self):
+    #     kwargs = super().get_form_kwargs()
+    #     kwargs['team'] = self.team
+    #     return kwargs
 
     def form_valid(self, form):
-        self.object = form.save(self.request)
+        self.object = form.save(InviteTeamMembersView.team)
         messages.add_message(self.request, messages.SUCCESS, "Invites Sent")
         return super().form_valid(form)
 
@@ -362,3 +330,79 @@ class InvitesView(LoginRequiredMixin, View):
         request.user.invites.remove(team)
         messages.add_message(request, messages.SUCCESS , f"Rejected Team {team} successfully")
         return InvitesView.team_invites(request)
+
+
+
+def team_tasks(request, team):
+    """Display the current team's tasks."""
+    try:
+        team = Team.objects.get(name=team)
+        tasks = Task.objects.filter(team_of_task = team)
+    except Team.DoesNotExist:
+        tasks = None
+        team = None
+    
+    task_form = TaskForm(team=team)
+    return render(request, 'team_tasks.html', {'team': team, 'tasks': tasks, 'task_form': task_form})
+
+
+class TaskCreateView(LoginRequiredMixin, FormView):
+    form_class = TaskForm
+    template_name = 'create_task.html'
+    team = None
+     
+    def get(self, request, *args, **kwargs):
+        team_name = self.kwargs.get('team')
+        TaskCreateView.team = Team.objects.get(name=team_name) # self.team didnt work
+        task_form = TaskForm(team=TaskCreateView.team)
+        return render(request, self.template_name, {'task_form': task_form, 'team': TaskCreateView.team})
+    
+    
+    def form_valid(self, form):
+        self.object = form.save(TaskCreateView.team) # tried to add self.team in here but get same error
+        messages.add_message(self.request, messages.SUCCESS, "Task Created")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        """Return redirect URL after successful update."""
+        return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
+
+    def form_invalid(self, form):
+        messages.add_message(self.request, messages.WARNING , "Unsuccessful: Task not Created")
+        return self.render_to_response(self.get_context_data(form=form))
+    
+
+
+# class TaskCreateView(LoginRequiredMixin, View):
+#     template_name = 'create_task.html'
+    
+#     def get(self, request):
+#         team_form = TeamSelectForm(user=request.user)
+#         task_form = TaskForm()
+#         return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form})
+
+#     def post(self, request):
+#         task_form = TaskForm()
+#         team_form = TeamSelectForm(user=request.user)
+        
+#         if 'select_team' in request.POST:
+#             kwargs= {'user': request.user}
+#             team_form = TeamSelectForm(request.POST, **kwargs)
+
+#             if team_form.is_valid():
+#                 team = team_form.cleaned_data['team']
+#                 request.session['selected_team_id']= team.id
+#                 task_form = TaskForm(team_id=team.id)
+#                 return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form, 'team_id': team.id})
+
+#         elif 'create_task' in request.POST:
+#             team_id = request.session.get('selected_team_id')
+#             task_form = TaskForm(request.POST, team_id=team_id)
+
+#             if task_form.is_valid():
+#                 task = task_form.save(commit=False)
+#                 task.team_of_task = Team.objects.get(id=team_id)
+#                 task_form.save()
+#                 return redirect('dashboard')  
+        
+#         return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form})

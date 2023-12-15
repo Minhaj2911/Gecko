@@ -151,11 +151,11 @@ class TeamForm(forms.ModelForm):
         if not members and members == []:
             self.add_error('members', 'members cannot be empty') 
         
-class InviteTeamMembersForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        team = kwargs.pop('team', None)
-        super().__init__(*args, **kwargs)
-        self.team = team
+class InviteTeamMembersForm(forms.ModelForm):
+    # def __init__(self, *args, **kwargs):
+    #     team = kwargs.pop('team', None)
+    #     super().__init__(*args, **kwargs)
+    #     self.team = team
 
     class Meta:
         """Form options."""
@@ -163,9 +163,11 @@ class InviteTeamMembersForm(forms.Form):
         fields=['members']
         # widgets= 
     
-    def save(self):
+    def save(self,team):
+        super().save(commit=False)
         for member in self.cleaned_data.get('members').all():
-            member.invites.add(self.team)
+            if member not in team.members.all():
+                member.invites.add(team)
         
 
 class TaskForm(forms.ModelForm):
@@ -179,20 +181,34 @@ class TaskForm(forms.ModelForm):
             'due_date': forms.DateTimeInput(
                 format= '%Y-%m-%dT%H:%M',
                 attrs={'type': 'datetime-local'}
-            )
+            ),
+            'description': forms.Textarea()
         }
 
     def __init__(self, *args, **kwargs):
         user= kwargs.pop('user', None)
-        team_id = kwargs.pop('team_id', None)
+        teamname = kwargs.pop('team', None)
         super(TaskForm, self).__init__(*args, **kwargs)
-        if team_id:
-             team = Team.objects.get(id= team_id)
-             self.fields['assignee'].queryset = team.members.all()
+        if teamname: 
+            self.team = Team.objects.get(name=teamname)
+            self.fields['assignee'].queryset = teamname.members.all()
         elif user:
             teams= user.teams.all()
             members= User.objects.filter(teams__in= teams).distinct()
             self.fields['assignee'].queryset = members
+
+    def save(self,team):
+        super().save(commit=False)
+        task = Task.objects.create(
+            title = self.cleaned_data.get('title'),
+            description = self.cleaned_data.get('description'),
+            assignee = self.cleaned_data.get('assignee'),
+            due_date = self.cleaned_data.get('due_date'),
+            status = self.cleaned_data.get('status'),
+            team_of_task = team, # cant use self.team.it didnt work 
+        )
+        return task
+
 
     def clean(self):
         super().clean()

@@ -1,26 +1,28 @@
 {% load static %}
 <nav class="navbar navbar-expand-lg">
   <div class="container-fluid">
-    <a class="navbar-brand" href="{% url 'home' %}">
-      <img src="{% static 'images/Task-Manager-Icon.png' %}" alt="Icon" class="zoom-icon">
-    </a>
-    <div class="ms-auto">
-        {% if user.is_authenticated %}
-        {% include 'partials/menu.html' %}
-          <a class="zoom-item" href="{% url 'dashboard' %}">
-            Dashboard
-          </a>
-          <a class="zoom-item" href="{%url 'create_team' %}"> <!-- change to own team dashbpard  -->
-            Teams
-          </a>
-        {% else %}
-          <a class="zoom-item" href="{% url 'log_in' %}">
-            Log In
-          </a>
-          <a class="zoom-item" href="{% url 'sign_up' %}">
-            Sign Up
-          </a>
+        {% if not user.is_authenticated %}
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <img src="{% static 'images/Task-Manager-Icon.png' %}" alt="Icon" class="zoom-icon">
+        </a>
         {% endif %}
-    </div>
+        <div class="ms-auto">
+            {% if user.is_authenticated %}
+            {% include 'partials/menu.html' %}
+              <a class="zoom-item" href="{% url 'dashboard' %}">
+                Dashboard
+              </a>
+              <a class="zoom-item" href="{%url 'create_team' %}"> <!-- change to own team dashbpard  -->
+                Teams
+              </a>
+            {% else %}
+              <a class="zoom-item" href="{% url 'log_in' %}">
+                Log In
+              </a>
+              <a class="zoom-item" href="{% url 'sign_up' %}">
+                Sign Up
+              </a>
+            {% endif %}
+        </div>
   </div>
 </nav>

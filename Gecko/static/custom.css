@@ -127,7 +127,7 @@ h3.profile-title {
 .content a {
   color: #cecfcf;
   font-family: 'Fredoka', sans-serif;
-  padding: 5px 10px; 
+  padding: 5px 10px;
   transition: transform 0.3s ease;
 }
 .content a:hover {
@@ -140,8 +140,8 @@ h3.profile-title {
  */
 
 .navbar {
-  background-color: rgba(255, 255, 255, 0.1); 
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3); 
+  background-color: rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .navbar-toggler {
@@ -163,12 +163,10 @@ a.zoom-item {
   color: #cecfcf;
   font-family: 'Fredoka', sans-serif;
   padding: 5px 10px;
-  transition: transform 0.3s ease;
 }
 
 a.zoom-item:hover {
   color: #6d9393;
-  transform: scale(1.2);
 }
 
 /*
@@ -192,12 +190,12 @@ a.zoom-item:hover {
 .dropdown-item {
   background-color: #1a0f06;
   color: #e3cc9c;
-  padding: 10px 20px; 
+  padding: 10px 20px;
 }
 
 .dropdown-item:hover {
-  background-color: #e3cc9c; 
-  color: #1a0f06; 
+  background-color: #e3cc9c;
+  color: #1a0f06;
 }
 
 /*
@@ -214,10 +212,10 @@ a.zoom-item:hover {
 }
 
 .container1 {
-  background-color: rgba(255, 255, 255, 0.1); 
+  background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 20px;
-  border-radius: 15px; 
+  border-radius: 15px;
   max-width: 300px;
   margin-left: -400px;
 }
@@ -226,7 +224,7 @@ a.zoom-item:hover {
   background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 20px;
-  border-radius: 15px; 
+  border-radius: 15px;
   max-width: 300px;
   margin-top: 200px;
   margin-left: 250px;
@@ -234,7 +232,7 @@ a.zoom-item:hover {
 }
 
 .container3 {
-  background-color: rgb(255 255 255 / 86%); 
+  background-color: rgb(255 255 255 / 86%);
   border: 1px solid rgba(255, 255, 255, 0.3);
   max-width: 30rem;
   padding-top: 30px;
@@ -245,6 +243,56 @@ a.zoom-item:hover {
   margin-left: -400px;
 }
 
+.container4 {
+  background-color: rgb(255 255 255 / 86%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  max-width: 30rem;
+  padding-top: 30px;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-bottom: 40px;
+  border-radius: 15%;
+}
+
 .btn-primary {
   background-color: black;
+}
+
+
+/*
+ * Dasboard
+ */
+
+body {
+  background-color: #212529 !important;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: 0.5fr 2fr;
+  grid-gap: 20px;
+}
+
+.team-section {
+  grid-column: 1;
+  margin-top: 20px;
+  margin-left: 20px;
+  overflow: auto;
+}
+
+.welcome-message {
+  grid-column: 2;
+  margin-top: 20px;
+  margin-left: 20px;
+}
+
+.tasks-overview {
+  grid-column: 2;
+  margin-top: -800px;
+  margin-right: 20px;
+  overflow: auto;
+}
+
+.custom-height {
+  height: 780px;
 }

@@ -112,13 +112,7 @@ class SignUpForm(NewPasswordMixin, forms.ModelForm):
             password=self.cleaned_data.get('new_password'),
         )
         return user
-
-class ResendActivationEmailForm(forms.Form):
-    """ A form for requesting a resend of the activation email."""
     
-    email = forms.EmailField(label='Your email')
-    
-
 class TeamForm(forms.ModelForm):
     """ Form enabling a user to create a team """
     class Meta:

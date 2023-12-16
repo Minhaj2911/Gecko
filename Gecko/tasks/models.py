@@ -47,10 +47,6 @@ class User(AbstractUser):
     def get_teams(self):
         return ",".join([str(m) for m in self.teams.all()]) 
 
-# for sam to go over
-    def __str__(self):
-        """Defines the string representation of a User instance."""
-        return self.username
     
 class Task(models.Model):
     """" Tasks can be created by team members.  """

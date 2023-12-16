@@ -85,7 +85,7 @@ class TaskTest(TestCase):
         self.task.due_date= invalid_date
         self._assert_task_is_invalid(self.task)
 
-    def test_vali_team_of_task(self):
+    def test_valid_team_of_task(self):
         self.task.team_of_task= self.team
         self._assert_task_is_valid(self.task)
 

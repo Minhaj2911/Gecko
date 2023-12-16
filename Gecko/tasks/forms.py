@@ -132,7 +132,7 @@ class TeamForm(forms.ModelForm):
         )
         team.members.set(self.cleaned_data.get('members'))
         
-        # may not be required as duplcates may not be created
+        # may not be required as duplicates may not be created
         if request.user not in team.members.all():
             team.members.add(request.user)
         
@@ -156,7 +156,7 @@ class TaskForm(forms.ModelForm):
     class Meta:
         """Form options."""
         model= Task
-        fields=['title', 'description', 'assignee', 'due_date', 'status', 'team']
+        fields=['title', 'description', 'assignee', 'due_date', 'status', 'priority']
         widgets= {
                 'due_date': forms.DateTimeInput(
                 format= '%Y-%m-%dT%H:%M',
@@ -220,3 +220,5 @@ class TaskFilterForm(forms.Form):
     due_date_end = forms.DateTimeField(required=False)
     status = forms.ChoiceField(choices=Task.STATUS_CHOICES, required=False)
     team = forms.ModelChoiceField(queryset=Team.objects.all(), required=False)
+    priority = forms.ChoiceField(choices=Task.PRIORITY_CHOICES, required=False)
+

@@ -64,6 +64,13 @@ class Task(models.Model):
     ]
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='assigned')
 
+    PRIORITY_CHOICES = [
+        (1, 'Low'),
+        (2, 'Medium'),
+        (3, 'High'),
+    ]
+    priority = models.IntegerField(choices=PRIORITY_CHOICES, default=2)
+
     def __init__(self, *args: Any, **kwargs):
         super().__init__(*args, **kwargs)
         self.existing_task= False

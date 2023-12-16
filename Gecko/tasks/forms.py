@@ -162,9 +162,9 @@ class TaskForm(forms.ModelForm):
     class Meta:
         """Form options."""
         model= Task
-        fields=['title', 'description', 'assignee', 'due_date', 'status']
+        fields=['title', 'description', 'assignee', 'due_date', 'status', 'team']
         widgets= {
-            'due_date': forms.DateTimeInput(
+                'due_date': forms.DateTimeInput(
                 format= '%Y-%m-%dT%H:%M',
                 attrs={'type': 'datetime-local'}
             )
@@ -218,3 +218,11 @@ class TaskStatusForm(forms.ModelForm):
             self.instance.existing_task = True
         else:
             self.instance.existing_task = False
+
+class TaskFilterForm(forms.Form):
+    title = forms.CharField(required=False)
+    assignee = forms.ModelChoiceField(queryset=User.objects.all(), required=False)
+    due_date_start = forms.DateTimeField(required=False)
+    due_date_end = forms.DateTimeField(required=False)
+    status = forms.ChoiceField(choices=Task.STATUS_CHOICES, required=False)
+    team = forms.ModelChoiceField(queryset=Team.objects.all(), required=False)

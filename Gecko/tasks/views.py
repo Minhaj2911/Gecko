@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, TeamSelectForm, TaskStatusForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, TeamSelectForm, TaskStatusForm, TaskFilterForm
 from tasks.helpers import login_prohibited
 from tasks.models import Team, Task, User
 from .tokens import account_activation_token
@@ -29,20 +29,33 @@ def dashboard(request):
     current_user = request.user
     return render(request, 'dashboard.html', {'user': current_user})
 
-@login_required
 def task_dashboard(request):
     """Display the current user's task dashboard."""
 
     current_user = request.user
-    search_task= request.GET.get('search_input')
+    form = TaskFilterForm(request.GET or None)
+    tasks = Task.objects.filter(assignee=current_user)
 
+    search_task = request.GET.get('search_input')
     if search_task:
-        user_tasks = Task.objects.filter(assignee = current_user).filter(title__icontains= search_task) | Task.objects.filter(assignee = current_user).filter(description__icontains= search_task)
+        tasks = tasks.filter(title__icontains=search_task) | tasks.filter(description__icontains=search_task)
 
-    else:
-        user_tasks= Task.objects.filter(assignee = current_user)
+    if form.is_valid():
+        if form.cleaned_data['title']:
+            tasks = tasks.filter(title__icontains=form.cleaned_data['title'])
+        if form.cleaned_data['status']:
+            tasks = tasks.filter(status=form.cleaned_data['status'])
+        if form.cleaned_data['due_date']:
+            tasks = tasks.filter(due_date=form.cleaned_data['due_date'])
+        if form.cleaned_data['team']:
+            tasks = tasks.filter(team=form.cleaned_data['team'])
 
-    return render(request, 'task_dashboard.html', {'user_tasks': user_tasks, 'user': current_user})
+        sort_by = request.GET.get('sort_by', 'due_date')
+        if sort_by in ['title', 'status', 'due_date', 'assignee__username', 'team__name']:
+            tasks = tasks.order_by(sort_by)
+
+    return render(request, 'task_dashboard.html', {'tasks': tasks, 'form': form})
+
 
 def task_description(request, pk):
     """Display the current task's description."""

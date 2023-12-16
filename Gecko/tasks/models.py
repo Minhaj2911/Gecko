@@ -68,8 +68,7 @@ class Task(models.Model):
     team_of_task= models.ForeignKey(
         "Team",
         on_delete=models.CASCADE,
-        blank= True,
-        null= True,
+        null= False,
         related_name='team_of_task'
         )
     

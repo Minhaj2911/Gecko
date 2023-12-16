@@ -85,6 +85,14 @@ class TaskTest(TestCase):
         self.task.due_date= invalid_date
         self._assert_task_is_invalid(self.task)
 
+    def test_vali_team_of_task(self):
+        self.task.team_of_task= self.team
+        self._assert_task_is_valid(self.task)
+
+    def test_team_of_task_cannot_be_null(self):
+        self.task.team_of_task= None
+        self._assert_task_is_invalid(self.task)
+
     def _assert_task_is_valid(self, task):
         try:
             task.full_clean()

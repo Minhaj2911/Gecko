@@ -32,7 +32,6 @@ class TeamDashboardView(LoginRequiredMixin, View):
     
     def dashboard(request):
         """Display the current user's team dashboard."""
-
         current_user = request.user
         user_teams = Team.objects.filter(members=current_user)
         return render(request, 'dashboard.html', {'user_teams': user_teams})
@@ -43,12 +42,8 @@ class TeamTaskView(LoginRequiredMixin, View):
 
     def team_tasks(request, pk):
         """Display the current team's tasks."""
-        # try:
         team = Team.objects.get(pk=pk)
         tasks = Task.objects.filter(team_of_task = team)
-        # except Team.DoesNotExist:
-        #     tasks = None
-        #     team = None
         return render(request, 'team_tasks.html', {'team': team, 'tasks': tasks})
     
 class TaskCreateView(LoginRequiredMixin, View):

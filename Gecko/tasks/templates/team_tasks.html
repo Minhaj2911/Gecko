@@ -5,7 +5,7 @@
     <div class="col-12">
       <h1>{{ team.name }}</h1>
       <p>{{ team.description}}</p>
-      <p>{{ team.admin}}</p>
+      <p>Admin: {{ team.admin}}</p>
       <p>Members:
         {% for member in team.members.all %}
         {{member.username}}

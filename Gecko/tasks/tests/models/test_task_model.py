@@ -29,7 +29,8 @@ class TaskTest(TestCase):
             description= 'Conduct a meeting to discuss the new project design',
             assignee= self.user,
             due_date= timezone.now() + timezone.timedelta(days= 3),
-            status= 'assigned'
+            status= 'assigned',
+            team_of_task= self.team
         )
     
     def test_title_cannot_be_blank(self):
@@ -94,6 +95,6 @@ class TaskTest(TestCase):
         with self.assertRaises(ValidationError):
             task.full_clean()
     
-        
+    #add tests for team_of_task field
 
     

@@ -108,3 +108,5 @@ class CreateTaskViewTestCase(TestCase):
         response_url= reverse('dashboard')
         self.assertRedirects(response, response_url, status_code= 302, target_status_code= 200)
         self.assertTemplateUsed(response, 'dashboard.html')
+
+    #add tests for no team_of_task field ?? for blank true and null true   

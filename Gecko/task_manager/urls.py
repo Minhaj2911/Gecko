@@ -39,5 +39,5 @@ urlpatterns = [
     path('create_team/', views.TeamCreationView.as_view(), name='create_team'),
     # path('create_team/', views.create_team, name='create_team'),
     #re_path('^searchableselect/', include('searchableselect.urls')),
-    path('team_tasks/<int:pk>/', views.TeamDashboardView.team_tasks, name='team_tasks'),
+    path('team_tasks/<int:pk>/', views.TeamTaskView.team_tasks, name='team_tasks'),
 ]

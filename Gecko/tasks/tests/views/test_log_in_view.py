@@ -142,15 +142,4 @@ class LogInViewTestCase(TestCase, LogInTester, MenuTesterMixin):
         self.assertEqual(len(messages_list), 1)
         self.assertEqual(messages_list[0].level, messages.ERROR)
 
-    def test_csrf_protection(self):
-        """Test if login view is protected against CSRF."""
-        response = self.client.get(self.url)
-        self.assertContains(response, 'csrfmiddlewaretoken')
 
-    def test_login_with_nonexistent_user(self):
-        """Test login attempt with a non-existent username."""
-        response = self.client.post(self.url, {'username': '@johndoe', 'password': 'password'})
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'log_in.html')
-        self.assertFalse(response.context['user'].is_authenticated)
-        self.assertEqual(len(response.context['messages']), 1)

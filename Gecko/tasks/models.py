@@ -104,5 +104,8 @@ class Team(models.Model):
     def clean(self):
         super().clean()
     
+    def __str__(self):
+        return self.name
+    
 
 

@@ -64,7 +64,11 @@ class TaskCreateView(LoginRequiredMixin, View):
 
             if task_form.is_valid():
                 task_form.save()
-                return redirect('dashboard')  
+                messages.add_message(self.request, messages.SUCCESS, "Task Created!")
+                return redirect('dashboard')
+            else:
+                print(task_form.errors)
+                messages.error(self.request,  f"Unsuccessful: Task Not Created!: {task_form.errors}")
         
         return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form})
     

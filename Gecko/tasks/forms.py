@@ -207,6 +207,7 @@ class TaskForm(forms.ModelForm):
             status = self.cleaned_data.get('status'),
             team_of_task = team, # cant use self.team.it didnt work 
         )
+        team.tasks.add(task)
         return task
 
 

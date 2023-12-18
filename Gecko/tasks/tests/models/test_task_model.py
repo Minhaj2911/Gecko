@@ -102,7 +102,3 @@ class TaskTest(TestCase):
     def _assert_task_is_invalid(self, task):
         with self.assertRaises(ValidationError):
             task.full_clean()
-    
-    #add tests for team_of_task field
-
-    

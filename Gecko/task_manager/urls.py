@@ -37,7 +37,7 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path('create_team/', views.TeamCreationView.as_view(), name='create_team'),
-    path('task_dashboard/', views.task_dashboard, name='task_dashboard'),
-    path('task_description/<int:pk>', views.task_description, name='task_description'),
-    path('change_task_status/<int:pk>/', views.change_task_status, name='change_task_status'),
+    path('task_dashboard/', views.TaskDashboardView.task_dashboard, name='task_dashboard'),
+    path('task_description/<int:pk>', views.TaskDescriptionView.task_description, name='task_description'),
+    path('change_task_status/<int:pk>/', views.TaskChangeStatusView.change_task_status, name='change_task_status'),
 ]

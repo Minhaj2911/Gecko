@@ -30,47 +30,53 @@ def dashboard(request):
     return render(request, 'dashboard.html', {'user': current_user})
 
 @login_required
-def task_dashboard(request):
-    """Display the current user's task dashboard."""
+class TaskDashboardView(LoginRequiredMixin, View):
+    """Display the user's task dashboard."""
+    def task_dashboard(request):
+        """Display the current user's task dashboard."""
 
-    current_user = request.user
-    search_task= request.GET.get('search_input')
+        current_user = request.user
+        search_task= request.GET.get('search_input')
 
-    if search_task:
-        user_tasks = Task.objects.filter(assignee = current_user).filter(title__icontains= search_task) | Task.objects.filter(assignee = current_user).filter(description__icontains= search_task)
+        if search_task:
+            user_tasks = Task.objects.filter(assignee = current_user).filter(title__icontains= search_task) | Task.objects.filter(assignee = current_user).filter(description__icontains= search_task)
 
-    else:
-        user_tasks= Task.objects.filter(assignee = current_user)
+        else:
+            user_tasks= Task.objects.filter(assignee = current_user)
 
-    return render(request, 'task_dashboard.html', {'user_tasks': user_tasks, 'user': current_user})
+        return render(request, 'task_dashboard.html', {'user_tasks': user_tasks, 'user': current_user})
 
-def task_description(request, pk):
-    """Display the current task's description."""
+class TaskDescriptionView(View):
+    """Display the task's description."""
+    def task_description(request, pk):
+        """Display the current task's description."""
 
-    current_user = request.user
-    
-    try:
-        task = Task.objects.get(assignee=current_user, pk=pk)
+        current_user = request.user
+        
+        try:
+            task = Task.objects.get(assignee=current_user, pk=pk)
 
-    except Task.DoesNotExist:
-        task = None
+        except Task.DoesNotExist:
+            task = None
 
-    return render(request, 'task_description.html', {'task': task})
+        return render(request, 'task_description.html', {'task': task})
 
-def change_task_status(request, pk):
-    """Change a particular task's status from the task description."""
-    task = Task.objects.get(pk=pk)
+class TaskChangeStatusView(View):
+    """Change a task's status from the task description."""
+    def change_task_status(request, pk):
+        """Change a particular task's status from the task description."""
+        task = Task.objects.get(pk=pk)
 
-    if request.method == 'POST':
-        form = TaskStatusForm(request.POST, instance=task)
-        if form.is_valid():
-            task.status = form.cleaned_data['status']
-            task.save()
-            return redirect('task_dashboard')
-    else:
-        form = TaskStatusForm(instance=task)    
+        if request.method == 'POST':
+            form = TaskStatusForm(request.POST, instance=task)
+            if form.is_valid():
+                task.status = form.cleaned_data['status']
+                task.save()
+                return redirect('task_dashboard')
+        else:
+            form = TaskStatusForm(instance=task)    
 
-    return render(request, 'change_status.html', {'form': form, 'task': task})
+        return render(request, 'change_status.html', {'form': form, 'task': task})
 
 @login_prohibited
 def home(request):

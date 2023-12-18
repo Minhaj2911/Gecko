@@ -11,12 +11,7 @@ class TaskStatusFormTestCase(TestCase):
 
     def setUp(self):
         super(TestCase, self).setUp()
-        self.user = User.objects.create_user(
-            '@johndoe',
-            first_name='John',
-            last_name='Doe',
-            email='johndoe@example.org'
-        )
+        self.user = User.objects.get(username='@johndoe')
 
         self.task = Task.objects.create(
             title='Kick-off meeting',

@@ -17,6 +17,11 @@
             <form method="post" action="" style="margin: auto;">
                 {% csrf_token %}
                 {{ task_form.as_p}}
+                {% if task_form.due_date.errors %}
+                    <div class="alert alert-danger">
+                    {{ task_form.due_date.errors.as_text }}
+                    </div>
+                {% endif %}
                 <input type="hidden" name="team_id" value="{{ team_id }}">
                 <div style="text-align: right;">
                     <button type="submit" name="create_task">Save Task</button> 

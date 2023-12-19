@@ -52,9 +52,11 @@ class TaskFormTestCase(TestCase):
         self.assertFalse(form.is_valid())
     
     def test_form_rejects_past_due_date(self):
-        self.form_input['due_date']= timezone.now() - timedelta(days= 1)
+        self.form_input['due_date']= timezone.now() - timedelta(days= 4)
         form= TaskForm(data= self.form_input)
         self.assertFalse(form.is_valid())
+        self.assertIn('due_date', form.errors)
+        self.assertEqual(form.errors['due_date'], ['Due date cannot be in the past'])
     
     def test_form_rejects_non_member_assignee(self):
         non_team_member_user= User.objects.create_user(

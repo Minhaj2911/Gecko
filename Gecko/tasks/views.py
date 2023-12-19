@@ -55,6 +55,8 @@ class TaskCreateView(LoginRequiredMixin, View):
                 request.session['selected_team_id']= team.id
                 task_form = TaskForm(team_id=team.id)
                 return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form, 'team_id': team.id})
+            else:
+                task_form = TaskForm(team_id=team.id)
 
         elif 'create_task' in request.POST:
             team_id = request.session.get('selected_team_id')
@@ -65,10 +67,14 @@ class TaskCreateView(LoginRequiredMixin, View):
                 messages.add_message(self.request, messages.SUCCESS, "Task Created!")
                 return redirect('dashboard')
             else:
-                print(task_form.errors)
-                messages.error(self.request,  f"Unsuccessful: Task Not Created!: {task_form.errors}")
+                # print(task_form.errors)
+                messages.error(request,  "Unsuccessful: Task Not Created! ")
+                return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form})
         
-        return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form})
+        else: 
+            messages.error(request, "Please select a Team!")
+        
+        return render(request, self.template_name, {'team_form': TeamSelectForm(user=request.user), 'task_form': task_form})
     
 class LoginProhibitedMixin:
     """Mixin that redirects when a user is logged in."""

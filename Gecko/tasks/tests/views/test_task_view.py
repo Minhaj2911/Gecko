@@ -64,6 +64,22 @@ class CreateTaskViewTestCase(TestCase):
         self.assertEqual(task.assignee.id, self.user.id)
         self.assertEqual(task.status, self.form_input['status'])
     
+    def test_invalid_team_select(self):
+        invalid_team_setup= { 
+            'team': -123.99,
+            'select_team': 'Select Team'
+        }
+        response= self.client.post(self.url, invalid_team_setup)
+        # self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'create_task.html')
+        team_form= TeamSelectForm(data= invalid_team_setup, user= self.user)
+        self.assertFalse(team_form.is_valid())
+        self.assertEqual(response.status_code, 200)
+
+
+
+
+    
     def test_invalid_due_date_task_creation(self):
         self.client.post(self.url, {'team': self.team.id, 'select_team': 'Select Team'})
         self.form_input['team_id']= self.team.id

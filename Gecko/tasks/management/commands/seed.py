@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from tasks.models import User, Task
+from tasks.models import User, Task, Team
 
 import pytz
 from faker import Faker
@@ -21,23 +21,34 @@ task_fixtures = [
     {'title': 'Create group schedule', 'description': 'Plan and design a schedule for group weekly meeting', 'assignee': '@charlie', 'due_date': timezone.now() + timezone.timedelta(days= 22) , 'status': 'assigned'},
 ]
 
+team_fixtures = [
+    {'name': 'Koala team', 'description': 'IT team', 'admin': '@johndoe'},
+    {'name': 'Panda team', 'description': 'Design team', 'admin': '@janedoe'},
+    {'name': 'Kangaroo team', 'description': 'Plan and analysis team', 'admin': '@charlie' }
+]
+
 
 class Command(BaseCommand):
     """Build automation command to seed the database."""
 
-    USER_COUNT = 300
+    USER_COUNT = 10
     TASK_COUNT = 5
+    TEAM_COUNT = 10
+    MAX_TEAM_MEMBERS = 8
     DEFAULT_PASSWORD = 'Password123'
     help = 'Seeds the database with sample data'
     task_status_options= ['assigned', 'in progress', 'completed']
 
     def __init__(self):
         self.faker = Faker('en_GB')
+    
+    
 
     def handle(self, *args, **options):
         self.create_users()
         self.users = User.objects.all()
         self.create_tasks()
+        self.create_teams()
 
     def create_users(self):
         self.generate_user_fixtures()
@@ -47,13 +58,29 @@ class Command(BaseCommand):
         self.generate_task_fixtures()
         self.generate_random_tasks(self.users)
     
-    def generate_task_fixtures(self):
-        for data in task_fixtures:
-            self.try_create_task(data)
+    def create_teams(self):
+        self.generate_team_fixtures()
+        self.generate_random_teams()
 
     def generate_user_fixtures(self):
         for data in user_fixtures:
             self.try_create_user(data)
+    
+    def generate_task_fixtures(self):
+        for data in task_fixtures:
+            self.try_create_task(data)
+    
+    def generate_team_fixtures(self):
+        for data in team_fixtures:
+        # Strip the '@' prefix from the admin username
+            admin_username = data['admin'].lstrip('@')
+            try:
+                admin_user = User.objects.get(username=admin_username)
+                modified_data = data.copy()
+                modified_data['admin'] = admin_user
+                self.try_create_team(modified_data)
+            except User.DoesNotExist:
+                print(f"Failed to create team: User '{admin_username}' does not exist.")
 
     def generate_random_users(self):
         user_count = User.objects.count()
@@ -71,6 +98,14 @@ class Command(BaseCommand):
             task_count = Task.objects.count()
         print("Task seeding complete.      ")
 
+    def generate_random_teams(self):
+        team_count = Team.objects.count()
+        while  team_count < self.TEAM_COUNT:
+            print(f"Seeding team {team_count}/{self.TEAM_COUNT}", end='\r')
+            self.generate_team()
+            team_count = Team.objects.count()
+        print("Team seeding complete.      ")
+
     def generate_user(self):
         first_name = self.faker.first_name()
         last_name = self.faker.last_name()
@@ -87,6 +122,12 @@ class Command(BaseCommand):
         self.try_create_task({
             'title': title, 'description': description, 'assignee': assignee, 'due_date': due_date, 'status': status})
     
+    def generate_team(self):
+        name = self.faker.word()
+        description = self.faker.text()
+        admin = random.choice(User.objects.all())
+        self.try_create_team({'name': name, 'description': description, 'admin': admin})
+    
        
     def try_create_user(self, data):
         try:
@@ -98,6 +139,12 @@ class Command(BaseCommand):
         try:
             self.create_task(data)
         except:
+            pass
+    
+    def try_create_team(self, data):
+        try:
+            self.create_team(data)
+        except :
             pass
 
     def create_user(self, data):
@@ -118,11 +165,40 @@ class Command(BaseCommand):
             status=data['status'],
         )
     
+    
+    def create_team(self, data):
+        admin_username = data['admin']
+        admin_user = User.objects.get(username=admin_username)
+        team = Team.objects.create(
+                name=data['name'],
+                description=data['description'],
+                admin=admin_user,
+            )
+        team.members.add(admin_user)
+        self.add_team_members(team, admin_user.username)
+        
+    def add_team_members(self, team, admin_username):
+        non_admin_users= User.objects.exclude(username= admin_username)
+        usernames= [user.username for user in non_admin_users]
+        member_count= team.members.count()
+        # non_admin_members= self.MAX_TEAM_MEMBERS - 1
+
+        while member_count< self.MAX_TEAM_MEMBERS - 1 and usernames:
+            random_user= random.choice(usernames)
+            selected_user= User.objects.get(username=random_user)
+            team.members.add(selected_user)
+            member_count += 1
+            usernames.remove(random_user)
+    
     def create_title(self):
         title= ""
         while len(title) < 1:
             title= self.faker.text(max_nb_chars=50)
         return title
+    
+    
+
+
     
     
 

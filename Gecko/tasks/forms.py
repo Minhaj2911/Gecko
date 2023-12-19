@@ -181,7 +181,10 @@ class TaskForm(forms.ModelForm):
         due_date = self.cleaned_data.get('due_date')
 
         if due_date is not None and due_date < timezone.now():
+            print("test error tingz: Due date cannot be in the past")
             self.add_error('due_date', 'Due date cannot be in the past')
+        else:
+            print("no errors for duedatesss")
 
 class TeamSelectForm(forms.Form):
     """ Form enabling users to select a team in order to create and assign tasks. """

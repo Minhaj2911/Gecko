@@ -50,7 +50,7 @@ class TaskDescriptionView(View):
     """Display the task's description."""
     def task_description(request, pk):
         """Display the current task's description."""
-
+        #remove try and except???
         current_user = request.user
         
         try:

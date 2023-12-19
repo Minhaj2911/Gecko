@@ -11,7 +11,6 @@ class ChangeTaskStatusViewTest(TestCase):
     fixtures = ['tasks/tests/fixtures/default_user.json']
 
     def setUp(self):
-        self.url = reverse('change_task_status')
         self.user = User.objects.get(username='@johndoe')
         self.client.force_login(self.user)
         self.team= Team.objects.create(
@@ -28,8 +27,39 @@ class ChangeTaskStatusViewTest(TestCase):
             description='Conduct a meeting to get to know your team members.',
             assignee=self.user,
             due_date=timezone.now() + timezone.timedelta(days=7),
-            status='assigned',
+            status='assigned'#,
             # team_of_task=self.team # comment out once merged to main
         )
-        
+
+        self.url = reverse('change_task_status', kwargs={'pk':self.task.pk})
+
+        self.form_input = {'status': 'completed'}
+    
+    def test_change_task_status_url(self):
+        self.assertEqual(self.url,f'/change_task_status/{self.task.pk}')
+    
+    def test_get_change_task_status(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'change_status.html')
+        form = response.context['form']
+        task = response.context['task']
+        self.assertTrue(isinstance(form, TaskStatusForm))
+        self.assertEqual(self.task, task)
+        self.assertFalse(form.is_bound)
+
+    def test_succesful_task_status_change(self):
+        self.client.post(self.url, self.form_input)
+        updated_task = Task.objects.get(pk=self.task.pk)
+        self.assertEqual(updated_task.status, 'completed')
+    
+    def test_successful_change_task_status_redirect(self):
+        response= self.client.post(self.url, self.form_input, follow= True)
+        response_url= reverse('task_dashboard')
+        self.assertRedirects(response, response_url, status_code= 302, target_status_code= 200)
+        self.assertTemplateUsed(response, 'task_dashboard.html')
+        updated_task = Task.objects.get(pk=self.task.pk)
+        self.assertEqual(updated_task.status, 'completed')
+
+
     

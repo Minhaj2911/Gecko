@@ -28,7 +28,7 @@ class TaskDescriptionViewTest(TestCase):
             description='Conduct a meeting to get to know your team members.',
             assignee=self.user,
             due_date=timezone.now() + timezone.timedelta(days=7),
-            status='assigned',
+            status='assigned'#,
             # team_of_task=self.team # comment out once merged to main
         )
         self.url = reverse('task_description', kwargs={'pk':self.task.pk})

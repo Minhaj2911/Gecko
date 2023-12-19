@@ -1,5 +1,5 @@
 from django.test import TestCase
-from tasks.models import User, Task
+from tasks.models import User, Task, Team
 from tasks.forms import TaskStatusForm
 from django.utils import timezone
 from django.test import TestCase
@@ -11,14 +11,20 @@ class TaskStatusFormTestCase(TestCase):
 
     def setUp(self):
         super(TestCase, self).setUp()
-        self.user = User.objects.get(username='@johndoe')
+        self.user = User.objects.create_user(
+            '@johndoe',
+            first_name='John',
+            last_name='Doe',
+            email='johndoe@example.org'
+        )
 
         self.task = Task.objects.create(
             title='Kick-off meeting',
             description='Conduct a meeting to get to know your team members.',
             assignee=self.user,
             due_date=timezone.now() + timezone.timedelta(days=7),
-            status='assigned'
+            status='assigned'#,
+            # team_of_task=self.team # comment out once merged to main
         )
 
         self.form_input = {'status': 'completed'}

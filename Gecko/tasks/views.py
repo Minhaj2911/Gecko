@@ -11,7 +11,6 @@ from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, TeamSelectForm
 from tasks.helpers import login_prohibited
 from tasks.models import Team, Task, User
-from .tokens import account_activation_token
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
@@ -19,7 +18,6 @@ from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.contrib.auth import get_user_model
-from .forms import ResendActivationEmailForm
 
 @login_prohibited
 def home(request):
@@ -120,20 +118,13 @@ class LogInView(LoginProhibitedMixin, View):
         return self.render()
 
     def post(self, request):
-        """
-        Handle the login attempt. If successful, redirect the user.
-        If the user is not active, prompt for email verification.
-        """
         
         form = LogInForm(request.POST)
         self.next = request.POST.get('next') or settings.REDIRECT_URL_WHEN_LOGGED_IN
         user = form.get_user()
-        if user and user.is_active:
+        if user is not None:
             login(request, user)
             return redirect(self.next)
-        elif user and not user.is_active:
-            messages.add_message(request, messages.ERROR, "Please verify your email to activate your account.") 
-            return self.render()
         else:
             messages.add_message(request, messages.ERROR, "The credentials provided were invalid!")
             return self.render()
@@ -203,95 +194,16 @@ class SignUpView(LoginProhibitedMixin, FormView):
 
     form_class = SignUpForm
     template_name = "sign_up.html"
-    redirect_when_logged_in_url = 'email_verification_notice'
+    redirect_when_logged_in_url = settings.REDIRECT_URL_WHEN_LOGGED_IN
 
     def form_valid(self, form):
-        """Process the valid sign-up form. 
-        Creates a user and sends an activation email."""
-        
         self.object = form.save()
-        self.object.is_active = False
-        self.object.save()
-        mail_subject = 'Activate your account.'
-        message = render_to_string('activation_email.html', {
-            'user': self.object,
-            'domain': 'localhost:8000',  # replace with pythonanywhere
-            'uid': urlsafe_base64_encode(force_bytes(self.object.pk)),
-            'token': account_activation_token.make_token(self.object),
-        })
-        
-        to_email = self.object.email
-        from_email = settings.EMAIL_HOST_USER
-        send_mail(mail_subject, message, from_email, [to_email], fail_silently=False)
-        messages.add_message(self.request, messages.INFO, 'Please confirm your email address to complete the registration.')
+        login(self.request, self.object)
         return super().form_valid(form)
 
     def get_success_url(self):
-        """Redirect to the email verification notice page after successful registration."""
-        return reverse('email_verification_notice')
+        return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
     
-def email_verification_notice(request):
-    """Display a page to notify the user that an email verification has been sent."""
-    return render(request, 'email_verification_notice.html')
-    
-def send_activation_email(request, uidb64, token):
-    """Handle the user account activation request.
-    Activates the user's account if the token is valid and the user is not already active."""
-    
-    User = get_user_model()
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-
-    if user is not None and account_activation_token.check_token(user, token):
-        if not user.is_active:
-            user.is_active = True
-            user.save()
-            messages.success(request, 'Your account has been activated, please log in.')
-            return redirect('log_in')
-        else:
-            messages.info(request, 'You already activated your account, please log in.')
-            return redirect('log_in')
-    else:
-        messages.error(request, 'The activation link is invalid or has expired. Please request a new activation email.')
-        return redirect('resend_activation_email')
-    
-
-class ResendActivationEmailView(FormView):
-    """Handle requests to resend the activation email.
-    Verifies if the user exists and is inactive before sending a new activation email."""
-    
-    template_name = 'resend_activation_email.html'
-    form_class = ResendActivationEmailForm
-
-    def form_valid(self, form):
-        """Process a valid form and resend the activation email if the user is inactive."""
-        
-        email = form.cleaned_data['email']
-        User = get_user_model()
-        user = User.objects.filter(email=email, is_active=False).first()
-        
-        if user:
-            # Construct and send the activation email
-            mail_subject = 'Activate your account.'
-            message = render_to_string('activation_email.html', {
-                'user': user,
-                'domain': 'localhost:8000',  # Replace with your actual domain when deploying
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                'token': account_activation_token.make_token(user),
-            })
-            send_mail(mail_subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
-            messages.success(self.request, 'If an account exists with this email, we have sent a new activation link.')
-            return super().form_valid(form)
-        else:
-            messages.error(self.request, "No inactive account found with the provided email.")
-            return self.render_to_response(self.get_context_data(form=form))
-
-    def get_success_url(self):
-        """Return the URL to redirect to after processing a valid form."""
-        return reverse('log_in')
     
 class TeamCreationView(LoginRequiredMixin, FormView):
     form_class = TeamForm
@@ -310,8 +222,4 @@ class TeamCreationView(LoginRequiredMixin, FormView):
         messages.add_message(self.request, messages.WARNING , "Unsuccessful: Team Not Created")
         return super().form_invalid(form)
 
-########
-
-# @login_required
-# def remove_member_from_team(request):
     

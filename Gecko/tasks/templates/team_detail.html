@@ -19,18 +19,15 @@
         {% endfor %}
     </ul>
 
-    <!-- Leave Team Button -->
     <form method="post" action="{% url 'leave_team' team.id %}">
         {% csrf_token %}
         <button type="submit">Leave Team</button>
     </form>
 
-    <!-- Add Members Button (visible only to admin) -->
     {% if is_admin %}
         <a href="{% url 'add_member' team.id %}">Add Members</a>
     {% endif %}
 
-    <!-- Add Task Button (visible to all members and admin) -->
     {% if can_create_task %}
         <a href="{% url 'create_task' team.id %}">Create Task</a>
     {% endif %}

@@ -196,6 +196,14 @@ class TeamSelectForm(forms.Form):
         super(TeamSelectForm, self).__init__(*args, **kwargs)
         if user:
             self.fields['team'].queryset = Team.objects.filter(members=user)
+
+class AssignNewAdminForm(forms.Form):
+    new_admin = forms.ModelChoiceField(queryset=None, label="Select New Admin")
+
+    def __init__(self, *args, **kwargs):
+        team_members = kwargs.pop('team_members')
+        super().__init__(*args, **kwargs)
+        self.fields['new_admin'].queryset = team_members
             
 class TaskStatusForm(forms.ModelForm):
     """ Form enabling team members to update the status of the assigned tasks. """

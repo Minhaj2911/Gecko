@@ -7,7 +7,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import View, FormView, UpdateView, DeleteView
 from django.urls import reverse, reverse_lazy
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, TeamSelectForm, TaskStatusForm, TaskFilterForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, TeamSelectForm, TaskStatusForm, TaskFilterForm, AssignNewAdminForm
 from tasks.helpers import login_prohibited
 from tasks.models import Task, Team
 
@@ -55,6 +55,29 @@ def team_detail(request, team_id):
         'can_create_task': can_create_task,
     }
     return render(request, 'team_detail.html', context)
+
+def leave_team(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+    
+    if request.method == 'POST':
+        if request.user == team.admin:
+            form = AssignNewAdminForm(request.POST, team_members=team.members.exclude(id=request.user.id))
+            if form.is_valid():
+                new_admin = form.cleaned_data['new_admin']
+                team.admin = new_admin
+                team.save()
+                team.members.remove(request.user)
+                return redirect('dashboard')  
+            else:
+                return render(request, 'assign_new_admin.html', {'form': form, 'team': team})
+        else:
+            team.members.remove(request.user)
+            return redirect('dashboard')  
+    if request.user == team.admin:
+        form = AssignNewAdminForm(team_members=team.members.exclude(id=request.user.id))
+        return render(request, 'assign_new_admin.html', {'form': form, 'team': team})
+    else:
+        return redirect('dashboard')
 
 class TaskCreateView(LoginRequiredMixin, View):
     template_name = 'create_task.html'

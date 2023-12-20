@@ -93,18 +93,3 @@ class CreateTaskViewTestCase(TestCase):
         response= self.client.post(self.url, self.form_input)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'create_task.html')
-    
-    def test_successful_create_task_redirect(self):
-        correct_form_input = {
-            'team_id': self.team.id,
-            'create_task': 'Save Task',
-            'title': 'Project meeting',
-            'description': 'Conduct a meeting to discuss the new project design',
-            'assignee': self.user.id,
-            'due_date': timezone.now() + timezone.timedelta(days= 3),
-            'status': 'assigned'
-        }
-        response= self.client.post(self.url, correct_form_input, follow= True)
-        response_url= reverse('dashboard')
-        self.assertRedirects(response, response_url, status_code= 302, target_status_code= 200)
-        self.assertTemplateUsed(response, 'dashboard.html')

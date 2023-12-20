@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from your_app.views import reverse_with_next, LogInTester, MenuTesterMixin
+from tasks.views import reverse_with_next, LogInTester, MenuTesterMixin
 
 class TestReverseWithNext(TestCase):
 

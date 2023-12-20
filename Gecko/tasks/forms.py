@@ -156,7 +156,7 @@ class TaskForm(forms.ModelForm):
     class Meta:
         """Form options."""
         model= Task
-        fields=['title', 'description', 'assignee', 'due_date', 'status', 'priority']
+        fields=['title', 'description', 'assignee', 'due_date', 'status', 'priority', 'team']
         widgets= {
                 'due_date': forms.DateTimeInput(
                 format= '%Y-%m-%dT%H:%M',

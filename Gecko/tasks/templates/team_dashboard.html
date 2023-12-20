@@ -1,0 +1,9 @@
+{% if teams %}
+    <ul>
+        {% for team in teams %}
+            <li><a href="{% url 'team_detail' team.id %}">{{ team.name }}</a></li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>You are not part of any teams.</p>
+{% endif %}

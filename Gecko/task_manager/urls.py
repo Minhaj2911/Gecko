@@ -29,8 +29,10 @@ urlpatterns = [
     path('profile/', views.ProfileUpdateView.as_view(), name='profile'),
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
     path('create_task/', views.TaskCreateView.as_view(), name='create_task'),
-    path('create_team/', views.TeamCreationView.as_view(), name='create_team'),
+    path('create_team/', views.TeamCreateView.as_view(), name='create_team'),
     path('task_dashboard/', views.task_dashboard, name='task_dashboard'),
     path('task_description/<int:pk>', views.task_description, name='task_description'),
-    path('change_task_status/<int:pk>/', views.change_task_status, name='change_task_status'),
+    #path('change_task_status/<int:pk>/', views.change_task_status, name='change_task_status'),
+    path('task/<int:pk>/delete/', views.TaskDeleteView.as_view(), name='task_delete'),
+    path('team/<int:team_id>/', views.team_detail, name='team_detail'),
 ]

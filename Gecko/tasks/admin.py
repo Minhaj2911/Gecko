@@ -8,7 +8,7 @@ class UserAdmin(admin.ModelAdmin):
 
     list_display = [
         'username', 'first_name', 'last_name', 'email'
-        #   ,'get_teams'
+        #   ,'get_teams', 'get_tasks'
     ]
 
 

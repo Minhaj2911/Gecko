@@ -1,18 +1,26 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<div class="container vh-100"><!--remove vh-100 if vh > 100-->
-  <div class="row">
-    <div class="col-12">
-      <h1>Welcome to your task dashboard {{ user.username }}</h1>
+<div class="grid-item tasks-overview">
+  <div class="card custom-height">
+    <div class="card-header">
+      Tasks Overview
+    </div>
+    <div class="card-body">
+      <p>Here you can view and manage your tasks.</p>
+      <!-- Example task -->
+      <!-- task details -->
+      <!-- More tasks -->
+    </div>
+  </div>
+</div>
       <div class="search-bar-container">
         <form action="{% url 'task_dashboard' %}" method="get">
             <input type="text" name="search_input" class= "search-input" placeholder=" Search for your assigned tasks by title or description..">
             <button type="submit" class="search-button">Search</button>
         </form>
       </div>
-      <div class="row">
-        {% if user_tasks%}
-          {% for task in user_tasks %}
+        {% if tasks %}
+          {% for task in tasks %}
             <div class="col-md-4">
               <div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
                 <div class="card-body">
@@ -29,7 +37,24 @@
             <h3>You don't have any tasks yet...</h3>
           </div>
         {% endif %}
-    </div>
   </div>
 </div>
+{% for task in tasks %}
+<div>
+    {{ task.title }}
+    <!-- Delete Button -->
+    <button onclick="showConfirmationForm('{{ task.id }}')">Delete</button>
+    
+    <!-- Hidden Confirmation Form -->
+    <div id="confirm-delete-{{ task.id }}" style="display:none;">
+        <form action="{% url 'task_delete' task.id %}" method="post">
+            {% csrf_token %}
+            <p>Are you sure you want to delete this task?</p>
+            <input type="submit" value="Confirm Delete">
+            <button type="button" onclick="hideConfirmationForm('{{ task.id }}')">Cancel</button>
+        </form>
+    </div>
+</div>
+{% endfor %}
+
 {% endblock %}

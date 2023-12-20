@@ -9,32 +9,30 @@
         Teams
       </div>
       <div class="card-body">
-        <p>Here you can view and manage your teams.</p>
-        <!-- Example team -->
-        <!-- Team details -->
-        <!-- More teams -->
+        {% include 'team_dashboard.html' %}
       </div>
     </div>
   </div>
 
   <div class="grid-item welcome-message">
     <h1>Welcome to your dashboard, {{ user.first_name }}!</h1>
-  </div>
-
-  <!-- Overview Section -->
-  <div class="grid-item tasks-overview">
-    <div class="card custom-height">
-      <div class="card-header">
-        Tasks Overview
-      </div>
-      <div class="card-body">
-        <p>Here you can view and manage your tasks.</p>
-        <!-- Example task -->
-        <!-- task details -->
-        <!-- More tasks -->
+    <!-- Overview Section -->
+    <div class="grid-item tasks-overview">
+      <div class="card custom-height">
+        <div class="card-header">
+          Tasks Overview
+        </div>
+        <div class="card-body">
+          <p>Here you can view and manage your tasks.</p>
+          <!-- Example task -->
+          <!-- task details -->
+          <!-- More tasks -->
+        </div>
       </div>
     </div>
   </div>
+
+  
 
 </div>
 {% endblock %}

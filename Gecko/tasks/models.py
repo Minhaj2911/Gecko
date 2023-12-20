@@ -55,7 +55,7 @@ class Task(models.Model):
     description= models.CharField(max_length=400, blank=True)
     assignee= models.ForeignKey(User, on_delete=models.SET_NULL, null= True)
     due_date= models.DateTimeField()
-    team = models.ForeignKey('Team', on_delete=models.CASCADE)
+    team = models.ForeignKey('Team', on_delete=models.CASCADE, default= None)
     
     STATUS_CHOICES = [
         ('assigned', 'Assigned'),

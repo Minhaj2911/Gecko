@@ -10,9 +10,6 @@
           <input type="hidden" name="next" value="{{ next }}">
           {% include 'partials/bootstrap_form.html' with form=form %}
           <input type="submit" value="Log in" class="btn btn-primary">
-          <p>
-            <a href="{% url 'password_reset' %}">Forgot Password?</a>
-          </p>
         </form>
       </div>
     </div>

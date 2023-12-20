@@ -25,31 +25,31 @@ class TaskDashboardView(LoginRequiredMixin, View):
     def task_dashboard(request):
         """Display the current user's task dashboard."""
 
-    current_user = request.user
-    form = TaskFilterForm(request.GET or None)
-    tasks = Task.objects.filter(assignee=current_user)
+        current_user = request.user
+        form = TaskFilterForm(request.GET or None)
+        tasks = Task.objects.filter(assignee=current_user)
 
-    search_task = request.GET.get('search_input')
-    if search_task:
-        tasks = tasks.filter(title__icontains=search_task) | tasks.filter(description__icontains=search_task)
+        search_task = request.GET.get('search_input')
+        if search_task:
+            tasks = tasks.filter(title__icontains=search_task) | tasks.filter(description__icontains=search_task)
 
-    if form.is_valid():
-        if form.cleaned_data['title']:
-            tasks = tasks.filter(title__icontains=form.cleaned_data['title'])
-        if form.cleaned_data['status']:
-            tasks = tasks.filter(status=form.cleaned_data['status'])
-        if form.cleaned_data['due_date']:
-            tasks = tasks.filter(due_date=form.cleaned_data['due_date'])
-        if form.cleaned_data['team']:
-            tasks = tasks.filter(team=form.cleaned_data['team'])
-        if form.cleaned_data.get('priority'):
-            tasks = tasks.filter(priority=form.cleaned_data['priority'])
+        if form.is_valid():
+            if form.cleaned_data['title']:
+                tasks = tasks.filter(title__icontains=form.cleaned_data['title'])
+            if form.cleaned_data['status']:
+                tasks = tasks.filter(status=form.cleaned_data['status'])
+            if form.cleaned_data['due_date']:
+                tasks = tasks.filter(due_date=form.cleaned_data['due_date'])
+            if form.cleaned_data['team']:
+                tasks = tasks.filter(team=form.cleaned_data['team'])
+            if form.cleaned_data.get('priority'):
+                tasks = tasks.filter(priority=form.cleaned_data['priority'])
 
-        sort_by = request.GET.get('sort_by', 'due_date')
-        if sort_by in ['title', 'status', 'due_date', 'assignee__username', 'team__name','priority', '-priority']:
-            tasks = tasks.order_by(sort_by)
+            sort_by = request.GET.get('sort_by', 'due_date')
+            if sort_by in ['title', 'status', 'due_date', 'assignee__username', 'team__name','priority', '-priority']:
+                tasks = tasks.order_by(sort_by)
 
-    return render(request, 'task_dashboard.html', {'tasks': tasks, 'form': form})
+        return render(request, 'task_dashboard.html', {'tasks': tasks, 'form': form})
 
 
 class TaskDescriptionView(View):

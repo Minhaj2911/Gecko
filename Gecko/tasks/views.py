@@ -56,6 +56,21 @@ def team_detail(request, team_id):
     }
     return render(request, 'team_detail.html', context)
 
+def transfer_admin(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+
+    if request.method == 'POST':
+        form = AssignNewAdminForm(request.POST, team_members=team.members.exclude(id=request.user.id))
+        if form.is_valid():
+            new_admin = form.cleaned_data['new_admin']
+            team.admin = new_admin
+            team.save()
+            return redirect('team_detail', team_id=team.id)
+    else:
+        form = AssignNewAdminForm(team_members=team.members.exclude(id=request.user.id))
+
+    return render(request, 'assign_new_admin.html', {'form': form, 'team': team})
+
 def leave_team(request, team_id):
     team = get_object_or_404(Team, id=team_id)
     

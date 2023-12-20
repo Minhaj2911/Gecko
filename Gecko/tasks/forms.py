@@ -118,7 +118,7 @@ class TeamForm(forms.ModelForm):
     class Meta:
         """Form options."""
         model= Team
-        fields=['name', 'description', 'members'] # add admin
+        fields=['name', 'description', 'members', 'admin']
         widgets={
             'description': forms.Textarea()}
            
@@ -148,6 +148,31 @@ class TeamForm(forms.ModelForm):
         members = self.cleaned_data.get('members')
         if not members and members == []:
             self.add_error('members', 'members cannot be empty') 
+
+class AddMembersForm(forms.Form):
+    new_members = forms.ModelMultipleChoiceField(
+        queryset=User.objects.none(), 
+        widget=forms.CheckboxSelectMultiple,
+        required=True
+    )
+
+    def __init__(self, *args, **kwargs):
+        team_members = kwargs.pop('team_members')
+        super().__init__(*args, **kwargs)
+        self.fields['new_members'].queryset = User.objects.exclude(id__in=team_members)
+
+class RemoveMembersForm(forms.Form):
+    members_to_remove = forms.ModelMultipleChoiceField(
+        queryset=None,  
+        widget=forms.CheckboxSelectMultiple,
+        required=True,
+        label="Select Members to Remove"
+    )
+
+    def __init__(self, *args, **kwargs):
+        team_members = kwargs.pop('team_members')
+        super().__init__(*args, **kwargs)
+        self.fields['members_to_remove'].queryset = team_members
         
 
 class TaskForm(forms.ModelForm):

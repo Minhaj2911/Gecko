@@ -7,7 +7,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import View, FormView, UpdateView, DeleteView
 from django.urls import reverse, reverse_lazy
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, TeamSelectForm, TaskStatusForm, TaskFilterForm, AssignNewAdminForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, TeamSelectForm, TaskStatusForm, TaskFilterForm, AssignNewAdminForm, AddMembersForm, RemoveMembersForm
 from tasks.helpers import login_prohibited
 from tasks.models import Task, Team
 
@@ -46,13 +46,11 @@ def team_detail(request, team_id):
     team = get_object_or_404(Team, id=team_id)
     tasks = Task.objects.filter(team=team)
     is_admin = team.admin == request.user
-    can_create_task = request.user in team.members.all() or is_admin
 
     context = {
         'team': team,
         'tasks': tasks,
         'is_admin': is_admin,
-        'can_create_task': can_create_task,
     }
     return render(request, 'team_detail.html', context)
 
@@ -70,6 +68,42 @@ def transfer_admin(request, team_id):
         form = AssignNewAdminForm(team_members=team.members.exclude(id=request.user.id))
 
     return render(request, 'assign_new_admin.html', {'form': form, 'team': team})
+
+def add_members(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+
+    if request.user != team.admin:
+        return redirect('team_detail')
+
+    existing_member_ids = team.members.values_list('id', flat=True)
+    if request.method == 'POST':
+        form = AddMembersForm(request.POST, team_members=existing_member_ids)
+        if form.is_valid():
+            new_members = form.cleaned_data['new_members']
+            team.members.add(*new_members)
+            return redirect('team_detail', team_id=team.id)
+    else:
+        form = AddMembersForm(team_members=existing_member_ids)
+
+    return render(request, 'add_members.html', {'form': form, 'team': team})
+
+def remove_members(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+
+    if request.user != team.admin:
+        return redirect('team_detail')
+
+    if request.method == 'POST':
+        form = RemoveMembersForm(request.POST, team_members=team.members.all())
+        if form.is_valid():
+            members_to_remove = form.cleaned_data['members_to_remove']
+            for member in members_to_remove:
+                team.members.remove(member)
+            return redirect('team_detail', team_id=team.id)
+    else:
+        form = RemoveMembersForm(team_members=team.members.all())
+
+    return render(request, 'remove_members.html', {'form': form, 'team': team})
 
 def leave_team(request, team_id):
     team = get_object_or_404(Team, id=team_id)

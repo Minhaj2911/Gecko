@@ -21,19 +21,14 @@
 
     {% if is_admin %}
     <a href="{% url 'transfer_admin' team.id %}">Transfer Admin Role</a>
+    <a href="{% url 'add_members' team.id %}">Add Members</a>
+    <a href="{% url 'remove_members' team.id %}">Remove Members</a>
     {% endif %}
 
     <form method="post" action="{% url 'leave_team' team.id %}">
         {% csrf_token %}
         <button type="submit">Leave Team</button>
     </form>
-
-    {% if is_admin %}
-        <a href="{% url 'add_member' team.id %}">Add Members</a>
-    {% endif %}
-
-    {% if can_create_task %}
         <a href="{% url 'create_task' team.id %}">Create Task</a>
-    {% endif %}
 </div>
 {% endblock %}

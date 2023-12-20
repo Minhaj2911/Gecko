@@ -30,7 +30,8 @@ class TaskFormTestCase(TestCase):
             'description': 'Conduct a meeting to discuss the new project design',
             'assignee': self.user,
             'due_date': timezone.now() + timezone.timedelta(days= 3),
-            'status': 'assigned'
+            'status': 'assigned',
+            'team_of_task': self.team
         }
 
     def test_valid_task_form(self):
@@ -68,7 +69,8 @@ class TaskFormTestCase(TestCase):
             'description': 'Conduct a meeting to discuss the new project design',
             'assignee': non_team_member_user.id,
             'due_date': timezone.now() + timezone.timedelta(days= 3),
-            'status': 'assigned'
+            'status': 'assigned',
+            'team_of_task': None
         }
         form= TaskForm(data= invalid_form_input, user=self.user)
         self.assertFalse(form.is_valid())
@@ -102,12 +104,19 @@ class TaskFormTestCase(TestCase):
         self.assertTrue(existing_form.is_valid())
         existing_task= existing_form.save()
         edited_due_date= timezone.now() + timezone.timedelta(days= 4)
+        edited_team= Team.objects.create(
+            name= 'Edited team',
+            description= 'Edited team project',
+            admin= self.user
+         )
+        edited_team.members.add(self.user)
         edited_data= {
             'title': 'Review tasks',
             'description': 'Create checklist to review tasks',
             'assignee': self.user,
             'due_date': edited_due_date,
-            'status': 'completed'
+            'status': 'completed',
+            'team_of_task': edited_team
         }
         updated_task= TaskForm(instance= existing_task,data= edited_data)
         self.assertTrue(updated_task.is_valid())
@@ -118,6 +127,7 @@ class TaskFormTestCase(TestCase):
         self.assertEqual(existing_task.assignee, self.user)
         self.assert_equal_due_date(existing_task.due_date, edited_due_date)
         self.assertEqual(existing_task.status, 'completed')
+        self.assertEqual(existing_task.team_of_task, edited_team)
 
     def assert_equal_due_date(self, due_date , expected_due_date):
         self.assertEqual(due_date.year, expected_due_date.year)

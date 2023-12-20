@@ -69,6 +69,7 @@ class Task(models.Model):
         "Team",
         on_delete=models.CASCADE,
         null= False,
+        blank= False,
         related_name='team_of_task'
         )
     

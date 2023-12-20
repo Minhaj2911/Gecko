@@ -28,7 +28,8 @@ class CreateTaskViewTestCase(TestCase):
             'description': 'Conduct a meeting to discuss the new project design',
             'assignee': self.user.id,
             'due_date': timezone.now() + timezone.timedelta(days= 3),
-            'status': 'assigned'
+            'status': 'assigned',
+            'team_of_task': self.team.id
         }
 
     def test_create_task_url(self):
@@ -63,6 +64,7 @@ class CreateTaskViewTestCase(TestCase):
         self.assertEqual(task.description, self.form_input['description'])
         self.assertEqual(task.assignee.id, self.user.id)
         self.assertEqual(task.status, self.form_input['status'])
+        self.assertEqual(task.team_of_task.id,self.team.id)
     
     def test_invalid_due_date_task_creation(self):
         self.client.post(self.url, {'team': self.team.id, 'select_team': 'Select Team'})
@@ -90,6 +92,15 @@ class CreateTaskViewTestCase(TestCase):
         self.form_input['team_id']= self.team.id
         self.form_input['create_task']= 'Save Task'
         self.form_input['assignee']= ''
+        response= self.client.post(self.url, self.form_input)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'create_task.html')
+    
+    def test_no_team_of_task_task_creation(self):
+        self.client.post(self.url, {'team': self.team.id, 'select_team': 'Select Team'})
+        self.form_input['team_id']= self.team.id
+        self.form_input['create_task']= 'Save Task'
+        self.form_input['team_of_task']= ''
         response= self.client.post(self.url, self.form_input)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'create_task.html')

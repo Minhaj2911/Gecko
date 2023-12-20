@@ -112,13 +112,7 @@ class SignUpForm(NewPasswordMixin, forms.ModelForm):
             password=self.cleaned_data.get('new_password'),
         )
         return user
-
-class ResendActivationEmailForm(forms.Form):
-    """ A form for requesting a resend of the activation email."""
     
-    email = forms.EmailField(label='Your email')
-    
-
 class TeamForm(forms.ModelForm):
     """ Form enabling a user to create a team """
     class Meta:
@@ -138,7 +132,7 @@ class TeamForm(forms.ModelForm):
         )
         team.members.set(self.cleaned_data.get('members'))
         
-        # may not be required as duplcates may not be created
+        # may not be required as duplicates may not be created
         if request.user not in team.members.all():
             team.members.add(request.user)
         
@@ -162,9 +156,9 @@ class TaskForm(forms.ModelForm):
     class Meta:
         """Form options."""
         model= Task
-        fields=['title', 'description', 'assignee', 'due_date', 'status']
+        fields=['title', 'description', 'assignee', 'due_date', 'status', 'priority']
         widgets= {
-            'due_date': forms.DateTimeInput(
+                'due_date': forms.DateTimeInput(
                 format= '%Y-%m-%dT%H:%M',
                 attrs={'type': 'datetime-local'}
             )
@@ -218,3 +212,13 @@ class TaskStatusForm(forms.ModelForm):
             self.instance.existing_task = True
         else:
             self.instance.existing_task = False
+
+class TaskFilterForm(forms.Form):
+    title = forms.CharField(required=False)
+    assignee = forms.ModelChoiceField(queryset=User.objects.all(), required=False)
+    due_date_start = forms.DateTimeField(required=False)
+    due_date_end = forms.DateTimeField(required=False)
+    status = forms.ChoiceField(choices=Task.STATUS_CHOICES, required=False)
+    team = forms.ModelChoiceField(queryset=Team.objects.all(), required=False)
+    priority = forms.ChoiceField(choices=Task.PRIORITY_CHOICES, required=False)
+

@@ -90,6 +90,25 @@ def home(request):
 
     return render(request, 'home.html')
 
+class TeamDashboardView(LoginRequiredMixin, View):
+    """Display the current user's team dashboard"""
+    
+    def dashboard(request):
+        """Display the current user's team dashboard."""
+        current_user = request.user
+        user_teams = Team.objects.filter(members=current_user)
+        return render(request, 'dashboard.html', {'user_teams': user_teams})
+    
+
+class TeamTaskView(LoginRequiredMixin, View):
+    """Display the current user's team's tasks"""
+
+    def team_tasks(request, pk):
+        """Display the current team's tasks."""
+        team = Team.objects.get(pk=pk)
+        tasks = Task.objects.filter(team_of_task = team)
+        return render(request, 'team_tasks.html', {'team': team, 'tasks': tasks})
+    
 class TaskCreateView(LoginRequiredMixin, View):
     template_name = 'create_task.html'
     
@@ -117,6 +136,8 @@ class TaskCreateView(LoginRequiredMixin, View):
             task_form = TaskForm(request.POST, team_id=team_id)
 
             if task_form.is_valid():
+                task = task_form.save(commit=False)
+                task.team_of_task = Team.objects.get(id=team_id)
                 task_form.save()
                 return redirect('dashboard')  
         

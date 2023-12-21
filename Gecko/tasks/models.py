@@ -55,7 +55,14 @@ class Task(models.Model):
     description= models.CharField(max_length=400, blank=True)
     assignee= models.ForeignKey(User, on_delete=models.SET_NULL, null= True)
     due_date= models.DateTimeField()
-    team = models.ForeignKey('Team', on_delete=models.CASCADE)
+    
+    team_of_task= models.ForeignKey(
+        "Team",
+        on_delete=models.CASCADE,
+        null= False,
+        blank= False,
+        related_name='team_of_task'
+        )
     
     STATUS_CHOICES = [
         ('assigned', 'Assigned'),
@@ -100,5 +107,6 @@ class Team(models.Model):
     def clean(self):
         super().clean()
     
-
+    def __str__(self):
+        return self.name
 

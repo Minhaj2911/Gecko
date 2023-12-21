@@ -128,6 +128,20 @@ def leave_team(request, team_id):
         return render(request, 'assign_new_admin.html', {'form': form, 'team': team})
     else:
         return redirect('dashboard')
+    
+def delete_team(request, team_id):
+    team = get_object_or_404(Team, pk=team_id)
+
+    if request.user != team.admin:  
+        return redirect('team_detail')
+
+    if request.method == 'POST':
+        team.delete()
+        messages.success(request, 'Team deleted successfully.')
+        return redirect('team_detail')
+
+    # Redirect or show an error if not a POST request
+    return redirect('some_view')
 
 class TaskCreateView(LoginRequiredMixin, View):
     template_name = 'create_task.html'

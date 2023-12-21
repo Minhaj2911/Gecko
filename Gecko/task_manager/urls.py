@@ -39,4 +39,5 @@ urlpatterns = [
     path('team/<int:team_id>/transfer_admin/', views.transfer_admin, name='transfer_admin'),
     path('team/<int:team_id>/add_members/', views.add_members, name='add_members'),
     path('team/<int:team_id>/remove_members/', views.remove_members, name='remove_members'),
+    path('team/<int:team_id>/delete/', views.delete_team, name='delete_team'),
 ]

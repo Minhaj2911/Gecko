@@ -43,13 +43,13 @@ def task_dashboard(request):
             tasks = tasks.filter(status=form.cleaned_data['status'])
         if form.cleaned_data['due_date']:
             tasks = tasks.filter(due_date=form.cleaned_data['due_date'])
-        if form.cleaned_data['team']:
-            tasks = tasks.filter(team=form.cleaned_data['team'])
+        if form.cleaned_data['team_of_task']:
+            tasks = tasks.filter(team=form.cleaned_data['team_of_task'])
         if form.cleaned_data.get('priority'):
             tasks = tasks.filter(priority=form.cleaned_data['priority'])
 
         sort_by = request.GET.get('sort_by', 'due_date')
-        if sort_by in ['title', 'status', 'due_date', 'assignee__username', 'priority', '-priority', 'team__name']:
+        if sort_by in ['title', 'status', 'due_date', 'assignee__username', 'priority', '-priority', 'team_of_task']:
             tasks = tasks.order_by(sort_by)
 
     return render(request, 'task_dashboard.html', {'tasks': tasks, 'form': form})
@@ -217,22 +217,18 @@ class TaskCreateView(LoginRequiredMixin, View):
 def task_description(request, pk):
     """Display the current task's description."""
 
-    try:
-        task = Task.objects.get(pk=pk)
-
-    except Task.DoesNotExist:
-        task = None
-
+    task = Task.objects.get(pk=pk)
     return render(request, 'task_description.html', {'task': task})
 
 class TaskEditView(UpdateView):
+    """ Edit all current task details. """""
     model = Task
-    fields = ['title', 'description', 'assignee', 'due_date', 'status', 'priority', 'team']
+    fields = ['title', 'description', 'assignee', 'due_date', 'status', 'priority', 'team_of_task']
     template_name = 'task_edit.html'
     form_class = TaskForm
 
     def get_object(request, pk):
-        """Return the object (task) to be updated."""
+        """Return the object (task) to be edited."""
         task = Task.objects.get(pk=pk)
         return task
 
@@ -242,6 +238,7 @@ class TaskEditView(UpdateView):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
 
 def update_task(request, pk):
+    """ Quick update to task status, priority, assignee, due_date"""
     task = Task.objects.get(pk=pk)
 
     if request.method == 'POST':
@@ -401,8 +398,3 @@ class SignUpView(LoginProhibitedMixin, FormView):
 
     def get_success_url(self):
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
-    
-    
-
-
-    

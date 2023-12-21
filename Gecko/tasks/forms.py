@@ -118,11 +118,10 @@ class TeamForm(forms.ModelForm):
     class Meta:
         """Form options."""
         model= Team
-        fields=['name', 'description', 'members'] #add admin
+        fields=['name', 'description', 'members']
         widgets={
             'description': forms.Textarea()}
-           
-
+        
     def save(self,request):
         super().save(commit=False)
         team = Team.objects.create(
@@ -141,15 +140,8 @@ class TeamForm(forms.ModelForm):
         
         return team
 
-    def clean(self):
-        super().clean()
-        """Clean the data and geberate error message for invalid admin."""
-        admin = self.cleaned_data.get('admin')
-        members = self.cleaned_data.get('members')
-        if not members and members == []:
-            self.add_error('members', 'members cannot be empty') 
-
 class AddMembersForm(forms.Form):
+    """ Form for adding a user to a team """
     new_members = forms.ModelMultipleChoiceField(
         queryset=User.objects.none(), 
         widget=forms.CheckboxSelectMultiple,
@@ -162,6 +154,7 @@ class AddMembersForm(forms.Form):
         self.fields['new_members'].queryset = User.objects.exclude(id__in=team_members)
 
 class RemoveMembersForm(forms.Form):
+    """ Form for removing members from a team """
     members_to_remove = forms.ModelMultipleChoiceField(
         queryset=None,  
         widget=forms.CheckboxSelectMultiple,
@@ -223,6 +216,7 @@ class TeamSelectForm(forms.Form):
             self.fields['team'].queryset = Team.objects.filter(members=user)
 
 class AssignNewAdminForm(forms.Form):
+    """" Form to assign a new admin. """
     new_admin = forms.ModelChoiceField(queryset=None, label="Select New Admin")
 
     def __init__(self, *args, **kwargs):
@@ -231,6 +225,7 @@ class AssignNewAdminForm(forms.Form):
         self.fields['new_admin'].queryset = team_members
 
 class TaskFilterForm(forms.Form):
+    """ Form enabling users to filter their assigned tasks based on task fields. """
     title = forms.CharField(required=False)
     assignee = forms.ModelChoiceField(queryset=User.objects.all(), required=False)
     due_date_start = forms.DateTimeField(required=False)

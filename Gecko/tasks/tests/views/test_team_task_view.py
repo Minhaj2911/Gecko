@@ -26,7 +26,7 @@ class TeamTaskViewTestCase(TestCase):
             assignee= self.user,
             due_date= timezone.now() + timezone.timedelta(days= 3),
             status= 'assigned',
-            team_of_task=self.team
+            team_of_task = self.team
         )
     
     def test_team_task_url(self):

@@ -32,14 +32,12 @@ class TaskDashboardViewTest(TestCase):
     
     def test_task_dashboard_url(self):
         self.assertEqual(self.url, "/task_dashboard/")
-    
+
     def test_get_task_dashboard(self):
+        self.client.force_login(self.user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'task_dashboard.html')
-        self.assertIn('user_tasks', response.context)
-        self.assertIn('user', response.context)
-        user_tasks = response.context['user_tasks']
-        user = response.context['user']
+        self.assertIn('tasks', response.context)
+        user_tasks = response.context['tasks']
         self.assertIn(self.task, user_tasks)
-        self.assertEqual(self.user, user)

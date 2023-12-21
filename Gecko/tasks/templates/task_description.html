@@ -4,7 +4,6 @@
     <div class="card-body">
       <h5 class="card-title">{{ task.title }} description</h5>
       <p class="card-text">{{ task.description }}</p>
-      <a href="{% url 'update_task_status' pk=task.id %}" button type="button" class="btn btn-secondary">Change status</a>
     </div>
   </div>
 {% endblock %}

@@ -20,7 +20,7 @@
     </ul>
 
     {% if is_admin %}
-    <a href="{% url 'transfer_admin' team.id %}">Transfer Admin Role</a>
+    <a href="{% url 'assign_new_admin' team.id %}">Transfer Admin Role</a>
     <a href="{% url 'add_members' team.id %}">Add Members</a>
     <a href="{% url 'remove_members' team.id %}">Remove Members</a>
     <form action="{% url 'delete_team' team.id %}" method="post">

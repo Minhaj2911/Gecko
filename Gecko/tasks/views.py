@@ -74,6 +74,8 @@ class TeamCreateView(LoginRequiredMixin, FormView):
 
 class TeamManagementView(LoginRequiredMixin, FormView):
     """ Edit Team view information. """
+    form_class = TeamForm
+    template_name = 'team_detail.html'
 
     def transfer_admin(request, pk):
         """" Transfer admin role to another team member. """

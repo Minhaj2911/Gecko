@@ -1,7 +1,7 @@
 """Unit tests for the User model."""
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-from tasks.models import User
+from tasks.models import User, Team
 
 class UserModelTestCase(TestCase):
     """Unit tests for the User model."""
@@ -147,7 +147,6 @@ class UserModelTestCase(TestCase):
         gravatar_url = f"{UserModelTestCase.GRAVATAR_URL}?size={size}&default=mp"
         return gravatar_url
 
-
     def _assert_user_is_valid(self):
         try:
             self.user.full_clean()
@@ -157,3 +156,22 @@ class UserModelTestCase(TestCase):
     def _assert_user_is_invalid(self):
         with self.assertRaises(ValidationError):
             self.user.full_clean()
+
+    def test_get_teams(self):
+        team1 = Team.objects.create(name='Team1', admin=self.user)
+        team2 = Team.objects.create(name='Team2', admin=self.user)
+        self.user.teams.set([team1, team2])
+
+        expected_teams = ','.join([team1.name, team2.name])
+        self.assertEqual(self.user.get_teams(), expected_teams)
+
+    def test_get_invites(self):
+        invite1 = Team.objects.create(name='Invite1', admin=self.user)
+        invite2 = Team.objects.create(name='Invite2', admin=self.user)
+        self.user.invites.set([invite1, invite2])
+
+        expected_invites = ','.join([invite1.name, invite2.name])
+        self.assertEqual(self.user.get_invites(), expected_invites)
+
+
+    

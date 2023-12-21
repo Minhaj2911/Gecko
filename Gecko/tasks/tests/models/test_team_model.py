@@ -3,6 +3,7 @@ from django.test import TestCase
 from datetime import timedelta, datetime
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from tasks.models import Task
 
 class TeamTest(TestCase):
     """Unit tests for the team model."""
@@ -91,3 +92,20 @@ class TeamTest(TestCase):
     def _assert_team_is_invalid(self, team):
         with self.assertRaises(ValidationError):
             team.full_clean()
+
+    def test_get_members(self):
+        expected_members = ",".join([str(member) for member in [self.user_admin, self.user_1, self.user_2, self.user_3]])
+        self.assertEqual(self.team.get_members(), expected_members)
+
+    def test_set_admin(self):
+        new_admin = User.objects.create_user('@janedoe', first_name='Jane', last_name='Doe', email='janedoe@example.org')
+        self.team.set_admin(new_admin)
+        self.assertEqual(self.team.admin, new_admin)
+
+    def test_get_tasks(self):
+        task1 = Task.objects.create(name='Task 1')
+        task2 = Task.objects.create(name='Task 2')
+        self.team.tasks.add(task1, task2)
+
+        expected_tasks = ",".join([str(task) for task in [task1, task2]])
+        self.assertEqual(self.team.get_tasks(), expected_tasks)

@@ -19,7 +19,7 @@ class TaskDashboardViewTest(TestCase):
             assignee=self.user,
             due_date=timezone.now() + timezone.timedelta(days=7),
             status='assigned',
-            team_of_task = self.team_of_task
+            team_of_task = self.team.id,
         )
     
     def test_task_dashboard_url(self):
@@ -35,4 +35,17 @@ class TaskDashboardViewTest(TestCase):
     def test_dashboard_view_with_logged_in_user(self):
         self.client.force_login(self.user)
         response = self.client.get(reverse('task_dashboard'))
-        self.assertEqual(response.status_code, 200) 
+        self.assertEqual(response.status_code, 200)
+
+
+    def test_dashboard_view_displays_user_teams_correctly(self):
+        url = reverse('dashboard')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'dashboard.html')
+        user = response.context['user']
+        teams = response.context['teams']
+        self.assertEqual(user, self.user)
+        self.assertIn(self.team1, teams)
+        self.assertIn(self.team2, teams)
+        self.assertEqual(len(teams), 2)

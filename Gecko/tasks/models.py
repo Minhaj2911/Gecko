@@ -47,23 +47,20 @@ class User(AbstractUser):
     def get_teams(self):
         return ",".join([str(m) for m in self.teams.all()]) 
 
-# for sam to go over
-    def __str__(self):
-        """Defines the string representation of a User instance."""
-        return self.username
     
 class Task(models.Model):
     """" Tasks can be created by team members.  """
 
-    title= models.CharField(max_length=50, blank=False)
+    title= models.CharField(max_length=50, blank=False, unique=True)
     description= models.CharField(max_length=400, blank=True)
+    due_date= models.DateTimeField()
+
     assignee= models.ForeignKey(
         "User",
         on_delete=models.CASCADE,
         blank= False,
         null= False,
     )
-    due_date= models.DateTimeField()
     
     team_of_task= models.ForeignKey(
         "Team",
@@ -78,7 +75,14 @@ class Task(models.Model):
         ('in progress', 'In Progress'),
         ('completed', 'Completed'),
     ]
-    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default='assigned')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='assigned')
+
+    PRIORITY_CHOICES = [
+        (1, 'Low'),
+        (2, 'Medium'),
+        (3, 'High'),
+    ]
+    priority = models.IntegerField(choices=PRIORITY_CHOICES, default=2)
 
     def __init__(self, *args: Any, **kwargs):
         super().__init__(*args, **kwargs)
@@ -88,8 +92,6 @@ class Task(models.Model):
         super().clean()
         if not self.existing_task and self.due_date is not None and self.due_date < timezone.now():
             raise ValidationError("Due date cannot be in the past")
-      
-    
 
 class Team(models.Model):
     """Teams can be created by a user"""

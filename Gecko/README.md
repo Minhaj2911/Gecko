@@ -2,13 +2,11 @@
 
 ## Team members
 The members of the team are:
-- *enter full name 1 here*
-- Joori Almusaed
 - Yasmin Alzaid
-- *enter full name 2 here*
-- *enter full name 3 here*
-- *enter full name 4 here*
-- *enter full name 5 here*
+- Samuel Chilakamari
+- Joori Almusaed
+- Mohammed Rahman
+- Gunel Farajli
 
 ## Project structure
 The project is called `task_manager`.  It currently consists of a single app `tasks`.

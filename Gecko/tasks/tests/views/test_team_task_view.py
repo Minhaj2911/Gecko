@@ -20,7 +20,8 @@ class TeamTaskViewTestCase(TestCase):
         self.team.members.add(self.user)
         self.url = reverse('team_tasks', kwargs={'pk':self.team.pk})
 
-        self.task = Task.objects.create(title= 'Client meeting',
+        self.task = Task.objects.create(
+            title= 'Client meeting',
             description= 'Conduct a meeting with the client to discuss the outcomes of the project.',
             assignee= self.user,
             due_date= timezone.now() + timezone.timedelta(days= 3),
@@ -34,7 +35,7 @@ class TeamTaskViewTestCase(TestCase):
     def test_get_team_tasks(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'team_tasks.html')
+        self.assertTemplateUsed(response, 'team_detail.html')
         self.assertIn('team', response.context)  
         self.assertIn('tasks', response.context) 
         team = response.context['team']

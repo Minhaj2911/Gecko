@@ -18,8 +18,7 @@ class TeamTaskViewTestCase(TestCase):
 
          )
         self.team.members.add(self.user)
-        self.url = reverse('team_tasks', kwargs={'pk':self.team.pk})
-
+        self.url = reverse('team_detail', kwargs={'pk':self.team.pk})
         self.task = Task.objects.create(
             title= 'Client meeting',
             description= 'Conduct a meeting with the client to discuss the outcomes of the project.',
@@ -30,9 +29,9 @@ class TeamTaskViewTestCase(TestCase):
         )
     
     def test_team_task_url(self):
-        self.assertEqual(self.url,f'/team_tasks/{self.team.pk}/')
+        self.assertEqual(self.url,f'/team_detail/{self.team.pk}/')
     
-    def test_get_team_tasks(self):
+    def test_get_team_detail(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'team_detail.html')

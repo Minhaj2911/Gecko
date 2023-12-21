@@ -181,10 +181,10 @@ class TaskForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         user= kwargs.pop('user', None)
-        team_id = kwargs.pop('team_id', None)
+        pk = kwargs.pop('pk', None)
         super(TaskForm, self).__init__(*args, **kwargs)
-        if team_id:
-             team = Team.objects.get(id= team_id)
+        if pk:
+             team = Team.objects.get(id= pk)
              self.fields['assignee'].queryset = team.members.all()
         elif user:
             teams= user.teams.all()

@@ -215,6 +215,9 @@ class TaskCreateView(LoginRequiredMixin, View):
                 request.session['selected_team_id']= team.id
                 task_form = TaskForm(team_id=team.id)
                 return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form, 'team_id': team.id})
+            else: 
+                task_form = TaskForm(team_id=team.id)
+
 
         elif 'create_task' in request.POST:
             team_id = request.session.get('selected_team_id')
@@ -224,7 +227,14 @@ class TaskCreateView(LoginRequiredMixin, View):
                 task = task_form.save(commit=False)
                 task.team_of_task = Team.objects.get(id=team_id)
                 task_form.save()
-                return redirect('dashboard')  
+                messages.add_message(self.request, messages.SUCCESS, "Task Created!")
+                return redirect('dashboard')
+            else:
+                messages.error(request,  "Unsuccessful: Task Not Created! ")
+                return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form})  
+            
+        else:
+            messages.error(request, "Please select a Team!")
         
         return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form})
 

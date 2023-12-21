@@ -1,7 +1,7 @@
 """Test of the task dashboard view."""
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.urls import reverse
-from tasks.models import User, Task
+from tasks.models import User, Task, Team
 from django.utils import timezone
 
 class TaskDashboardViewTest(TestCase):
@@ -10,9 +10,11 @@ class TaskDashboardViewTest(TestCase):
     fixtures = ['tasks/tests/fixtures/default_user.json']
 
     def setUp(self):
+        self.client = Client()
         self.url = reverse('task_dashboard')
         self.user = User.objects.get(username='@johndoe')
         self.client.force_login(self.user)
+        self.team = Team.objects.create(name='Test Team', admin=self.user)
         self.task = Task.objects.create(
             title='Kick-off meeting',
             description='Conduct a meeting to get to know your team members.',
@@ -25,7 +27,6 @@ class TaskDashboardViewTest(TestCase):
     def test_task_dashboard_url(self):
         self.assertEqual(self.url, "/task_dashboard/")
     
-
     def test_get_task_dashboard(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)

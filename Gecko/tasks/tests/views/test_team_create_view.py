@@ -1,8 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib.auth.models import User
 from django.contrib import messages
-from tasks.models import Team
+from tasks.models import Team, User
 from tasks.views import TeamCreateView 
 
 class TeamCreateViewTests(TestCase):

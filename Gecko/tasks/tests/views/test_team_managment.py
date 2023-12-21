@@ -1,13 +1,12 @@
 from django.test import TestCase, Client
 from django.urls import reverse
-from django.contrib.auth.models import User
-from tasks.models import Team  
+from tasks.models import Team, User 
 
 class TeamManagementTests(TestCase):
     def setUp(self):
         self.client = Client()
-        self.admin_user = User.objects.create_user('admin', password='password')
-        self.other_user = User.objects.create_user('member', password='password')
+        self.admin_user = User.objects.get_or_create_user('admin', password='password')
+        self.other_user = User.objects.get_or_create_user('member', password='password')
         self.team = Team.objects.create(name="Test Team", admin=self.admin_user)
         self.team.members.add(self.admin_user, self.other_user)
         self.client.force_login(self.admin_user)
@@ -21,7 +20,7 @@ class TeamManagementTests(TestCase):
         self.assertRedirects(response, reverse('team_detail', kwargs={'team_id': self.team.pk}))
 
     def test_add_members(self):
-        new_member = User.objects.create_user('newmember', password='password')
+        new_member = self.other_user
         url = reverse('add_members', kwargs={'pk': self.team.pk})
         add_member_data = {'new_members': [new_member.id]}
         response = self.client.post(url, add_member_data, follow=True)

@@ -25,7 +25,37 @@ def dashboard(request):
 
     return render(request, 'dashboard.html', context)
 
+def task_dashboard(request):
+    """Display the current user's task dashboard."""
+
+    current_user = request.user
+    form = TaskFilterForm(request.GET or None)
+    tasks = Task.objects.filter(assignee=current_user)
+
+    search_task = request.GET.get('search_input')
+    if search_task:
+        tasks = tasks.filter(title__icontains=search_task) | tasks.filter(description__icontains=search_task)
+
+    if form.is_valid():
+        if form.cleaned_data['title']:
+            tasks = tasks.filter(title__icontains=form.cleaned_data['title'])
+        if form.cleaned_data['status']:
+            tasks = tasks.filter(status=form.cleaned_data['status'])
+        if form.cleaned_data['due_date']:
+            tasks = tasks.filter(due_date=form.cleaned_data['due_date'])
+        if form.cleaned_data['team']:
+            tasks = tasks.filter(team=form.cleaned_data['team'])
+        if form.cleaned_data.get('priority'):
+            tasks = tasks.filter(priority=form.cleaned_data['priority'])
+
+        sort_by = request.GET.get('sort_by', 'due_date')
+        if sort_by in ['title', 'status', 'due_date', 'assignee__username', 'priority', '-priority', 'team__name']:
+            tasks = tasks.order_by(sort_by)
+
+    return render(request, 'task_dashboard.html', {'tasks': tasks, 'form': form})
+
 class TeamCreateView(LoginRequiredMixin, FormView): 
+    """"Display the current user's team dashboard"""
     form_class = TeamForm
     template_name = "create_team.html"
 
@@ -41,118 +71,113 @@ class TeamCreateView(LoginRequiredMixin, FormView):
     def form_invalid(self, form):
         messages.add_message(self.request, messages.WARNING , "Unsuccessful: Team Not Created")
         return super().form_invalid(form)
+
+class TeamManagementView(LoginRequiredMixin, FormView):
     
+    def transfer_admin(request, pk):
+        """ Transfer admin role to another team member. """
+        team = Team.objects.get(pk=pk)
 
-
-def transfer_admin(request, pk):
-    team = Team.objects.get(pk=pk)
-
-    if request.method == 'POST':
-        form = AssignNewAdminForm(request.POST, team_members=team.members.exclude(id=request.user.id))
-        if form.is_valid():
-            new_admin = form.cleaned_data['new_admin']
-            team.admin = new_admin
-            team.save()
-            return redirect('team_detail', team_id=pk)
-    else:
-        form = AssignNewAdminForm(team_members=team.members.exclude(id=request.user.id))
-
-    return render(request, 'assign_new_admin.html', {'form': form, 'team': team})
-
-def add_members(request, pk):
-    team = Team.objects.get(pk=pk)
-
-    if request.user != team.admin:
-        return redirect('team_detail')
-
-    existing_member_ids = team.members.values_list('id', flat=True)
-    if request.method == 'POST':
-        form = AddMembersForm(request.POST, team_members=existing_member_ids)
-        if form.is_valid():
-            new_members = form.cleaned_data['new_members']
-            team.members.add(*new_members)
-            return redirect('team_detail', team_id=pk)
-    else:
-        form = AddMembersForm(team_members=existing_member_ids)
-
-    return render(request, 'add_members.html', {'form': form, 'team': team})
-
-def remove_members(request, pk):
-    team = Team.objects.get(pk=pk)
-
-    if request.user != team.admin:
-        return redirect('team_detail')
-
-    if request.method == 'POST':
-        form = RemoveMembersForm(request.POST, team_members=team.members.all())
-        if form.is_valid():
-            members_to_remove = form.cleaned_data['members_to_remove']
-            for member in members_to_remove:
-                team.members.remove(member)
-            return redirect('team_detail', team_id=pk)
-    else:
-        form = RemoveMembersForm(team_members=team.members.all())
-
-    return render(request, 'remove_members.html', {'form': form, 'team': team})
-
-def leave_team(request, pk):
-    team = Team.objects.get(pk=pk)
-    
-    if request.method == 'POST':
-        if request.user == team.admin:
+        if request.method == 'POST':
             form = AssignNewAdminForm(request.POST, team_members=team.members.exclude(id=request.user.id))
             if form.is_valid():
                 new_admin = form.cleaned_data['new_admin']
                 team.admin = new_admin
                 team.save()
+                return redirect('team_detail', team_id=pk)
+        else:
+            form = AssignNewAdminForm(team_members=team.members.exclude(id=request.user.id))
+
+        return render(request, 'assign_new_admin.html', {'form': form, 'team': team})
+
+    def add_members(request, pk):
+        """ Add new members to the team"""
+        team = Team.objects.get(pk=pk)
+
+        if request.user != team.admin:
+            return redirect('team_detail')
+
+        existing_member_ids = team.members.values_list('id', flat=True)
+        if request.method == 'POST':
+            form = AddMembersForm(request.POST, team_members=existing_member_ids)
+            if form.is_valid():
+                new_members = form.cleaned_data['new_members']
+                team.members.add(*new_members)
+                return redirect('team_detail', team_id=pk)
+        else:
+            form = AddMembersForm(team_members=existing_member_ids)
+
+        return render(request, 'add_members.html', {'form': form, 'team': team})
+
+    def remove_members(request, pk):
+        """ Remove members from a team. """
+        team = Team.objects.get(pk=pk)
+
+        if request.user != team.admin:
+            return redirect('team_detail')
+
+        if request.method == 'POST':
+            form = RemoveMembersForm(request.POST, team_members=team.members.all())
+            if form.is_valid():
+                members_to_remove = form.cleaned_data['members_to_remove']
+                for member in members_to_remove:
+                    team.members.remove(member)
+                return redirect('team_detail', team_id=pk)
+        else:
+            form = RemoveMembersForm(team_members=team.members.all())
+
+        return render(request, 'remove_members.html', {'form': form, 'team': team})
+
+    def leave_team(request, pk):
+        """ Leave team, if admin leaves call transfer admin. """
+        team = Team.objects.get(pk=pk)
+        
+        if request.method == 'POST':
+            if request.user == team.admin:
+                form = AssignNewAdminForm(request.POST, team_members=team.members.exclude(id=request.user.id))
+                if form.is_valid():
+                    new_admin = form.cleaned_data['new_admin']
+                    team.admin = new_admin
+                    team.save()
+                    team.members.remove(request.user)
+                    return redirect('dashboard')  
+                else:
+                    return render(request, 'assign_new_admin.html', {'form': form, 'team': team})
+            else:
                 team.members.remove(request.user)
                 return redirect('dashboard')  
-            else:
-                return render(request, 'assign_new_admin.html', {'form': form, 'team': team})
+        if request.user == team.admin:
+            form = AssignNewAdminForm(team_members=team.members.exclude(id=request.user.id))
+            return render(request, 'assign_new_admin.html', {'form': form, 'team': team})
         else:
-            team.members.remove(request.user)
-            return redirect('dashboard')  
-    if request.user == team.admin:
-        form = AssignNewAdminForm(team_members=team.members.exclude(id=request.user.id))
-        return render(request, 'assign_new_admin.html', {'form': form, 'team': team})
-    else:
-        return redirect('dashboard')
-    
-def delete_team(request, pk):
-    team = Team.objects.get(pk=pk)
-
-    if request.user != team.admin:  
-        return redirect('team_detail')
-
-    if request.method == 'POST':
-        team.delete()
-        messages.success(request, 'Team deleted successfully.')
-        return redirect('team_detail')
-
-    return redirect('team_detail')
-
-class TeamDashboardView(LoginRequiredMixin, View):
-    """Display the current user's team dashboard"""
-    
-    def dashboard(request):
-        """Display the current user's team dashboard."""
-        current_user = request.user
-        user_teams = Team.objects.filter(members=current_user)
-        return render(request, 'dashboard.html', {'user_teams': user_teams})
-    
-
-def team_detail(request, pk):
-        """Display the current team's tasks."""
+            return redirect('dashboard')
+        
+    def delete_team(request, pk):
+        """" Delete the team. """
         team = Team.objects.get(pk=pk)
-        tasks = Task.objects.filter(team_of_task = team)
-        is_admin = team.admin == request.user
 
-        context = {
-        'team': team,
-        'tasks': tasks,
-        'is_admin': is_admin,
-        }
-        return render(request, 'team_detail.html', context)
+        if request.user != team.admin:  
+            return redirect('team_detail')
+
+        if request.method == 'POST':
+            team.delete()
+            messages.success(request, 'Team deleted successfully.')
+            return redirect('team_detail')
+
+        return redirect('team_detail') 
+
+    def team_detail(request, pk):
+            """ Display the current team's details. """
+            team = Team.objects.get(pk=pk)
+            tasks = Task.objects.filter(team_of_task = team)
+            is_admin = team.admin == request.user
+
+            context = {
+            'team': team,
+            'tasks': tasks,
+            'is_admin': is_admin,
+            }
+            return render(request, 'team_detail.html', context)
     
 class TaskCreateView(LoginRequiredMixin, View):
     template_name = 'create_task.html'
@@ -187,35 +212,6 @@ class TaskCreateView(LoginRequiredMixin, View):
                 return redirect('dashboard')  
         
         return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form})
-
-def task_dashboard(request):
-    """Display the current user's task dashboard."""
-
-    current_user = request.user
-    form = TaskFilterForm(request.GET or None)
-    tasks = Task.objects.filter(assignee=current_user)
-
-    search_task = request.GET.get('search_input')
-    if search_task:
-        tasks = tasks.filter(title__icontains=search_task) | tasks.filter(description__icontains=search_task)
-
-    if form.is_valid():
-        if form.cleaned_data['title']:
-            tasks = tasks.filter(title__icontains=form.cleaned_data['title'])
-        if form.cleaned_data['status']:
-            tasks = tasks.filter(status=form.cleaned_data['status'])
-        if form.cleaned_data['due_date']:
-            tasks = tasks.filter(due_date=form.cleaned_data['due_date'])
-        if form.cleaned_data['team']:
-            tasks = tasks.filter(team=form.cleaned_data['team'])
-        if form.cleaned_data.get('priority'):
-            tasks = tasks.filter(priority=form.cleaned_data['priority'])
-
-        sort_by = request.GET.get('sort_by', 'due_date')
-        if sort_by in ['title', 'status', 'due_date', 'assignee__username', 'priority', '-priority', 'team__name']:
-            tasks = tasks.order_by(sort_by)
-
-    return render(request, 'task_dashboard.html', {'tasks': tasks, 'form': form})
 
 
 def task_description(request, pk):

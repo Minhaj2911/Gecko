@@ -40,14 +40,34 @@ class TeamManagementViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('team_detail', kwargs={'pk': self.team.pk}))
 
-    def test_leave_team(self):
+    def test_admin_leaves_and_new_admin_assigned(self):
+        self.client.force_login(self.user)
+        response = self.client.post(reverse('leave_team', kwargs={'pk': self.team.pk}))
+        self.team.refresh_from_db()
+
+        self.assertNotEqual(self.team.admin, self.user)
+        self.assertNotIn(self.user, self.team.members.all())
+        self.assertRedirects(response, reverse('dashboard'), status_code=302, target_status_code=200)
+
+    def test_last_member_leaves_deletes_team(self):
+        user = User.objects.create_user(username='last_member', password='password')
+        solo_team = Team.objects.create(name='Solo Team', admin=user)
+        solo_team.members.add(user)
+
+        self.client.force_login(user)
+        response = self.client.post(reverse('leave_team', kwargs={'pk': solo_team.pk}))
+        
+        self.assertFalse(Team.objects.filter(pk=solo_team.pk).exists())
+        self.assertRedirects(response, reverse('dashboard'), status_code=302, target_status_code=200)
+
+    def test_leave_team_as_non_admin(self):
+        self.client.force_login(self.other_user)
         url = reverse('leave_team', kwargs={'pk': self.team.pk})
         response = self.client.post(url)
         self.team.refresh_from_db()
-        self.assertNotIn(self.user, self.team.members.all())
+        self.assertNotIn(self.other_user, self.team.members.all())
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('dashboard'))
-
 
     def test_delete_team(self):
         url = reverse('delete_team', kwargs={'pk': self.team.pk})

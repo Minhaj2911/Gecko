@@ -12,6 +12,7 @@ from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm,
 from tasks.helpers import login_prohibited
 from tasks.models import Task, Team
 from django.contrib.auth.mixins import LoginRequiredMixin
+import random
 
 @login_required
 def dashboard(request):
@@ -120,39 +121,39 @@ def remove_members(request, pk):
     return render(request, 'remove_members.html', {'form': form, 'team': team})
 
 def leave_team(request, pk):
-    """ Leave team, if admin leaves call transfer admin. """
+    """ Leave team and handle admin transfer or delete team if last member. """
     team = Team.objects.get(pk=pk)
-    
+
     if request.method == 'POST':
+        members = team.members.all()
         if request.user == team.admin:
-            form = AssignNewAdminForm(request.POST, team_members=team.members.exclude(id=request.user.id))
-            if form.is_valid():
-                new_admin = form.cleaned_data['new_admin']
+            if members.count() > 1:
+                new_admin = random.choice(members.exclude(id=request.user.id))
                 team.admin = new_admin
                 team.save()
-                team.members.remove(request.user)
-                return redirect('dashboard')  
             else:
-                return render(request, 'assign_new_admin.html', {'form': form, 'team': team})
-        else:
-            team.members.remove(request.user)
-            return redirect('dashboard')  
-    if request.user == team.admin:
-        form = AssignNewAdminForm(team_members=team.members.exclude(id=request.user.id))
-        return render(request, 'assign_new_admin.html', {'form': form, 'team': team})
-    else:
+                team.delete()
+                return redirect('dashboard')
+        team.members.remove(request.user)
+
         return redirect('dashboard')
-        
+
+    return redirect('dashboard', pk=pk)
+
+
 def delete_team(request, pk):
-    """" Delete the team. """
+    """ Delete the team. """
     team = Team.objects.get(pk=pk)
     if request.user != team.admin:  
-        return redirect('team_detail')
+        return redirect('team_detail', pk=pk)  
+
     if request.method == 'POST':
         team.delete()
         messages.success(request, 'Team deleted successfully.')
-        return redirect('team_detail')
-    return redirect('team_detail') 
+        return redirect('dashboard')  
+
+    return redirect('dashboard')  
+
 
 def team_detail(request, pk):
     """ Display the current team's details. """

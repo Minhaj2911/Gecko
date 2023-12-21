@@ -1,15 +1,11 @@
 """Unit tests of the team form."""
 from django.test import TestCase
-from tasks.models import User, Team
+from tasks.models import User
 from tasks.forms import TeamForm
-from django.utils import timezone
-from datetime import timedelta, datetime
-from django import forms
 
 class TeamFormTestCase(TestCase):
     """Unit tests of the team form."""
 
-    ##user should be replaced with a team member from a group
     def setUp(self):
         super(TestCase, self).setUp()
         self.user_admin = User.objects.create_user(

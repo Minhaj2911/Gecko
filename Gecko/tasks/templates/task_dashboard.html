@@ -1,35 +1,105 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<div class="container vh-100"><!--remove vh-100 if vh > 100-->
-  <div class="row">
-    <div class="col-12">
-      <h1>Welcome to your task dashboard {{ user.username }}</h1>
+<div class="grid-item tasks-overview">
+  <div class="card custom-height">
+    <div class="card-header">
+      Tasks Overview
+    </div>
+    <div class="card-body">
+      <!-- Example task -->
+      <!-- task details -->
+      <!-- More tasks -->
+    </div>
+  </div>
+</div>
       <div class="search-bar-container">
         <form action="{% url 'task_dashboard' %}" method="get">
             <input type="text" name="search_input" class= "search-input" placeholder=" Search for your assigned tasks by title or description..">
             <button type="submit" class="search-button">Search</button>
         </form>
       </div>
-      <div class="row">
-        {% if user_tasks%}
-          {% for task in user_tasks %}
+        {% if tasks %}
+          {% for task in tasks %}
             <div class="col-md-4">
               <div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
                 <div class="card-body">
                   <h5 class="card-title">{{ task.title }}</h5>
                   <p class="card-text">Due: {{ task.due_date }}</p>
-                  <p class="card-text">Status: {{ task.status }}</p>
+                      <!-- Form to Update Status -->
+                      <form method="post" action="{% url 'update_task' task.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_status">
+                        <select name="status">
+                            {% for status, status_display in task.STATUS_CHOICES %}
+                                <option value="{{ status }}" {% if task.status == status %}selected{% endif %}>
+                                    {{ status_display }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit">Update Status</button>
+                    </form>
+
+                    <!-- Form to Update Priority -->
+                    <form method="post" action="{% url 'update_task' task.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_priority">
+                        <select name="priority">
+                            {% for priority, priority_display in task.PRIORITY_CHOICES %}
+                                <option value="{{ priority }}" {% if task.priority == priority %}selected{% endif %}>
+                                    {{ priority_display }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit">Update Priority</button>
+                    </form>
+
+                    <!-- Form to Update Assignee -->
+                    <form method="post" action="{% url 'update_task' task.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_assignee">
+                        <select name="assignee">
+                            {% for user in users %}
+                                <option value="{{ user.id }}" {% if task.assignee == user %}selected{% endif %}>
+                                    {{ user.get_full_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit">Update Assignee</button>
+                    </form>
+
+                    <!-- Form to Update Due Date -->
+                    <form method="post" action="{% url 'update_task' task.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_due_date">
+                        <input type="date" name="due_date" value="{{ task.due_date|date:'Y-m-d' }}">
+                        <button type="submit">Update Due Date</button>
+                    </form>
+            
+                <a href="{% url 'task_edit' task.id %}">Edit Full Task</a>
                   <a href="{% url 'task_description' pk=task.id %}" button type="button" class="btn btn-secondary"><i class="bi bi-justify-left"></i> View Details</a>
+
+                <!-- Delete Button -->
+                <button onclick="showConfirmationForm('{{ task.id }}')">Delete</button>
+                
+                <!-- Hidden Confirmation Form -->
+                <div id="confirm-delete-{{ task.id }}" style="display:none;">
+                    <form action="{% url 'task_delete' task.id %}" method="post">
+                        {% csrf_token %}
+                        <p>Are you sure you want to delete this task?</p>
+                        <input type="submit" value="Confirm Delete">
+                        <button type="button" onclick="hideConfirmationForm('{{ task.id }}')">Cancel</button>
+                    </form>
+                </div>
                 </div>
               </div>
             </div>
+            
           {% endfor %}
         {% else %}
           <div class="col-12">
             <h3>You don't have any tasks yet...</h3>
           </div>
         {% endif %}
-    </div>
   </div>
 </div>
 {% endblock %}

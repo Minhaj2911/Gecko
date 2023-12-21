@@ -1,8 +1,6 @@
 """Tests of the create task view."""
-from django.contrib.auth.hashers import check_password
 from django.test import TestCase
 from django.urls import reverse
-from tasks.forms import TaskForm, TeamSelectForm
 from tasks.models import User, Team, Task
 from django.utils import timezone
 
@@ -20,7 +18,7 @@ class CreateTaskViewTestCase(TestCase):
             description= 'Gecko research project',
             admin= self.user
 
-         )
+        )
         self.team.members.add(self.user)
 
         self.form_input = {
@@ -29,7 +27,8 @@ class CreateTaskViewTestCase(TestCase):
             'assignee': self.user.id,
             'due_date': timezone.now() + timezone.timedelta(days= 3),
             'status': 'assigned',
-            'team_of_task': self.team.id
+            'team_of_task': self.team.id,
+            'priority': 2,
         }
 
     def test_create_task_url(self):

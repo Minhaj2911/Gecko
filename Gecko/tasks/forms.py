@@ -118,7 +118,7 @@ class TeamForm(forms.ModelForm):
     class Meta:
         """Form options."""
         model= Team
-        fields=['name', 'description', 'members'] # add admin
+        fields=['name', 'description', 'members'] #add admin
         widgets={
             'description': forms.Textarea()}
            
@@ -148,6 +148,31 @@ class TeamForm(forms.ModelForm):
         members = self.cleaned_data.get('members')
         if not members and members == []:
             self.add_error('members', 'members cannot be empty') 
+
+class AddMembersForm(forms.Form):
+    new_members = forms.ModelMultipleChoiceField(
+        queryset=User.objects.none(), 
+        widget=forms.CheckboxSelectMultiple,
+        required=True
+    )
+
+    def __init__(self, *args, **kwargs):
+        team_members = kwargs.pop('team_members')
+        super().__init__(*args, **kwargs)
+        self.fields['new_members'].queryset = User.objects.exclude(id__in=team_members)
+
+class RemoveMembersForm(forms.Form):
+    members_to_remove = forms.ModelMultipleChoiceField(
+        queryset=None,  
+        widget=forms.CheckboxSelectMultiple,
+        required=True,
+        label="Select Members to Remove"
+    )
+
+    def __init__(self, *args, **kwargs):
+        team_members = kwargs.pop('team_members')
+        super().__init__(*args, **kwargs)
+        self.fields['members_to_remove'].queryset = team_members
         
 
 class TaskForm(forms.ModelForm):
@@ -156,7 +181,7 @@ class TaskForm(forms.ModelForm):
     class Meta:
         """Form options."""
         model= Task
-        fields=['title', 'description', 'assignee', 'due_date', 'status', 'team_of_task']
+        fields=['title', 'description', 'assignee', 'due_date', 'status', 'priority', 'team_of_task']
         widgets= {
                 'due_date': forms.DateTimeInput(
                 format= '%Y-%m-%dT%H:%M',
@@ -196,22 +221,14 @@ class TeamSelectForm(forms.Form):
         super(TeamSelectForm, self).__init__(*args, **kwargs)
         if user:
             self.fields['team'].queryset = Team.objects.filter(members=user)
-            
-class TaskStatusForm(forms.ModelForm):
-    """ Form enabling team members to update the status of the assigned tasks. """
-    
-    class Meta:
-        """Form options."""
 
-        model= Task
-        fields=['status']
-    
-    def clean(self):
-        super().clean()
-        if self.instance:
-            self.instance.existing_task = True
-        else:
-            self.instance.existing_task = False
+class AssignNewAdminForm(forms.Form):
+    new_admin = forms.ModelChoiceField(queryset=None, label="Select New Admin")
+
+    def __init__(self, *args, **kwargs):
+        team_members = kwargs.pop('team_members')
+        super().__init__(*args, **kwargs)
+        self.fields['new_admin'].queryset = team_members
 
 class TaskFilterForm(forms.Form):
     title = forms.CharField(required=False)

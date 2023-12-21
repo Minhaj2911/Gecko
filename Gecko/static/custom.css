@@ -2,7 +2,7 @@
  * Alerts
  */
 
- .alert {
+.alert {
   border-radius: 0px;
 }
 
@@ -158,14 +158,14 @@ h3.profile-title {
   transform: scale(1.2);
 }
 
-a.zoom-item {
+a.nav-item {
   text-decoration: none;
   color: #cecfcf;
   font-family: 'Fredoka', sans-serif;
   padding: 5px 10px;
 }
 
-a.zoom-item:hover {
+a.nav-item:hover {
   color: #6d9393;
 }
 
@@ -260,7 +260,7 @@ a.zoom-item:hover {
 
 
 /*
- * Dasboard
+ * Dashboard
  */
 
 body {
@@ -282,19 +282,24 @@ body {
 
 .welcome-message {
   grid-column: 2;
-  margin-top: 20px;
+  margin-top: 30px;
   margin-left: 20px;
+  font-size: 6rem;
+  color: #cecfcf;
+  font-family: 'Fredoka', sans-serif;
 }
 
 .tasks-overview {
   grid-column: 2;
-  margin-top: -800px;
   margin-right: 20px;
   overflow: auto;
+  color: black;
+  font-family: sans-serif;
+  font-size: 1rem;
 }
 
 .custom-height {
-  height: 780px;
+  height: 900px;
 }
 
 /*

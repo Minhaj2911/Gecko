@@ -53,8 +53,14 @@ class Task(models.Model):
 
     title= models.CharField(max_length=50, blank=False, unique=True)
     description= models.CharField(max_length=400, blank=True)
-    assignee= models.ForeignKey(User, on_delete=models.SET_NULL, null= True)
     due_date= models.DateTimeField()
+
+    assignee= models.ForeignKey(
+        "User",
+        on_delete=models.CASCADE,
+        blank= False,
+        null= False,
+    )
     
     team_of_task= models.ForeignKey(
         "Team",

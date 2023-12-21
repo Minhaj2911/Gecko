@@ -1,7 +1,6 @@
 """Test of the task description view."""
 from django.test import TestCase
 from django.urls import reverse
-from tasks.forms import TaskStatusForm
 from tasks.models import User, Task, Team
 from django.utils import timezone
 

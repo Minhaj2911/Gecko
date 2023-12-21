@@ -1,3 +1,4 @@
+from email.utils import parsedate_to_datetime
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, logout
@@ -25,7 +26,7 @@ def dashboard(request):
     return render(request, 'dashboard.html', context)
 
 
-class TeamCreateView(LoginRequiredMixin, FormView):
+class TeamCreateView(LoginRequiredMixin, FormView): 
     form_class = TeamForm
     template_name = "create_team.html"
 
@@ -184,7 +185,7 @@ def task_dashboard(request):
             tasks = tasks.filter(priority=form.cleaned_data['priority'])
 
         sort_by = request.GET.get('sort_by', 'due_date')
-        if sort_by in ['title', 'status', 'due_date', 'assignee__username', 'priority', '-priority']: # 'team__name'
+        if sort_by in ['title', 'status', 'due_date', 'assignee__username', 'priority', '-priority', 'team__name']:
             tasks = tasks.order_by(sort_by)
 
     return render(request, 'task_dashboard.html', {'tasks': tasks, 'form': form})
@@ -203,7 +204,7 @@ def task_description(request, pk):
 
 class TaskEditView(UpdateView):
     model = Task
-    fields = ['title', 'description', 'assignee', 'due_date', 'status', 'priority']
+    fields = ['title', 'description', 'assignee', 'due_date', 'status', 'priority', 'team']
     template_name = 'task_edit.html'
     form_class = TaskForm
 
@@ -217,26 +218,34 @@ class TaskEditView(UpdateView):
         messages.add_message(self.request, messages.SUCCESS, "Task updated!")
         return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
 
+def update_task(request, pk):
+    task = Task.objects.get(pk=pk)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        user = request.user
+
+        if action == 'update_status':
+            task.status = request.POST.get('status')
+        elif action == 'update_priority':
+            task.priority = request.POST.get('priority')
+        elif action == 'update_assignee':
+            user_id = request.POST.get('assignee')
+            task.assignee = user.objects.get(id=user_id)
+        elif action == 'update_due_date':
+            due_date = parsedate_to_datetime(request.POST.get('due_date'))
+            task.due_date = due_date
+
+        task.save()
+        return redirect('dashboard')
+
+    return redirect('dashboard')
+
+
 class TaskDeleteView(DeleteView):
     model = Task
     success_url = reverse_lazy('dashboard') 
 
-
-def change_task_status(request, pk):
-    """Change a particular task's status from the task description."""
-    
-    task = Task.objects.get(pk=pk)
-
-    if request.method == 'POST':
-        form = TaskStatusForm(request.POST, instance=task)
-        if form.is_valid():
-            task.status = form.cleaned_data['status']
-            task.save()
-            return redirect('task_dashboard')
-    else:
-        form = TaskStatusForm(instance=task)    
-
-    return render(request, 'change_status.html', {'form': form, 'task': task})
 
 @login_prohibited
 def home(request):
@@ -244,8 +253,6 @@ def home(request):
 
     return render(request, 'home.html')
 
-
-    
 class LoginProhibitedMixin:
     """Mixin that redirects when a user is logged in."""
 

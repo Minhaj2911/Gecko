@@ -11,7 +11,7 @@ class ChangeTaskStatusViewTest(TestCase):
     fixtures = ['tasks/tests/fixtures/default_user.json']
 
     def setUp(self):
-        self.url = reverse('change_task_status')
+        self.url = reverse('update_task_status')
         self.user = User.objects.get(username='@johndoe')
         self.client.force_login(self.user)
         self.task = Task.objects.create(

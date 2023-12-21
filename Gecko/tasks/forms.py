@@ -129,14 +129,11 @@ class TeamForm(forms.ModelForm):
             admin = request.user,
             description = self.cleaned_data.get('description')
         )
-        team.members.set(self.cleaned_data.get('members'))
-        
-        # may not be required as duplicates may not be created
-        if request.user not in team.members.all():
-            team.members.add(request.user)
-        
-        for member in team.members.all():
-            member.teams.add(team)
+        team.members.add(request.user)
+
+        for member in self.cleaned_data.get('members').all():
+            if member != request.user:
+                member.invites.add(team)
         
         return team
 

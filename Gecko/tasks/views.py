@@ -73,9 +73,10 @@ class TeamCreateView(LoginRequiredMixin, FormView):
         return super().form_invalid(form)
 
 class TeamManagementView(LoginRequiredMixin, FormView):
-    
+    """ Edit Team view information. """
+
     def transfer_admin(request, pk):
-        """ Transfer admin role to another team member. """
+        """" Transfer admin role to another team member. """
         team = Team.objects.get(pk=pk)
 
         if request.method == 'POST':
@@ -93,10 +94,8 @@ class TeamManagementView(LoginRequiredMixin, FormView):
     def add_members(request, pk):
         """ Add new members to the team"""
         team = Team.objects.get(pk=pk)
-
         if request.user != team.admin:
             return redirect('team_detail')
-
         existing_member_ids = team.members.values_list('id', flat=True)
         if request.method == 'POST':
             form = AddMembersForm(request.POST, team_members=existing_member_ids)
@@ -106,16 +105,13 @@ class TeamManagementView(LoginRequiredMixin, FormView):
                 return redirect('team_detail', team_id=pk)
         else:
             form = AddMembersForm(team_members=existing_member_ids)
-
         return render(request, 'add_members.html', {'form': form, 'team': team})
 
     def remove_members(request, pk):
         """ Remove members from a team. """
         team = Team.objects.get(pk=pk)
-
         if request.user != team.admin:
             return redirect('team_detail')
-
         if request.method == 'POST':
             form = RemoveMembersForm(request.POST, team_members=team.members.all())
             if form.is_valid():
@@ -125,7 +121,6 @@ class TeamManagementView(LoginRequiredMixin, FormView):
                 return redirect('team_detail', team_id=pk)
         else:
             form = RemoveMembersForm(team_members=team.members.all())
-
         return render(request, 'remove_members.html', {'form': form, 'team': team})
 
     def leave_team(request, pk):
@@ -151,33 +146,51 @@ class TeamManagementView(LoginRequiredMixin, FormView):
             return render(request, 'assign_new_admin.html', {'form': form, 'team': team})
         else:
             return redirect('dashboard')
-        
+            
     def delete_team(request, pk):
         """" Delete the team. """
         team = Team.objects.get(pk=pk)
-
         if request.user != team.admin:  
             return redirect('team_detail')
-
         if request.method == 'POST':
             team.delete()
             messages.success(request, 'Team deleted successfully.')
             return redirect('team_detail')
-
         return redirect('team_detail') 
 
     def team_detail(request, pk):
-            """ Display the current team's details. """
-            team = Team.objects.get(pk=pk)
-            tasks = Task.objects.filter(team_of_task = team)
-            is_admin = team.admin == request.user
+        """ Display the current team's details. """
+        team = Team.objects.get(pk=pk)
+        tasks = Task.objects.filter(team_of_task = team)
+        is_admin = team.admin == request.user
 
-            context = {
+        context = {
             'team': team,
             'tasks': tasks,
             'is_admin': is_admin,
-            }
-            return render(request, 'team_detail.html', context)
+        }
+        return render(request, 'team_detail.html', context)
+        
+class InvitesView(LoginRequiredMixin, View):
+    def team_invites(request):
+        user_invites = request.user.invites.all()
+        return render(request, 'invites.html', {'user_invites': user_invites})
+    
+    def join_team(request, team):
+        team = Team.objects.get(name=team)
+
+        request.user.teams.add(team)
+        request.user.invites.remove(team)
+        team.members.add(request.user)
+        messages.add_message(request, messages.SUCCESS , f"Joined Team {team} successfully")
+        return InvitesView.team_invites(request)
+        
+
+    def reject_invite(request, team):
+        team = Team.objects.get(name=team)
+        request.user.invites.remove(team)
+        messages.add_message(request, messages.SUCCESS , f"Rejected Team {team} successfully")
+        return InvitesView.team_invites(request)
     
 class TaskCreateView(LoginRequiredMixin, View):
     template_name = 'create_task.html'

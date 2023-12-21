@@ -10,7 +10,7 @@ from django.views.generic.edit import FormView, UpdateView
 from django.urls import reverse
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, TeamSelectForm, TaskStatusForm, TaskFilterForm
 from tasks.helpers import login_prohibited
-from tasks.models import Task
+from tasks.models import Team, Task, User
 
 @login_required
 def dashboard(request):

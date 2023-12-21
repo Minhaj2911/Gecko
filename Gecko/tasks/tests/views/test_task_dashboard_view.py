@@ -29,8 +29,8 @@ class TaskDashboardViewTest(TestCase):
             description='Conduct a meeting to get to know your team members.',
             assignee=self.user,
             due_date=timezone.now() + timezone.timedelta(days=7),
-            status='assigned'#,
-            # team_of_task=self.team # comment out once merged to main
+            status='assigned',
+            team_of_task=self.team
         )
     
     def test_task_dashboard_url(self):

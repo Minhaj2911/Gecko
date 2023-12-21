@@ -103,9 +103,22 @@ class TeamTest(TestCase):
         self.assertEqual(self.team.admin, new_admin)
 
     def test_get_tasks(self):
-        task1 = Task.objects.create(name='Task 1')
-        task2 = Task.objects.create(name='Task 2')
+        task1 = Task.objects.create(title='Task 1', 
+            description= 'Conduct a meeting to discuss the new project design',
+            assignee= self.user_1, 
+            due_date=datetime.now() + timedelta(days=4), 
+            status= 'assigned',
+            team_of_task= self.team)
+        
+        task2 = Task.objects.create(title='Task 2', 
+            description= 'Review planning analysis',
+            assignee= self.user_2, 
+            due_date=timezone.now() + timezone.timedelta(days= 6), 
+            status= 'assigned',
+            team_of_task= self.team)
+
         self.team.tasks.add(task1, task2)
 
         expected_tasks = ",".join([str(task) for task in [task1, task2]])
         self.assertEqual(self.team.get_tasks(), expected_tasks)
+

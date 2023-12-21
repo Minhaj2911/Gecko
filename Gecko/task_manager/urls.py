@@ -19,7 +19,7 @@ from django.urls import path
 from tasks import views
 from django.contrib.auth import views as auth_views
 
-urlpatterns = [
+urlpatterns = [ 
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
     path('dashboard/', views.dashboard, name='dashboard'),

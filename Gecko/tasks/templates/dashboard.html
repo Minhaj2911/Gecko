@@ -10,9 +10,29 @@
       </div>
       <div class="card-body">
         <p>Here you can view and manage your teams.</p>
-        <!-- Example team -->
-        <!-- Team details -->
-        <!-- More teams -->
+        <div class="row">
+          {% if user_teams%}
+            {% for team in user_teams %}
+              <div class="col-md-4">
+                <div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
+                  <div class="card-body">
+                    <h5 class="card-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ team.name }}</h5>
+                    <p class="card-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ team.description }}</p>
+                    <p class="card-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Admin: {{ team.admin }}</p>
+                    <p class="card-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Members:
+                      {% for member in team.members.all %}
+                      {{member.username}}
+                      {% endfor %}
+                    </p>
+                    <a href="{% url 'team_tasks' pk=team.id %}" button type="button" class="btn btn-secondary"><i class="bi bi-justify-left"></i> View Details</a>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+              <h3>You don't have any teams yet...</h3>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>

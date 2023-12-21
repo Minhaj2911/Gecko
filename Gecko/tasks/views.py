@@ -221,12 +221,7 @@ def task_dashboard(request):
 def task_description(request, pk):
     """Display the current task's description."""
 
-    try:
-        task = Task.objects.get(pk=pk)
-
-    except Task.DoesNotExist:
-        task = None
-
+    task = Task.objects.get(pk=pk)
     return render(request, 'task_description.html', {'task': task})
 
 class TaskEditView(UpdateView):

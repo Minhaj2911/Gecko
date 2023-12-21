@@ -26,7 +26,8 @@ class CreateTaskViewTestCase(TestCase):
             'description': 'Conduct a meeting to discuss the new project design',
             'assignee': self.user.id,
             'due_date': timezone.now() + timezone.timedelta(days= 3),
-            'status': 'assigned'
+            'status': 'assigned',
+            'priority': 2,
         }
 
     def test_create_task_url(self):
@@ -100,7 +101,8 @@ class CreateTaskViewTestCase(TestCase):
             'description': 'Conduct a meeting to discuss the new project design',
             'assignee': self.user.id,
             'due_date': timezone.now() + timezone.timedelta(days= 3),
-            'status': 'assigned'
+            'status': 'assigned',
+            'priority': 2,
         }
         response= self.client.post(self.url, correct_form_input, follow= True)
         response_url= reverse('dashboard')

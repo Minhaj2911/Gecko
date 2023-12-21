@@ -1,10 +1,8 @@
 """Test of the task dashboard view."""
 from django.test import TestCase
 from django.urls import reverse
-from tasks.forms import TaskStatusForm
 from tasks.models import User, Task
 from django.utils import timezone
-from tasks.tests.helpers import reverse_with_next
 
 class TaskDashboardViewTest(TestCase):
     """Test of the task dashboard view."""

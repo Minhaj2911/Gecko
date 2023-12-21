@@ -8,7 +8,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import View, FormView, UpdateView, DeleteView
 from django.urls import reverse, reverse_lazy
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, TeamSelectForm, TaskStatusForm, TaskFilterForm, AssignNewAdminForm, AddMembersForm, RemoveMembersForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, TeamSelectForm, TaskFilterForm, AssignNewAdminForm, AddMembersForm, RemoveMembersForm
 from tasks.helpers import login_prohibited
 from tasks.models import Task, Team
 
@@ -140,8 +140,7 @@ def delete_team(request, team_id):
         messages.success(request, 'Team deleted successfully.')
         return redirect('team_detail')
 
-    # Redirect or show an error if not a POST request
-    return redirect('some_view')
+    return redirect('team_detail')
 
 class TaskCreateView(LoginRequiredMixin, View):
     template_name = 'create_task.html'

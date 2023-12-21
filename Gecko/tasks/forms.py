@@ -181,7 +181,7 @@ class TaskForm(forms.ModelForm):
     class Meta:
         """Form options."""
         model= Task
-        fields=['title', 'description', 'assignee', 'due_date', 'status', 'priority', 'team']
+        fields=['title', 'description', 'assignee', 'due_date', 'status', 'priority']
         widgets= {
                 'due_date': forms.DateTimeInput(
                 format= '%Y-%m-%dT%H:%M',
@@ -229,22 +229,6 @@ class AssignNewAdminForm(forms.Form):
         team_members = kwargs.pop('team_members')
         super().__init__(*args, **kwargs)
         self.fields['new_admin'].queryset = team_members
-            
-class TaskStatusForm(forms.ModelForm):
-    """ Form enabling team members to update the status of the assigned tasks. """
-    
-    class Meta:
-        """Form options."""
-
-        model= Task
-        fields=['status']
-    
-    def clean(self):
-        super().clean()
-        if self.instance:
-            self.instance.existing_task = True
-        else:
-            self.instance.existing_task = False
 
 class TaskFilterForm(forms.Form):
     title = forms.CharField(required=False)

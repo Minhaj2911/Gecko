@@ -10,7 +10,7 @@ from django.views.generic import View, FormView, UpdateView, DeleteView
 from django.urls import reverse, reverse_lazy
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, TeamSelectForm, TaskFilterForm, AssignNewAdminForm, AddMembersForm, RemoveMembersForm
 from tasks.helpers import login_prohibited
-from tasks.models import Task, Team
+from tasks.models import Task, Team, User
 
 @login_required
 def dashboard(request):
@@ -44,8 +44,8 @@ class TeamCreateView(LoginRequiredMixin, FormView):
     
 class InvitesView(LoginRequiredMixin, View):
     def team_invites(request):
-        #user_invites = User.objects.get(username = request.user).invites.all()
-        user_invites = request.user.invites.all()
+        user_invites = User.objects.get(username = request.user).invites.all()
+        #user_invites = request.user.invites.all()
         return render(request, 'invites.html', {'user_invites': user_invites})
     
     def join_team(request, team):

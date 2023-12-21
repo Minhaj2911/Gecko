@@ -22,7 +22,7 @@ from django.contrib.auth import views as auth_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
-    path('dashboard/', views.dashboard, name='dashboard'),
+    path('dashboard/', views.TeamDashboardView.dashboard, name='dashboard'),
     path('log_in/', views.LogInView.as_view(), name='log_in'),
     path('log_out/', views.log_out, name='log_out'),
     path('password/', views.PasswordView.as_view(), name='password'),
@@ -30,4 +30,7 @@ urlpatterns = [
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
     path('create_task/', views.TaskCreateView.as_view(), name='create_task'),
     path('create_team/', views.TeamCreationView.as_view(), name='create_team'),
+    # path('create_team/', views.create_team, name='create_team'),
+    #re_path('^searchableselect/', include('searchableselect.urls')),
+    path('team_tasks/<int:pk>/', views.TeamTaskView.team_tasks, name='team_tasks'),
 ]

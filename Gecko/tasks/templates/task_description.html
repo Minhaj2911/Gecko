@@ -36,6 +36,8 @@
         </form>
         
 
+          <a href="{% url 'task_edit' task.id %}" class="btn btn-secondary btn-block"><i class="bi bi-justify-left"></i>Edit</a>
+          <a href="{% url 'task_delete' task.id %}" class="btn btn-secondary btn-block"><i class="bi bi-justify-left"></i>Delete</a>
         </div>
       </div>
     </div>

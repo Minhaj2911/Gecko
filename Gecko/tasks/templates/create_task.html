@@ -1,27 +1,38 @@
 {% extends 'base_content.html' %}
 {% block content %}
-    <h1 style="text-align: center;">Create and assign a task to one of your team members</h1>
 
-    <div style="max-width: 600px; margin: 20px auto; padding: 10px; background-color: beige; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);">
-        <form method="post" action="">
-        {% csrf_token %}
-        {{ team_form.as_p}}
-        <div style="text-align: right;">
-            <button type="submit" name="select_team">Select Team</button> 
-            </div>
-        </form>
-    </div>
-
-    {% if pk %}
-        <div style="max-width: 600px; margin: 20px auto; padding: 10px; background-color: beige;  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);">
-            <form method="post" action="" style="margin: auto;">
+    <div class="container my-auto-two">
+        <div class="row">
+          <div class="col-12">
+            <div class="card container4">
+                <form method="post" action="">
                 {% csrf_token %}
-                {{ task_form.as_p}}
-                <input type="hidden" name="pk" value="{{ pk }}">
+                {% include 'partials/bootstrap_form.html' with form=team_form %}
                 <div style="text-align: right;">
-                    <button type="submit" name="create_task">Save Task</button> 
-                </div>
-            </form>
+                    <button type="submit" name="select_team" class="btn btn-primary">Select Team</button> 
+                    </div>
+                </form>
+            </div>
         </div>
+    </div>
+</div>
+
+    {% if team_id %}
+    <div class="container my-auto-two">
+        <div class="row">
+          <div class="col-12">
+            <div class="card container4">
+                    <form method="post" action="" style="margin: auto;">
+                        {% csrf_token %}
+                        {% include 'partials/bootstrap_form.html' with form=task_form %}
+                        <input type="hidden" name="team_id" value="{{ team_id }}">
+                        <div style="text-align: right;">
+                            <button type="submit" name="create_task" class="btn btn-primary">Save Task</button> 
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     {% endif %}
 {% endblock %}

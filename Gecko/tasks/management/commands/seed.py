@@ -5,7 +5,7 @@ from tasks.models import User, Task, Team
 import pytz
 from faker import Faker
 from random import randint, random
-from datetime import timedelta, datetime
+from datetime import timedelta
 from django.utils import timezone
 import random
 
@@ -16,9 +16,9 @@ user_fixtures = [
 ]
 
 task_fixtures = [
-    {'title': 'Review client notes', 'description': 'Assess and evaluate current project state based on the client notes', 'assignee': '@johndoe', 'due_date': timezone.now() + timezone.timedelta(days= 3) , 'status': 'in progress', 'priority': 2, 'team_of_task': 'Koala team'},
-    {'title': 'Initiate project plan', 'description': 'Brainstorm new project ideas for banking project', 'assignee': '@janedoe', 'due_date': timezone.now() + timezone.timedelta(days= 10) , 'status': 'completed', 'priority': 1, 'team_of_task': 'Panda team'},
-    {'title': 'Create group schedule', 'description': 'Plan and design a schedule for group weekly meeting', 'assignee': '@charlie', 'due_date': timezone.now() + timezone.timedelta(days= 22) , 'status': 'assigned', 'priority': 3, 'team_of_task': 'Kangaroo team'},
+    {'title': 'Review client notes', 'description': 'Assess and evaluate current project state based on the client notes', 'assignee': '@johndoe', 'due_date': timezone.now() + timezone.timedelta(days= 3) , 'status': 'in progress', 'priority': 2},
+    {'title': 'Initiate project plan', 'description': 'Brainstorm new project ideas for banking project', 'assignee': '@janedoe', 'due_date': timezone.now() + timezone.timedelta(days= 10) , 'status': 'completed', 'priority': 1},
+    {'title': 'Create group schedule', 'description': 'Plan and design a schedule for group weekly meeting', 'assignee': '@charlie', 'due_date': timezone.now() + timezone.timedelta(days= 22) , 'status': 'assigned', 'priority': 3},
 ]
 
 team_fixtures = [
@@ -115,9 +115,8 @@ class Command(BaseCommand):
         due_date = timezone.now() + timezone.timedelta(days= random.randint(1,365))
         status = random.choice(self.task_status_options)
         priority= random.choice(self.task_priority_options)
-        team_of_task= random.choice(Team.objects.all())
         self.try_create_task({
-            'title': title, 'description': description, 'assignee': assignee, 'due_date': due_date, 'status': status, 'priority': priority, 'team_of_task': team_of_task })
+            'title': title, 'description': description, 'assignee': assignee, 'due_date': due_date, 'status': status, 'priority': priority })
           
     def generate_team(self):
         name = self.faker.unique.word()
@@ -156,8 +155,6 @@ class Command(BaseCommand):
         self.add_teams_invites_to_users(user)
     
     def create_task(self, data):
-        team_name = data['team_of_task']
-        team = Team.objects.get(name=team_name)
         task= Task.objects.create(
             title=data['title'],
             description=data['description'],
@@ -165,7 +162,6 @@ class Command(BaseCommand):
             due_date=data['due_date'],
             status=data['status'], 
             priority=data['priority'],
-            team_of_task=team,
         )
         team.tasks.add(task)
     

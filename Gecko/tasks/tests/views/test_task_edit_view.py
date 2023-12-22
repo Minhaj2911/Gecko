@@ -1,7 +1,8 @@
 from django.test import TestCase
 from django.urls import reverse
 from tasks.models import Task, User
-from datetime import datetime, timedelta
+from datetime import timedelta
+from django.utils import timezone
 
 class TaskEditViewTest(TestCase):
     """Tests of the task edit view."""
@@ -9,7 +10,7 @@ class TaskEditViewTest(TestCase):
 
     def setUp(self):
         self.assignee = User.objects.get(username='@johndoe')
-        due_date = datetime.now() + timedelta(days=10)
+        due_date = timezone.now() + timezone.timedelta(days= 3)
         self.task = Task.objects.create(
             title='Test Task', 
             description='This is a test task',

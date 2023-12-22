@@ -27,7 +27,6 @@ class CreateTaskViewTestCase(TestCase):
             'assignee': self.user.id,
             'due_date': timezone.now() + timezone.timedelta(days= 3),
             'status': 'assigned',
-            'team_of_task': self.team.id,
             'priority': 2,
         }
 
@@ -50,7 +49,7 @@ class CreateTaskViewTestCase(TestCase):
     
     def test_successful_task_creation(self):
         self.client.post(self.url, {'team': self.team.id, 'select_team': 'Select Team'})
-        self.form_input['pk']= self.team.id
+        self.form_input['team_id']= self.team.id
         self.form_input['create_task']= 'Save Task'
         before_count= Task.objects.count()
         response= self.client.post(self.url, self.form_input, follow= True)
@@ -63,11 +62,11 @@ class CreateTaskViewTestCase(TestCase):
         self.assertEqual(task.description, self.form_input['description'])
         self.assertEqual(task.assignee.id, self.user.id)
         self.assertEqual(task.status, self.form_input['status'])
-        self.assertEqual(task.team_of_task.id,self.team.id)
+        self.assertEqual(task.priority, self.form_input['priority'])
     
     def test_invalid_due_date_task_creation(self):
         self.client.post(self.url, {'team': self.team.id, 'select_team': 'Select Team'})
-        self.form_input['pk']= self.team.id
+        self.form_input['team_id']= self.team.id
         self.form_input['create_task']= 'Save Task'
         self.form_input['due_date']= timezone.now() - timezone.timedelta(days= 2)
         before_count= Task.objects.count()
@@ -79,7 +78,7 @@ class CreateTaskViewTestCase(TestCase):
 
     def test_blank_title_task_creation(self):
         self.client.post(self.url, {'team': self.team.id, 'select_team': 'Select Team'})
-        self.form_input['pk']= self.team.id
+        self.form_input['team_id']= self.team.id
         self.form_input['create_task']= 'Save Task'
         self.form_input['title']= ''
         response= self.client.post(self.url, self.form_input)
@@ -88,18 +87,25 @@ class CreateTaskViewTestCase(TestCase):
 
     def test_no_assignee_task_creation(self):
         self.client.post(self.url, {'team': self.team.id, 'select_team': 'Select Team'})
-        self.form_input['pk']= self.team.id
+        self.form_input['team_id']= self.team.id
         self.form_input['create_task']= 'Save Task'
         self.form_input['assignee']= ''
         response= self.client.post(self.url, self.form_input)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'create_task.html')
     
-    def test_no_team_of_task_task_creation(self):
-        self.client.post(self.url, {'team': self.team.id, 'select_team': 'Select Team'})
-        self.form_input['pk']= self.team.id
-        self.form_input['create_task']= 'Save Task'
-        self.form_input['team_of_task']= ''
-        response= self.client.post(self.url, self.form_input)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'create_task.html')
+    def test_successful_create_task_redirect(self):
+        correct_form_input = {
+            'team_id': self.team.id,
+            'create_task': 'Save Task',
+            'title': 'Project meeting',
+            'description': 'Conduct a meeting to discuss the new project design',
+            'assignee': self.user.id,
+            'due_date': timezone.now() + timezone.timedelta(days= 3),
+            'status': 'assigned',
+            'priority': 2
+        }
+        response= self.client.post(self.url, correct_form_input, follow= True)
+        response_url= reverse('dashboard')
+        self.assertRedirects(response, response_url, status_code= 302, target_status_code= 200)
+        self.assertTemplateUsed(response, 'dashboard.html')

@@ -1,6 +1,6 @@
 from tasks.models import Task, User, Team
 from django.test import TestCase
-from datetime import timedelta, datetime
+from datetime import timedelta
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 

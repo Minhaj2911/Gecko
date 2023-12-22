@@ -44,13 +44,11 @@ def task_dashboard(request):
             tasks = tasks.filter(status=form.cleaned_data['status'])
         if form.cleaned_data['due_date']:
             tasks = tasks.filter(due_date=form.cleaned_data['due_date'])
-        if form.cleaned_data['team_of_task']:
-            tasks = tasks.filter(team=form.cleaned_data['team_of_task'])
         if form.cleaned_data.get('priority'):
             tasks = tasks.filter(priority=form.cleaned_data['priority'])
 
         sort_by = request.GET.get('sort_by', 'due_date')
-        if sort_by in ['title', 'status', 'due_date', 'assignee__username', 'priority', '-priority', 'team_of_task']:
+        if sort_by in ['title', 'status', 'due_date', 'assignee__username', 'priority', '-priority']:
             tasks = tasks.order_by(sort_by)
 
     return render(request, 'task_dashboard.html', {'tasks': tasks, 'form': form})
@@ -226,23 +224,23 @@ class TaskCreateView(LoginRequiredMixin, View):
             if team_form.is_valid():
                 team = team_form.cleaned_data['team']
                 request.session['selected_team_id'] = team.id
-                task_form = TaskForm()  
+                task_form = TaskForm(team_id=team.id)
+                return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form, 'team_id': team.id})  
             else: 
                 task_form = TaskForm()
 
         elif 'create_task' in request.POST:
-            pk = request.session.get('selected_team_id')
-            task_form = TaskForm(request.POST)
+            team_id = request.session.get('selected_team_id')
+            task_form = TaskForm(request.POST, team_id=team_id)
 
-            if task_form.is_valid() and pk:
+            if task_form.is_valid():
                 task = task_form.save(commit=False)
-                task.team_of_task = Team.objects.get(pk=pk)
                 task.save()
                 messages.success(request, "Task Created!")
                 return redirect('dashboard')
             else:
                 messages.error(request, "Unsuccessful: Task Not Created!")
-                team_form = TeamSelectForm(user=request.user)
+                return render(request, self.template_name, {'team_form': team_form, 'task_form': task_form})
 
         else:
             messages.error(request, "Please select a Team!")

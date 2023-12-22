@@ -1,6 +1,6 @@
 from tasks.models import Team, User
 from django.test import TestCase
-from datetime import timedelta, datetime
+from datetime import timedelta
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from tasks.models import Task
@@ -95,7 +95,7 @@ class TeamTest(TestCase):
         task1 = Task.objects.create(title='Task 1', 
             description= 'Conduct a meeting to discuss the new project design',
             assignee= self.user_1, 
-            due_date=datetime.now() + timedelta(days=4), 
+            due_date=timezone.now() + timezone.timedelta(days= 3), 
             status= 'assigned', priority= 1)
         
         task2 = Task.objects.create(title='Task 2', 

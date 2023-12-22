@@ -10,8 +10,7 @@ from django.views.generic import View, FormView, UpdateView, DeleteView
 from django.urls import reverse, reverse_lazy
 from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, TeamSelectForm, TaskFilterForm, AssignNewAdminForm, AddMembersForm, RemoveMembersForm
 from tasks.helpers import login_prohibited
-from tasks.models import Task, Team
-from django.contrib.auth.mixins import LoginRequiredMixin
+from tasks.models import Task, Team, User
 import random
 
 @login_required
@@ -73,6 +72,29 @@ class TeamCreateView(LoginRequiredMixin, FormView):
     def form_invalid(self, form):
         messages.add_message(self.request, messages.WARNING , "Unsuccessful: Team Not Created")
         return super().form_invalid(form)
+    
+class InvitesView(LoginRequiredMixin, View):
+    def team_invites(request):
+        user_invites = User.objects.get(username = request.user).invites.all()
+        #user_invites = request.user.invites.all()
+        return render(request, 'invites.html', {'user_invites': user_invites})
+    
+    def join_team(request, team):
+        team = Team.objects.get(name=team)
+
+        request.user.teams.add(team)
+        request.user.invites.remove(team)
+        team.members.add(request.user)
+        messages.add_message(request, messages.SUCCESS , f"Joined Team {team} successfully")
+        return InvitesView.team_invites(request)
+        
+
+    def reject_invite(request, team):
+        team = Team.objects.get(name=team)
+        # add a rejection message of some kind to the team admin
+        request.user.invites.remove(team)
+        messages.add_message(request, messages.SUCCESS , f"Rejected Team {team} successfully")
+        return InvitesView.team_invites(request)
 
 def transfer_admin(request, pk):
     """" Transfer admin role to another team member. """

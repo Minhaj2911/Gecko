@@ -32,6 +32,7 @@ class Migration(migrations.Migration):
                 ('last_name', models.CharField(max_length=50)),
                 ('email', models.EmailField(max_length=254, unique=True)),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),
+                ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.permission', verbose_name='user permissions')),
             ],
             options={
                 'ordering': ['last_name', 'first_name'],
@@ -39,6 +40,49 @@ class Migration(migrations.Migration):
             managers=[
                 ('objects', django.contrib.auth.models.UserManager()),
             ],
+        ),
+        migrations.CreateModel(
+            name='Task',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('title', models.CharField(max_length=50, unique=True)),
+                ('description', models.CharField(blank=True, max_length=400)),
+                ('due_date', models.DateTimeField()),
+                ('status', models.CharField(choices=[('assigned', 'Assigned'), ('in progress', 'In Progress'), ('completed', 'Completed')], default='assigned', max_length=20)),
+                ('priority', models.IntegerField(choices=[(1, 'Low'), (2, 'Medium'), (3, 'High')], default=2)),
+                ('assignee', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Team',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=50, unique=True)),
+                ('description', models.CharField(blank=True, max_length=500)),
+                ('admin', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('members', models.ManyToManyField(related_name='members', to=settings.AUTH_USER_MODEL)),
+                ('tasks', models.ManyToManyField(blank=True, related_name='tasks', to='tasks.task')),
+            ],
+        ),
+        migrations.AddField(
+            model_name='task',
+            name='team_of_task',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='team_of_task', to='tasks.team'),
+        ),
+        migrations.AddField(
+            model_name='user',
+            name='invites',
+            field=models.ManyToManyField(blank=True, related_name='invites', to='tasks.team'),
+        ),
+        migrations.AddField(
+            model_name='user',
+            name='teams',
+            field=models.ManyToManyField(blank=True, related_name='teams', to='tasks.team'),
+        ),
+        migrations.AddField(
+            model_name='user',
+            name='user_permissions',
+            field=models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.permission', verbose_name='user permissions'),
         ),
         migrations.CreateModel(
             name='Task',

@@ -10,7 +10,6 @@ class TeamTest(TestCase):
 
     def setUp(self):
 
-        ##user should be replaced with a team member from a group
         self.user_admin = User.objects.create_user(
             '@johndoe',
             first_name='John',
@@ -72,16 +71,6 @@ class TeamTest(TestCase):
     def test_admin_must_not_be_blank(self):
         self.team.admin= None
         self._assert_team_is_invalid(self.team)
-
-    # def test_members_must_not_be_blank(self):
-    #     self.team.members.clear()
-    #     self._assert_team_is_invalid(self.team)
-
-    # def test_members_must_include_admin(self):
-    #     print(str(self.team.members.all()))
-    #     self.team.members.remove(self.user_admin)
-    #     print(str(self.team.members.all()))
-    #     self._assert_team_is_invalid(self.team)
 
     def _assert_team_is_valid(self, team):
         try:

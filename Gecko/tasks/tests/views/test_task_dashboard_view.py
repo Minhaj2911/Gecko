@@ -1,43 +1,64 @@
-"""Test of the task dashboard view."""
-from django.test import TestCase, Client
+from django.test import TestCase, RequestFactory
 from django.urls import reverse
 from tasks.models import User, Task, Team
-from django.utils import timezone
+import datetime
+from tasks.views import task_dashboard
 
-class TaskDashboardViewTest(TestCase):
-    """Test of the task dashboard view."""
-
-    fixtures = ['tasks/tests/fixtures/default_user.json']
+class TaskDashboardViewTests(TestCase):
+    """Tests of the task dashboard view."""
+    fixtures = ['tasks/tests/fixtures/default_user.json', 'tasks/tests/fixtures/other_users.json']
 
     def setUp(self):
-        self.client = Client()
-        self.url = reverse('task_dashboard')
-        self.user = User.objects.get(username='@johndoe')
-        self.client.force_login(self.user)
-        self.team= Team.objects.create(
-            name= 'Gecko',
-            description= 'Gecko research project',
-            admin= self.user
+        self.factory = RequestFactory()
+        self.user = User.objects.create_user(username='@johndoe')
+        self.team_admin = User.objects.create_user(username='@janedoe')
+        self.team = Team.objects.create(name='Test Team', admin=self.team_admin)
+        Task.objects.create(title='Test Task 1', description='Task 1 description', assignee=self.user, team_of_task=self.team, due_date=datetime.date.today())
+        Task.objects.create(title='Test Task 2', description='Task 2 description', assignee=self.user, team_of_task=self.team, due_date=datetime.date.today())
 
-        )
-        self.team.members.add(self.user)
-        self.task = Task.objects.create(
-            title='Kick-off meeting',
-            description='Conduct a meeting to get to know your team members.',
-            assignee=self.user,
-            due_date=timezone.now() + timezone.timedelta(days=7),
-            status='assigned',
-            team_of_task=self.team
-        )
-    
-    def test_task_dashboard_url(self):
-        self.assertEqual(self.url, "/task_dashboard/")
-
-    def test_get_task_dashboard(self):
-        self.client.force_login(self.user)
-        response = self.client.get(self.url)
+    def test_task_dashboard_with_current_user(self):
+        request = self.factory.get(reverse('task_dashboard'))
+        request.user = self.user
+        response = task_dashboard(request)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'task_dashboard.html')
         self.assertIn('tasks', response.context)
-        user_tasks = response.context['tasks']
-        self.assertIn(self.task, user_tasks)
+        self.assertEqual(len(response.context['tasks']), 2) 
+
+    def test_task_dashboard_search_functionality(self):
+        request = self.factory.get(reverse('task_dashboard'), {'search_input': 'Task 1'})
+        request.user = self.user
+        response = task_dashboard(request)
+        self.assertEqual(len(response.context['tasks']), 1)
+        self.assertEqual(response.context['tasks'][0].title, 'Test Task 1')
+
+    def test_task_dashboard_form_filter(self):
+        form_data = {'title': 'Task 1', 'status': 'Open', 'due_date': datetime.date.today(), 'team_of_task': self.team.id, 'priority': 'High'}
+        request = self.factory.get(reverse('task_dashboard'), form_data)
+        request.user = self.user
+        response = task_dashboard(request)
+        self.assertEqual(len(response.context['tasks']), 1)
+        self.assertEqual(response.context['tasks'][0].title, 'Test Task 1')
+
+    def test_task_dashboard_form_filter_no_due_date(self):
+        form_data = {'title': 'Task 1', 'status': 'Open', 'team_of_task': self.team.id, 'priority': 'High'}
+        request = self.factory.get(reverse('task_dashboard'), form_data)
+        request.user = self.user
+        response = task_dashboard(request)
+        self.assertEqual(len(response.context['tasks']), 1)
+        self.assertEqual(response.context['tasks'][0].title, 'Test Task 1')
+
+    def test_task_dashboard_form_filter_no_results(self):
+        form_data = {'title': 'Task 1', 'status': 'Open', 'due_date': datetime.date.today(), 'team_of_task': self.team.id, 'priority': 'Low'}
+        request = self.factory.get(reverse('task_dashboard'), form_data)
+        request.user = self.user
+        response = task_dashboard(request)
+        self.assertEqual(len(response.context['tasks']), 0)
+
+    def test_task_dashboard_sorting(self):
+        request = self.factory.get(reverse('task_dashboard'), {'sort_by': 'title'})
+        request.user = self.user
+        response = task_dashboard(request)
+        self.assertEqual(len(response.context['tasks']), 2)
+        self.assertEqual(response.context['tasks'][0].title, 'Test Task 1')
+
+

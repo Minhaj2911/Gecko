@@ -140,6 +140,7 @@ def remove_members(request, pk):
             members_to_remove = form.cleaned_data['members_to_remove']
             for member in members_to_remove:
                 team.members.remove(member)
+                member.teams.remove(team)
                 messages.success(request, f'{member} removed from team.')
             return redirect('team_detail', pk=pk)
     else:

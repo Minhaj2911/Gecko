@@ -4,7 +4,7 @@
   <div class="row">
   
       {% if user_invites %}
-        <h1>Invites</h1>
+        <h1 style = "color:white">Invites</h1>
         {% for invite in user_invites%}
           <div class="col-md-4">
               <div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
@@ -25,7 +25,7 @@
             </div>
         {% endfor %}
       {% else%}
-        <h1>You have no invites yet</h1>
+        <h1 style = "color:white">You have no invites yet</h1>
       {% endif %}
       </div>
     </div>

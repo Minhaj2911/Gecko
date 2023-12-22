@@ -130,6 +130,7 @@ class TeamForm(forms.ModelForm):
             description = self.cleaned_data.get('description')
         )
         team.members.add(request.user)
+        request.user.teams.add(team)
 
         for member in self.cleaned_data.get('members').all():
             if member != request.user:

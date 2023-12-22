@@ -17,11 +17,10 @@ import random
 def dashboard(request):
     """Display the current user's dashboard."""
 
-    current_user = request.user
-    user_teams = Team.objects.filter(admin=request.user).distinct() | Team.objects.filter(members=request.user).distinct()
+    current_user =User.objects.get(username = request.user)
     context = {
         'user': current_user,
-        'teams': user_teams
+        'user_teams': current_user.teams.all()
     }
 
     return render(request, 'dashboard.html', context)

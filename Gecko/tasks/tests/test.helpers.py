@@ -3,8 +3,6 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from tasks.helpers import login_prohibited
 from tasks.views import reverse_with_next, LogInTester, MenuTesterMixin
-from django.test import TestCase, Client
-from django.urls import reverse
 from django.conf import settings
 
 class TestReverseWithNext(TestCase):
@@ -46,21 +44,35 @@ class LoginProhibitedDecoratorTests(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='12345')
-        self.authenticated_url = reverse('dashboard') 
-        self.non_authenticated_url = reverse('home')  
-    @login_prohibited
-    def some_view(request):
-        return HttpResponse("This is a test view.")
-
-    def test_redirect_authenticated_user(self):
         self.client.login(username='testuser', password='12345')
-        response = self.client.get(self.authenticated_url)
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, settings.REDIRECT_URL_WHEN_LOGGED_IN)
 
-    def test_allow_non_authenticated_user(self):
-        response = self.client.get(self.non_authenticated_url)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content.decode(), "This is a test view.")
+    def test_login_prohibited(self):
+        @login_prohibited
+        def test_view(request):
+            return HttpResponse('Test View')
+        response = test_view(self.client.get('/dashboard/'))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, settings.LOGIN_REDIRECT_URL)
+
+    def test_login_prohibited_with_next(self):
+        @login_prohibited
+        def test_view(request):
+            return HttpResponse('Test View')
+        response = test_view(self.client.get('/dashboard/?next=/home/'))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/home/')
+
+    def test_login_prohibited_with_next_and_query_params(self):
+        @login_prohibited
+        def test_view(request):
+            return HttpResponse('Test View')
+        response = test_view(self.client.get('/dashboard/?next=/home/?test=test'))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/home/?test=test')
+
+  
+  
+  
+  
 
 

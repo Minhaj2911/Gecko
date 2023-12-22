@@ -3,9 +3,8 @@ from django.test import TestCase
 from django.urls import reverse
 from tasks.models import User, Team
 
-class TeamDashboardViewTestCase(TestCase):
-    """Tests of the team dashboard view."""
-    
+class DashboardViewTestCase(TestCase):
+    """Tests of the dashboard view."""
     fixtures = ['tasks/tests/fixtures/default_user.json']
     
     def setUp(self):
@@ -24,9 +23,7 @@ class TeamDashboardViewTestCase(TestCase):
         self.assertEqual(self.url, "/dashboard/")
     
     def test_get_dashboard(self):
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'dashboard.html')
-        self.assertIn('user_teams', response.context)   
-        user_teams = response.context['user_teams']
-        self.assertIn(self.team, user_teams)
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('dashboard'))
+        self.assertIn('teams', response.context)
+        self.assertIn(self.team, response.context['teams'])

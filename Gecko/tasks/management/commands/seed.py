@@ -16,9 +16,9 @@ user_fixtures = [
 ]
 
 task_fixtures = [
-    {'title': 'Review client notes', 'description': 'Assess and evaluate current project state based on the client notes', 'assignee': '@johndoe', 'due_date': timezone.now() + timezone.timedelta(days= 3) , 'status': 'in progress', 'priority': 2, 'team': 'Koala team'},
-    {'title': 'Initiate project plan', 'description': 'Brainstorm new project ideas for banking project', 'assignee': '@janedoe', 'due_date': timezone.now() + timezone.timedelta(days= 10) , 'status': 'completed', 'priority': 1, 'team': 'Panda team'},
-    {'title': 'Create group schedule', 'description': 'Plan and design a schedule for group weekly meeting', 'assignee': '@charlie', 'due_date': timezone.now() + timezone.timedelta(days= 22) , 'status': 'assigned', 'priority': 3, 'team': 'Kangaroo team'},
+    {'title': 'Review client notes', 'description': 'Assess and evaluate current project state based on the client notes', 'assignee': '@johndoe', 'due_date': timezone.now() + timezone.timedelta(days= 3) , 'status': 'in progress', 'priority': 2, 'team_of_task': 'Koala team'},
+    {'title': 'Initiate project plan', 'description': 'Brainstorm new project ideas for banking project', 'assignee': '@janedoe', 'due_date': timezone.now() + timezone.timedelta(days= 10) , 'status': 'completed', 'priority': 1, 'team_of_task': 'Panda team'},
+    {'title': 'Create group schedule', 'description': 'Plan and design a schedule for group weekly meeting', 'assignee': '@charlie', 'due_date': timezone.now() + timezone.timedelta(days= 22) , 'status': 'assigned', 'priority': 3, 'team_of_task': 'Kangaroo team'},
 ]
 
 team_fixtures = [
@@ -31,26 +31,27 @@ team_fixtures = [
 class Command(BaseCommand):
     """Build automation command to seed the database."""
 
-    USER_COUNT = 10
-    TASK_COUNT = 5
+    USER_COUNT = 30
+    TASK_COUNT = 10
     TEAM_COUNT = 10
     MAX_TEAM_MEMBERS = 8
     MAX_TASKS_PER_TEAM = 10
+    MAX_TEAMS_PER_USER = 10
     DEFAULT_PASSWORD = 'Password123'
     help = 'Seeds the database with sample data'
     task_status_options= ['assigned', 'in progress', 'completed']
-    # task_priority_options= [1, 2, 3]
+    task_priority_options= [1, 2, 3]
 
     def __init__(self):
         self.faker = Faker('en_GB')
     
-    
-
     def handle(self, *args, **options):
         self.create_users()
         self.users = User.objects.all()
-        self.create_tasks()
         self.create_teams()
+        for user in self.users:
+            self.add_teams_invites_to_users(user)
+        self.create_tasks()
 
     def create_users(self):
         self.generate_user_fixtures()
@@ -113,11 +114,11 @@ class Command(BaseCommand):
         assignee = random.choice(users)
         due_date = timezone.now() + timezone.timedelta(days= random.randint(1,365))
         status = random.choice(self.task_status_options)
-        # priority= random.choice(self.task_priority_options)
-        # team= random.choice(Team.objects.all())
+        priority= random.choice(self.task_priority_options)
+        team_of_task= random.choice(Team.objects.all())
         self.try_create_task({
-            'title': title, 'description': description, 'assignee': assignee, 'due_date': due_date, 'status': status, 'priority': priority, 'team': team})
-    
+            'title': title, 'description': description, 'assignee': assignee, 'due_date': due_date, 'status': status, 'priority': priority, 'team_of_task': team_of_task })
+          
     def generate_team(self):
         name = self.faker.unique.word()
         description = self.faker.text(max_nb_chars=500)
@@ -145,26 +146,28 @@ class Command(BaseCommand):
             pass
 
     def create_user(self, data):
-        User.objects.create_user(
+        user= User.objects.create_user(
             username=data['username'],
             email=data['email'],
             password=Command.DEFAULT_PASSWORD,
             first_name=data['first_name'],
             last_name=data['last_name'],
         )
+        self.add_teams_invites_to_users(user)
     
     def create_task(self, data):
-        # team_name = data['team']
-        # team = Team.objects.get(name=team_name)
-        Task.objects.create(
+        team_name = data['team_of_task']
+        team = Team.objects.get(name=team_name)
+        task= Task.objects.create(
             title=data['title'],
             description=data['description'],
             assignee=data['assignee'],
             due_date=data['due_date'],
             status=data['status'], 
-            # priority=data['priority'],
-            # team=team,
+            priority=data['priority'],
+            team_of_task=team,
         )
+        team.tasks.add(task)
     
     
     def create_team(self, data):
@@ -177,19 +180,32 @@ class Command(BaseCommand):
             )
         team.members.add(admin_user)
         self.add_team_members(team, admin_user)
-        # self.add_tasks_for_teams(team)
+        self.add_tasks_for_teams(team)
         
-    def add_team_members(self, team, admin_username):
-        non_admin_users= User.objects.exclude(username= admin_username)
+    def add_team_members(self, team, admin_user):
+        non_admin_users= User.objects.exclude(id=admin_user.id)
         for user in non_admin_users[:self.MAX_TEAM_MEMBERS - 1]:
             team.members.add(user)
         
-    # def add_tasks_for_teams(self, team):
-    #     tasks= Task.objects.all[:self.MAX_TASKS_PER_TEAM]
-    #     for task in tasks:
-    #         team.tasks.add(task)
+    def add_tasks_for_teams(self, team):
+        tasks= Task.objects.all()[:self.MAX_TASKS_PER_TEAM]
+        for task in tasks:
+            team.tasks.add(task)
     
-    
+    def add_teams_invites_to_users(self, user):
+        teams_objects= Team.objects.all()
+        for _ in range(random.randint(0, self.MAX_TEAMS_PER_USER)):
+            if teams_objects:
+                team= random.choice(teams_objects)
+                if not team.members.filter(id=user.id).exists():
+                    user.teams.add(team)
+                
+        for _ in range(random.randint(0, self.MAX_TEAMS_PER_USER)):
+            if teams_objects:
+                team_invites= random.choice(teams_objects)
+                if not user.invites.filter(id=team_invites.id).exists():
+                    user.invites.add(team_invites)
+
     def create_title(self):
         title= ""
         while len(title) < 1:

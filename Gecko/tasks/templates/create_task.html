@@ -12,12 +12,12 @@
         </form>
     </div>
 
-    {% if team_id %}
+    {% if pk %}
         <div style="max-width: 600px; margin: 20px auto; padding: 10px; background-color: beige;  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);">
             <form method="post" action="" style="margin: auto;">
                 {% csrf_token %}
                 {{ task_form.as_p}}
-                <input type="hidden" name="team_id" value="{{ team_id }}">
+                <input type="hidden" name="pk" value="{{ pk }}">
                 <div style="text-align: right;">
                     <button type="submit" name="create_task">Save Task</button> 
                 </div>

@@ -27,13 +27,13 @@ class TaskDescriptionViewTest(TestCase):
             description='Conduct a meeting to get to know your team members.',
             assignee=self.user,
             due_date=timezone.now() + timezone.timedelta(days=7),
-            status='assigned'#,
-            # team_of_task=self.team # comment out once merged to main
+            status='assigned',
+            team_of_task=self.team
         )
         self.url = reverse('task_description', kwargs={'pk':self.task.pk})
 
     def test_task_description_url(self):
-        self.assertEqual(self.url,f'/task_description/{self.task.pk}')
+        self.assertEqual(self.url,f'/task_description/{self.task.pk}/')
     
     def test_get_task_description(self):
         response = self.client.get(self.url)

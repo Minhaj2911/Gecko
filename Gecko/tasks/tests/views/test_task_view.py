@@ -50,7 +50,7 @@ class CreateTaskViewTestCase(TestCase):
     
     def test_successful_task_creation(self):
         self.client.post(self.url, {'team': self.team.id, 'select_team': 'Select Team'})
-        self.form_input['team_id']= self.team.id
+        self.form_input['pk']= self.team.id
         self.form_input['create_task']= 'Save Task'
         before_count= Task.objects.count()
         response= self.client.post(self.url, self.form_input, follow= True)
@@ -67,7 +67,7 @@ class CreateTaskViewTestCase(TestCase):
     
     def test_invalid_due_date_task_creation(self):
         self.client.post(self.url, {'team': self.team.id, 'select_team': 'Select Team'})
-        self.form_input['team_id']= self.team.id
+        self.form_input['pk']= self.team.id
         self.form_input['create_task']= 'Save Task'
         self.form_input['due_date']= timezone.now() - timezone.timedelta(days= 2)
         before_count= Task.objects.count()
@@ -79,7 +79,7 @@ class CreateTaskViewTestCase(TestCase):
 
     def test_blank_title_task_creation(self):
         self.client.post(self.url, {'team': self.team.id, 'select_team': 'Select Team'})
-        self.form_input['team_id']= self.team.id
+        self.form_input['pk']= self.team.id
         self.form_input['create_task']= 'Save Task'
         self.form_input['title']= ''
         response= self.client.post(self.url, self.form_input)
@@ -88,7 +88,7 @@ class CreateTaskViewTestCase(TestCase):
 
     def test_no_assignee_task_creation(self):
         self.client.post(self.url, {'team': self.team.id, 'select_team': 'Select Team'})
-        self.form_input['team_id']= self.team.id
+        self.form_input['pk']= self.team.id
         self.form_input['create_task']= 'Save Task'
         self.form_input['assignee']= ''
         response= self.client.post(self.url, self.form_input)
@@ -97,7 +97,7 @@ class CreateTaskViewTestCase(TestCase):
     
     def test_no_team_of_task_task_creation(self):
         self.client.post(self.url, {'team': self.team.id, 'select_team': 'Select Team'})
-        self.form_input['team_id']= self.team.id
+        self.form_input['pk']= self.team.id
         self.form_input['create_task']= 'Save Task'
         self.form_input['team_of_task']= ''
         response= self.client.post(self.url, self.form_input)

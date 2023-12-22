@@ -1,10 +1,21 @@
 from django.test import TestCase
 from django.urls import reverse
-from tasks.models import Task
+from tasks.models import Task, User
+from datetime import datetime, timedelta
 
 class TaskEditViewTest(TestCase):
+    """Tests of the task edit view."""
+    fixtures = ['tasks/tests/fixtures/default_user.json']
+
     def setUp(self):
-        self.task = Task.objects.create(title='Test Task', description='This is a test task')
+        self.assignee = User.objects.get(username='@johndoe')
+        due_date = datetime.now() + timedelta(days=10)
+        self.task = Task.objects.create(
+            title='Test Task', 
+            description='This is a test task',
+            due_date=due_date,
+            assignee=self.assignee
+        )
 
     def test_update_task(self):
         url = reverse('task_edit', kwargs={'pk': self.task.pk})

@@ -5,10 +5,11 @@ from tasks.models import Team
 from tasks.views import InvitesView
 
 class TestInvitesView(TestCase):
+    """ Tests for InvitesView. """
+    fixtures = ['tasks/tests/fixtures/default_user.json']
     def setUp(self):
         self.factory = RequestFactory()
-        self.user = User.objects.create_user(
-            username='test', email='test@example.com', password='test')
+        self.user = User.objects.create_user(username='@johndoe')
         self.team = Team.objects.create(name='test_team')
         self.user.invites.add(self.team)
 

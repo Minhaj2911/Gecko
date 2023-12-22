@@ -10,8 +10,8 @@ class TaskDashboardViewTests(TestCase):
 
     def setUp(self):
         self.factory = RequestFactory()
-        self.user = User.objects.create_user(username='@johndoe')
-        self.team_admin = User.objects.create_user(username='@janedoe')
+        self.user = User.objects.get(username='@johndoe')
+        self.team_admin = User.objects.get(username='@janedoe')
         self.team = Team.objects.create(name='Test Team', admin=self.team_admin)
         Task.objects.create(title='Test Task 1', description='Task 1 description', assignee=self.user, team_of_task=self.team, due_date=datetime.date.today())
         Task.objects.create(title='Test Task 2', description='Task 2 description', assignee=self.user, team_of_task=self.team, due_date=datetime.date.today())

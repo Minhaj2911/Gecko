@@ -76,7 +76,6 @@ class TeamCreateView(LoginRequiredMixin, FormView):
 class InvitesView(LoginRequiredMixin, View):
     def team_invites(request):
         user_invites = User.objects.get(username = request.user).invites.all()
-        #user_invites = request.user.invites.all()
         return render(request, 'invites.html', {'user_invites': user_invites})
     
     def join_team(request, team):
@@ -91,7 +90,6 @@ class InvitesView(LoginRequiredMixin, View):
 
     def reject_invite(request, team):
         team = Team.objects.get(name=team)
-        # add a rejection message of some kind to the team admin
         request.user.invites.remove(team)
         messages.add_message(request, messages.SUCCESS , f"Rejected Team {team} successfully")
         return InvitesView.team_invites(request)

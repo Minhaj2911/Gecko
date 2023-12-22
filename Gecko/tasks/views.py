@@ -173,6 +173,7 @@ def leave_team(request, pk):
                 messages.success(request, 'Left team and team deleted successfully.')
                 return redirect('dashboard')
         team.members.remove(request.user)
+        request.user.teams.remove(team)
         messages.success(request, 'Left team successfully.')
 
         return redirect('dashboard')

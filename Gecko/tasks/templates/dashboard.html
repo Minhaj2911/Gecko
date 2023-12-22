@@ -13,7 +13,6 @@
         Teams
       </div>
       <div class="card-body">
-        <p>Here you can view and manage your teams.</p>
         <div class="row">
           {% if user_teams%}
             {% for team in user_teams %}
@@ -23,10 +22,6 @@
                     <h5 class="card-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ team.name }}</h5>
                     <p class="card-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ team.description }}</p>
                     <p class="card-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Admin: {{ team.admin }}</p>
-                    <p class="card-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Members:
-                      {% for member in team.members.all %}
-                      {{member.username}}
-                      {% endfor %}
                     </p>
                     <a href="{% url 'team_detail' pk=team.id %}" button type="button" class="btn btn-secondary"><i class="bi bi-justify-left"></i> View Details</a>
                   </div>
@@ -45,7 +40,7 @@
 
   <!-- Overview Section -->
   <div class="grid-item tasks-overview">
-    <div class="card custom-height">
+    <div class="card h-100">
       <div class="card-header">
         Tasks Overview
       </div>

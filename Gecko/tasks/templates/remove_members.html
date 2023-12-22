@@ -1,9 +1,17 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<h2>Remove Members from {{ team.name }}</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Remove Selected Members</button>
-</form>
+<div class="container my-auto-two">
+    <div class="row">
+        <div class="col-12">
+            <div class="card container4">
+                <h2>Remove Members from {{ team.name }}</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit">Remove Selected Members</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

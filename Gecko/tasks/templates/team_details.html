@@ -16,7 +16,7 @@
 
     {% if is_admin %}
     <a href="{% url 'assign_new_admin' team.id %}">Transfer Admin Role</a>
-    <a href="{% url 'add_members' team.id %}">Add Members</a>
+    <a href="{% url 'invite_team_members' team.id %}">Invite Team Members</a>
     <a href="{% url 'remove_members' team.id %}">Remove Members</a>
     <form action="{% url 'delete_team' team.id %}" method="post">
         {% csrf_token %}

@@ -1,9 +1,0 @@
-{% extends 'base_content.html' %}
-{% block content %}
-<h2>Add Members to {{ team.name }}</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Add Members</button>
-</form>
-{% endblock %}

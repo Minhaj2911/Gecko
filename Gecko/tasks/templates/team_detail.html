@@ -16,6 +16,28 @@
         {% endfor %}
       </ul>
     </div>
+    <div class="row">
+      {% if tasks %}
+      <p>Tasks:</p>
+      {% for task in tasks %}
+      <div class="col-md-4">
+        <div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
+          <div class="card-header bg-transparent border-light">{{ task.title }}</div>
+          <div class="card-body">
+            <p class="card-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ task.description }}</p>
+            <p class="card-text">Assignee: {{ task.assignee }}</p>
+            <p class="card-text">Due: {{ task.due_date }}</p>
+            <p class="card-text">Status: {{ task.status }}</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+      {% else %}
+      <div class="col-md-12">
+        <h2>No tasks yet...</h2>
+      </div>
+      {% endif %}
+    </div>
     <div class="card-footer">
       <div class="row">
         {% if is_admin %}
@@ -53,27 +75,5 @@
       </div>
     </div>
   </div>
-</div>
-<div class="row">
-  {% if tasks %}
-  <p>Tasks:</p>
-  {% for task in tasks %}
-  <div class="col-md-4">
-    <div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
-      <div class="card-header bg-transparent border-light">{{ task.title }}</div>
-      <div class="card-body">
-        <p class="card-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ task.description }}</p>
-        <p class="card-text">Assignee: {{ task.assignee }}</p>
-        <p class="card-text">Due: {{ task.due_date }}</p>
-        <p class="card-text">Status: {{ task.status }}</p>
-      </div>
-    </div>
-  </div>
-  {% endfor %}
-  {% else %}
-  <div class="col-md-12">
-    <h2>No tasks yet...</h2>
-  </div>
-  {% endif %}
 </div>
 {% endblock %}

@@ -65,8 +65,14 @@ class Task(models.Model):
         blank= False,
         null= False,
     )
+
+    team_of_task= models.ForeignKey(
+        "Team",
+        on_delete=models.CASCADE,
+        null= True,
+        related_name='team_of_task'
+        )
     
-       
     STATUS_CHOICES = [
         ('assigned', 'Assigned'),
         ('in progress', 'In Progress'),

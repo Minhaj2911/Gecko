@@ -19,9 +19,14 @@ def dashboard(request):
 
     current_user = User.objects.get(username = request.user)
     user_teams = Team.objects.filter(members=request.user)
+    try:
+        user_tasks = Task.objects.filter(assignee=request.user)
+    except Task.DoesNotExist:
+        user_tasks = None
     context = {
         'user': current_user,
         'user_teams': user_teams,
+        'user_tasks': user_tasks
     }
 
     return render(request, 'dashboard.html', context)

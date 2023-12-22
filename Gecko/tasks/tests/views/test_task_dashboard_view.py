@@ -1,3 +1,4 @@
+"""Tests of the task dashboard view."""
 from django.test import TestCase, RequestFactory
 from django.urls import reverse
 from tasks.models import User, Task, Team

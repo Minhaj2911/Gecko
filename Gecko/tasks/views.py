@@ -188,11 +188,11 @@ def delete_team(request, pk):
 def team_detail(request, pk):
     """ Display the current team's details. """
     team = Team.objects.get(pk=pk)
-    # tasks = Task.objects.filter(team_of_task = team)
+    tasks = Task.objects.filter(tasks = team)
     is_admin = team.admin == request.user
     context = {
         'team': team,
-        'tasks': team.tasks.all(),
+        'tasks': tasks,
         'is_admin': is_admin,
     }
     return render(request, 'team_detail.html', context)

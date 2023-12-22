@@ -55,6 +55,8 @@
   </div>
 </div>
 <div class="row">
+  {% if tasks %}
+  <p>Tasks:</p>
   {% for task in tasks %}
   <div class="col-md-4">
     <div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
@@ -68,5 +70,10 @@
     </div>
   </div>
   {% endfor %}
+  {% else %}
+  <div class="col-md-12">
+    <h2>No tasks yet...</h2>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

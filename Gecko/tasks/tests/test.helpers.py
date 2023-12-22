@@ -1,5 +1,7 @@
+from django.http import HttpResponse
 from django.test import TestCase
 from django.contrib.auth.models import User
+from tasks.helpers import login_prohibited
 from tasks.views import reverse_with_next, LogInTester, MenuTesterMixin
 from django.test import TestCase, Client
 from django.urls import reverse
@@ -43,26 +45,22 @@ class TestMenuTesterMixin(TestCase, MenuTesterMixin):
 class LoginProhibitedDecoratorTests(TestCase):
 
     def setUp(self):
-        self.client = Client()
         self.user = User.objects.create_user(username='testuser', password='12345')
+        self.authenticated_url = reverse('dashboard') 
+        self.non_authenticated_url = reverse('home')  
+    @login_prohibited
+    def some_view(request):
+        return HttpResponse("This is a test view.")
 
-    def test_view_redirects_when_logged_in(self):
-        # Log in the user
+    def test_redirect_authenticated_user(self):
         self.client.login(username='testuser', password='12345')
-
-        # Call the view
-        response = self.client.get(reverse('sample_view'))
-
-        # Check that the response is a redirect
+        response = self.client.get(self.authenticated_url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, settings.REDIRECT_URL_WHEN_LOGGED_IN)
 
-    def test_view_loads_when_not_logged_in(self):
-        # Call the view without logging in
-        response = self.client.get(reverse('sample_view'))
-
-        # Check that the view loads normally
+    def test_allow_non_authenticated_user(self):
+        response = self.client.get(self.non_authenticated_url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "This is a sample view.")
+        self.assertEqual(response.content.decode(), "This is a test view.")
 
 

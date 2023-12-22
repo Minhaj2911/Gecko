@@ -84,3 +84,4 @@ class TeamManagementViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'team_detail.html')
 
+

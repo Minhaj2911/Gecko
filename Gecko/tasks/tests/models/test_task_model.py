@@ -30,7 +30,7 @@ class TaskTest(TestCase):
             assignee= self.user,
             due_date= timezone.now() + timezone.timedelta(days= 3),
             status= 'assigned',
-            team_of_task= self.team
+            priority= 1
         )
     
     def test_title_cannot_be_blank(self):
@@ -49,6 +49,20 @@ class TaskTest(TestCase):
         valid_status_choices= ['assigned', 'in progress', 'completed']
         for status in valid_status_choices:
             self.task.status= status
+            self._assert_task_is_valid(self.task)
+    
+    def test_valid_default_priority(self):
+        self.task.priority= 2
+        self._assert_task_is_valid(self.task)
+    
+    def test_invalid_priority(self):
+        self.task.priority= ' '
+        self._assert_task_is_invalid(self.task)
+    
+    def test_valid_priority_choice(self):
+        valid_status_priority= [1, 2, 3]
+        for priority in valid_status_priority:
+            self.task.priority= priority
             self._assert_task_is_valid(self.task)
     
     def test_valid_assignee(self):
@@ -83,14 +97,6 @@ class TaskTest(TestCase):
     def test_invalid_past_due_date_assigment(self):
         invalid_date= timezone.now() - timedelta(days= 22)
         self.task.due_date= invalid_date
-        self._assert_task_is_invalid(self.task)
-
-    def test_valid_team_of_task(self):
-        self.task.team_of_task= self.team
-        self._assert_task_is_valid(self.task)
-
-    def test_team_of_task_cannot_be_null(self):
-        self.task.team_of_task= None
         self._assert_task_is_invalid(self.task)
 
     def _assert_task_is_valid(self, task):

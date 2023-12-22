@@ -10,7 +10,6 @@ class TeamTest(TestCase):
 
     def setUp(self):
 
-        ##user should be replaced with a team member from a group
         self.user_admin = User.objects.create_user(
             '@johndoe',
             first_name='John',
@@ -73,16 +72,6 @@ class TeamTest(TestCase):
         self.team.admin= None
         self._assert_team_is_invalid(self.team)
 
-    # def test_members_must_not_be_blank(self):
-    #     self.team.members.clear()
-    #     self._assert_team_is_invalid(self.team)
-
-    # def test_members_must_include_admin(self):
-    #     print(str(self.team.members.all()))
-    #     self.team.members.remove(self.user_admin)
-    #     print(str(self.team.members.all()))
-    #     self._assert_team_is_invalid(self.team)
-
     def _assert_team_is_valid(self, team):
         try:
             team.full_clean()
@@ -107,15 +96,13 @@ class TeamTest(TestCase):
             description= 'Conduct a meeting to discuss the new project design',
             assignee= self.user_1, 
             due_date=datetime.now() + timedelta(days=4), 
-            status= 'assigned',
-            team_of_task= self.team)
+            status= 'assigned', priority= 1)
         
         task2 = Task.objects.create(title='Task 2', 
             description= 'Review planning analysis',
             assignee= self.user_2, 
             due_date=timezone.now() + timezone.timedelta(days= 6), 
-            status= 'assigned',
-            team_of_task= self.team)
+            status= 'assigned', priority= 2)
 
         self.team.tasks.add(task1, task2)
 

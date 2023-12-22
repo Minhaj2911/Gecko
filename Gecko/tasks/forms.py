@@ -171,7 +171,7 @@ class TaskForm(forms.ModelForm):
     class Meta:
         """Form options."""
         model= Task
-        fields=['title', 'description', 'assignee', 'due_date', 'status', 'priority', 'team_of_task']
+        fields=['title', 'description', 'assignee', 'due_date', 'status', 'priority']
         widgets= {
                 'due_date': forms.DateTimeInput(
                 format= '%Y-%m-%dT%H:%M',
@@ -181,10 +181,10 @@ class TaskForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         user= kwargs.pop('user', None)
-        pk = kwargs.pop('pk', None)
+        team_id = kwargs.pop('team_id', None)
         super(TaskForm, self).__init__(*args, **kwargs)
-        if pk:
-             team = Team.objects.get(id= pk)
+        if team_id:
+             team = Team.objects.get(id= team_id)
              self.fields['assignee'].queryset = team.members.all()
         elif user:
             teams= user.teams.all()
@@ -228,6 +228,5 @@ class TaskFilterForm(forms.Form):
     due_date_start = forms.DateTimeField(required=False)
     due_date_end = forms.DateTimeField(required=False)
     status = forms.ChoiceField(choices=Task.STATUS_CHOICES, required=False)
-    team = forms.ModelChoiceField(queryset=Team.objects.all(), required=False)
     priority = forms.ChoiceField(choices=Task.PRIORITY_CHOICES, required=False)
 

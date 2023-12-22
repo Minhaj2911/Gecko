@@ -7,7 +7,8 @@ class UserAdmin(admin.ModelAdmin):
     """Configuration of the admin interface for users."""
 
     list_display = [
-        'username', 'first_name', 'last_name', 'email','get_teams','get_invites'
+        'username', 'first_name', 'last_name', 'email'
+
     ]
 
 
@@ -16,7 +17,7 @@ class TaskAdmin(admin.ModelAdmin):
     """Configuration of the admin interface for tasks."""
 
     list_display = [
-        'title', 'description', 'assignee', 'due_date','team_of_task'
+        'title', 'description', 'assignee', 'due_date',
     ]
 
 
@@ -26,5 +27,5 @@ class TeamAdmin(admin.ModelAdmin):
     """Configuration of the admin interface for tasks."""
 
     list_display = [
-        'name', 'description', 'admin' , 'get_members','get_tasks'
+        'name', 'description', 'admin' , 'get_members' 
     ]

@@ -57,6 +57,10 @@
                   padding: 8px;
                   border: 1px solid #dddddd;
                   text-align: left;
+                  max-width: 200px;
+                  white-space: nowrap; 
+                  overflow: hidden; 
+                  text-overflow: ellipsis;
               }
           
               th {
@@ -74,7 +78,7 @@
             {% for task in user_tasks %}
   
               <tr>
-                <td>{{ task.title }}</td>
+                <td><a href="{% url 'task_description' task.id %}">{{ task.title }}</a></td>
                 <td>{{ task.description }}</td>
                 <td>{{ task.due_date }}</td>
                 <td>{{ task.status }}</td>

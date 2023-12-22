@@ -1,9 +1,17 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
-    <div class="card-body">
-      <h5 class="card-title">{{ task.title }} description</h5>
-      <p class="card-text">{{ task.description }}</p>
+  <div class="container my-auto-two">
+    <div class="row">
+      <div class="col-12">
+        <div class="card container4">
+          <h5 class="card-title">Title: {{ task.title }} </h5>
+          <p class="card-text">Description: {{ task.description }}</p>
+          <p class="card-text">Due Date: {{ task.due_date }}</p>
+          <p class="card-text">Team: {{ task.team_of_task }}</p>
+          <p class="card-text">Status: {{ task.status }}</p>
+          <p class="card-text">Priority: {{ task.priority }}</p>
+        </div>
+      </div>
     </div>
   </div>
 {% endblock %}

@@ -35,7 +35,6 @@ urlpatterns = [
     path('update_task/<int:pk>/', views.update_task, name='update_task'),
     path('task_edit/<int:pk>/', views.TaskEditView.as_view(), name='task_edit'),
     path('delete_task/<int:pk>/', views.TaskDeleteView.as_view(), name='task_delete'),
-    path('team/<int:pk>/', views.team_detail, name='team_detail'),
     path('leave_team/<int:pk>/', views.leave_team, name='leave_team'),
     path('transfer_admin/<int:pk>/', views.transfer_admin, name='assign_new_admin'),
     path('add_members/<int:pk>/', views.add_members, name='add_members'),

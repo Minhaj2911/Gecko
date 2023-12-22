@@ -1,36 +1,72 @@
 {% extends 'base_content.html' %}
 {% block content %}
-<div class="container vh-100"><!--remove vh-100 if vh > 100-->
-  <div class="row">
-    <div class="col-12">
+<div class="grid-item team-section">
+  <div class="card h-100">
+    <div class="card-header">
+      Team Details
+    </div>
+    <div class="card-body">
       <h1>{{ team.name }}</h1>
-      <p>{{ team.description}}</p>
+      <p>Description: {{ team.description}}</p>
       <p>Admin: {{ team.admin}}</p>
-      <p>Members:
+      <p>Members:</p>
+      <ul>
         {% for member in team.members.all %}
-        {{member.username}}
+        <li>{{member.username}}</li>
         {% endfor %}
-      </p>
+      </ul>
+    </div>
+    <div class="card-footer">
       <div class="row">
-        {% if tasks %}
-          {% for task in tasks %}
-            <div class="col-md-4">
-              <div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
-                <div class="card-header bg-transparent border-light">{{ task.title }}</div>
-                <div class="card-body">
-                  <p class="card-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ task.description }}</p>
-                  <p class="card-text">Assignee: {{ task.assignee }}</p>
-                  <p class="card-text">Due: {{ task.due_date }}</p>
-                  <p class="card-text">Status: {{ task.status }}</p>
-                </div>
-              </div>
-            </div>
-          {% endfor %}
-        {% else %}
-            <h3>No tasks yet...</h3>
+        {% if is_admin %}
+          <div class="col">
+            <form method="post" action="{% url 'assign_new_admin' team.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-primary">Transfer Admin Role</button>
+            </form>
+          </div>
+          <div class="col">
+            <form method="post" action="{% url 'add_members' team.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-secondary">Add members</button>
+            </form>
+          </div>
+          <div class="col">
+            <form method="post" action="{% url 'remove_members' team.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-warning">Remove members</button>
+            </form>
+          </div>
+          <div class="col">
+            <form method="post" action="{% url 'delete_team' team.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger">Delete Team</button>
+            </form>
+          </div>
         {% endif %}
+        <div class="col">
+          <form method="post" action="{% url 'leave_team' team.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-info">Leave Team</button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
+</div>
+<div class="row">
+  {% for task in tasks %}
+  <div class="col-md-4">
+    <div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
+      <div class="card-header bg-transparent border-light">{{ task.title }}</div>
+      <div class="card-body">
+        <p class="card-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ task.description }}</p>
+        <p class="card-text">Assignee: {{ task.assignee }}</p>
+        <p class="card-text">Due: {{ task.due_date }}</p>
+        <p class="card-text">Status: {{ task.status }}</p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
 </div>
 {% endblock %}

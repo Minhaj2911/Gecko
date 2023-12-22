@@ -94,12 +94,16 @@ class InvitesView(LoginRequiredMixin, View):
 def transfer_admin(request, pk):
     """" Transfer admin role to another team member. """
     team = Team.objects.get(pk=pk)
+    if request.user != team.admin:
+        messages.error(request, 'Only the admin can transfir admin role.')
+        return redirect('team_detail')
     if request.method == 'POST':
         form = AssignNewAdminForm(request.POST, team_members=team.members.exclude(id=request.user.id))
         if form.is_valid():
             new_admin = form.cleaned_data['new_admin']
             team.admin = new_admin
             team.save()
+            messages.success(request, f'{new_admin} is now the admin of {team}.')
             return redirect('team_detail', pk=pk)
     else:
         form = AssignNewAdminForm(team_members=team.members.exclude(id=request.user.id))
@@ -109,6 +113,7 @@ def add_members(request, pk):
     """ Add new members to the team"""
     team = Team.objects.get(pk=pk)
     if request.user != team.admin:
+        messages.error(request, 'Only the admin can add members.')
         return redirect('team_detail')
     existing_member_ids = team.members.values_list('id', flat=True)
     if request.method == 'POST':
@@ -116,6 +121,7 @@ def add_members(request, pk):
         if form.is_valid():
             new_members = form.cleaned_data['new_members']
             team.members.add(*new_members)
+            messages.success(request, 'Members added successfully.')
             return redirect('team_detail', pk=pk)
     else:
         form = AddMembersForm(team_members=existing_member_ids)
@@ -125,6 +131,7 @@ def remove_members(request, pk):
     """ Remove members from a team. """
     team = Team.objects.get(pk=pk)
     if request.user != team.admin:
+        messages.error(request, 'Only the admin can remove members.')
         return redirect('team_detail')
     if request.method == 'POST':
         form = RemoveMembersForm(request.POST, team_members=team.members.all())
@@ -132,6 +139,7 @@ def remove_members(request, pk):
             members_to_remove = form.cleaned_data['members_to_remove']
             for member in members_to_remove:
                 team.members.remove(member)
+                messages.success(request, f'{member} removed from team.')
             return redirect('team_detail', pk=pk)
     else:
         form = RemoveMembersForm(team_members=team.members.all())
@@ -147,11 +155,14 @@ def leave_team(request, pk):
             if members.count() > 1:
                 new_admin = random.choice(members.exclude(id=request.user.id))
                 team.admin = new_admin
+                messages.success(request, f'{new_admin} is now the admin of {team}.')
                 team.save()
             else:
                 team.delete()
+                messages.success(request, 'Left team and team deleted successfully.')
                 return redirect('dashboard')
         team.members.remove(request.user)
+        messages.success(request, 'Left team successfully.')
 
         return redirect('dashboard')
 
@@ -161,7 +172,8 @@ def leave_team(request, pk):
 def delete_team(request, pk):
     """ Delete the team. """
     team = Team.objects.get(pk=pk)
-    if request.user != team.admin:  
+    if request.user != team.admin: 
+        messages.error(request, 'Only the admin can delete a team.') 
         return redirect('team_detail', pk=pk)  
 
     if request.method == 'POST':
@@ -175,7 +187,7 @@ def delete_team(request, pk):
 def team_detail(request, pk):
     """ Display the current team's details. """
     team = Team.objects.get(pk=pk)
-    tasks = Task.objects.filter(team_of_task = team)
+    tasks = Task.objects.filter(tasks = team)
     is_admin = team.admin == request.user
     context = {
         'team': team,
@@ -256,7 +268,7 @@ def task_description(request, pk):
 class TaskEditView(UpdateView):
     """ Edit all current task details. """""
     model = Task
-    fields = ['title', 'description', 'assignee', 'due_date', 'status', 'priority', 'team_of_task']
+    fields = ['title', 'description', 'assignee', 'due_date', 'status', 'priority']
     template_name = 'task_edit.html'
     form_class = TaskForm
 

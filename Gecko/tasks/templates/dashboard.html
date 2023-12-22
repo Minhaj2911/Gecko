@@ -72,6 +72,7 @@
                 <th>Task Name</th>
                 <th>Description</th>
                 <th>Due Date</th>
+                <th>Priority</th>
                 <th>Status</th>
                 <th>Team</th>
             </tr>
@@ -81,6 +82,7 @@
                 <td><a href="{% url 'task_description' task.id %}">{{ task.title }}</a></td>
                 <td>{{ task.description }}</td>
                 <td>{{ task.due_date }}</td>
+                <td>{{ task.priority }}</td>
                 <td>{{ task.status }}</td>
                 <td>{{ task.team_of_task }}</td>
               </tr>

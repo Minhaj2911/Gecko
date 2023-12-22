@@ -10,6 +10,32 @@
           <p class="card-text">Team: {{ task.team_of_task }}</p>
           <p class="card-text">Status: {{ task.status }}</p>
           <p class="card-text">Priority: {{ task.priority }}</p>
+          <form method="post" action="{% url 'update_task' task.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_status">
+            <select name="status">
+                {% for status, status_display in task.STATUS_CHOICES %}
+                    <option value="{{ status }}" {% if task.status == status %}selected{% endif %}>
+                        {{ status_display }}
+                    </option>
+                {% endfor %}
+            </select>
+            <button type="submit">Update Status</button>
+        </form>
+        <form method="post" action="{% url 'update_task' task.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="update_priority">
+          <select name="priority">
+              {% for priority, priority_display in task.PRIORITY_CHOICES %}
+                  <option value="{{ priority }}" {% if task.priority == priority %}selected{% endif %}>
+                      {{ priority_display }}
+                  </option>
+              {% endfor %}
+          </select>
+          <button type="submit">Update Priority</button>
+        </form>
+        
+
         </div>
       </div>
     </div>

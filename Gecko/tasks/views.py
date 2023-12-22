@@ -114,6 +114,7 @@ def add_members(request, pk):
     """ Add new members to the team"""
     team = Team.objects.get(pk=pk)
     if request.user != team.admin:
+        messages.error(request, 'Only the admin can add members.')
         return redirect('team_detail')
     existing_member_ids = team.members.values_list('id', flat=True)
     if request.method == 'POST':
@@ -122,6 +123,7 @@ def add_members(request, pk):
             new_members = form.cleaned_data['new_members']
             for member in new_members:
                 if member not in team.members.all():
+                    messages.success(request, 'Invite to join team has been sent.')
                     member.invites.add(team)
             return redirect('team_detail', pk=pk)
     else:

@@ -8,7 +8,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import redirect, render
 from django.views.generic import View, FormView, UpdateView, DeleteView
 from django.urls import reverse, reverse_lazy
-from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, TeamSelectForm, TaskFilterForm, AssignNewAdminForm, AddMembersForm, RemoveMembersForm
+from tasks.forms import LogInForm, PasswordForm, UserForm, SignUpForm, TaskForm, TeamForm, TeamSelectForm, TaskFilterForm, AssignNewAdminForm, AddMembersForm, RemoveMembersForm,InviteTeamMembersForm
 from tasks.helpers import login_prohibited
 from tasks.models import Task, Team, User
 import random
@@ -17,10 +17,11 @@ import random
 def dashboard(request):
     """Display the current user's dashboard."""
 
-    current_user =User.objects.get(username = request.user)
+    current_user = User.objects.get(username = request.user)
+    user_teams = Team.objects.filter(members=request.user)
     context = {
         'user': current_user,
-        'user_teams': current_user.teams.all()
+        'user_teams': user_teams,
     }
 
     return render(request, 'dashboard.html', context)
@@ -113,15 +114,15 @@ def add_members(request, pk):
     """ Add new members to the team"""
     team = Team.objects.get(pk=pk)
     if request.user != team.admin:
-        messages.error(request, 'Only the admin can add members.')
         return redirect('team_detail')
     existing_member_ids = team.members.values_list('id', flat=True)
     if request.method == 'POST':
         form = AddMembersForm(request.POST, team_members=existing_member_ids)
         if form.is_valid():
             new_members = form.cleaned_data['new_members']
-            team.members.add(*new_members)
-            messages.success(request, 'Members added successfully.')
+            for member in new_members:
+                if member not in team.members.all():
+                    member.invites.add(team)
             return redirect('team_detail', pk=pk)
     else:
         form = AddMembersForm(team_members=existing_member_ids)
@@ -139,6 +140,7 @@ def remove_members(request, pk):
             members_to_remove = form.cleaned_data['members_to_remove']
             for member in members_to_remove:
                 team.members.remove(member)
+                member.teams.remove(team)
                 messages.success(request, f'{member} removed from team.')
             return redirect('team_detail', pk=pk)
     else:

@@ -137,7 +137,8 @@ class TeamForm(forms.ModelForm):
                 member.invites.add(team)
         
         return team
-
+    
+#can be deleteed?
 class AddMembersForm(forms.Form):
     """ Form for adding a user to a team """
     new_members = forms.ModelMultipleChoiceField(
@@ -150,6 +151,17 @@ class AddMembersForm(forms.Form):
         team_members = kwargs.pop('team_members')
         super().__init__(*args, **kwargs)
         self.fields['new_members'].queryset = User.objects.exclude(id__in=team_members)
+
+class InviteTeamMembersForm(forms.ModelForm):
+    class Meta:
+        """Form options."""
+        model= Team
+        fields=['members']
+    def save(self,team):
+        super().save(commit=False)
+        for member in self.cleaned_data.get('members').all():
+            if member not in team.members.all():
+                member.invites.add(team)
 
 class RemoveMembersForm(forms.Form):
     """ Form for removing members from a team """

@@ -66,7 +66,7 @@ class Task(models.Model):
         null= False,
     )
     
-    
+       
     STATUS_CHOICES = [
         ('assigned', 'Assigned'),
         ('in progress', 'In Progress'),

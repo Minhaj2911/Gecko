@@ -28,6 +28,7 @@ class TaskTest(TestCase):
             title= 'Project meeting',
             description= 'Conduct a meeting to discuss the new project design',
             assignee= self.user,
+            team_of_task= self.team,
             due_date= timezone.now() + timezone.timedelta(days= 3),
             status= 'assigned',
             priority= 1
@@ -98,6 +99,10 @@ class TaskTest(TestCase):
         invalid_date= timezone.now() - timedelta(days= 22)
         self.task.due_date= invalid_date
         self._assert_task_is_invalid(self.task)
+    
+    def test_valid_team_of_task(self):
+        self.task.team_of_task= self.team
+        self._assert_task_is_valid(self.task)
 
     def _assert_task_is_valid(self, task):
         try:

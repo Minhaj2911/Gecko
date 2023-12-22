@@ -10,6 +10,8 @@
           <p class="card-text">Team: {{ task.team_of_task }}</p>
           <p class="card-text">Status: {{ task.status }}</p>
           <p class="card-text">Priority: {{ task.priority }}</p>
+          <a href="{% url 'task_edit' task.id %}" class="btn btn-secondary btn-block"><i class="bi bi-justify-left"></i>Edit</a>
+          <a href="{% url 'task_delete' task.id %}" class="btn btn-secondary btn-block"><i class="bi bi-justify-left"></i>Delete</a>
         </div>
       </div>
     </div>

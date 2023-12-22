@@ -259,7 +259,7 @@ def task_description(request, pk):
     task = Task.objects.get(pk=pk)
     return render(request, 'task_description.html', {'task': task})
 
-class TaskEditView(UpdateView):
+class TaskEditView(LoginRequiredMixin, UpdateView):
     """ Edit all current task details. """""
     model = Task
     fields = ['title', 'description', 'assignee', 'due_date', 'status', 'priority']

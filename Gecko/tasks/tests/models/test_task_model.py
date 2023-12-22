@@ -31,7 +31,8 @@ class TaskTest(TestCase):
             team_of_task= self.team,
             due_date= timezone.now() + timezone.timedelta(days= 3),
             status= 'assigned',
-            priority= 1
+            priority= 1,
+            team_of_task = self.team
         )
     
     def test_title_cannot_be_blank(self):

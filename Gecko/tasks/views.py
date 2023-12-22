@@ -49,11 +49,13 @@ def task_dashboard(request):
             tasks = tasks.filter(status=form.cleaned_data['status'])
         if form.cleaned_data['due_date']:
             tasks = tasks.filter(due_date=form.cleaned_data['due_date'])
+        if form.cleaned_data['team_of_task']:
+            tasks = tasks.filter(team_of_task=form.cleaned_data['team_of_task'])
         if form.cleaned_data.get('priority'):
             tasks = tasks.filter(priority=form.cleaned_data['priority'])
 
         sort_by = request.GET.get('sort_by', 'due_date')
-        if sort_by in ['title', 'status', 'due_date', 'assignee__username', 'priority', '-priority']:
+        if sort_by in ['title', 'status', 'due_date', 'priority', '-priority']:
             tasks = tasks.order_by(sort_by)
 
     return render(request, 'task_dashboard.html', {'tasks': tasks, 'form': form})
@@ -65,7 +67,7 @@ class TeamCreateView(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
         self.object = form.save(self.request)
-        messages.add_message(self.request, messages.SUCCESS, "Team Created!")
+        messages.add_message(self.request, messages.SUCCESS, "Team Created! Member Invites have been sent.")
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -119,6 +121,7 @@ def add_members(request, pk):
     """ Add new members to the team"""
     team = Team.objects.get(pk=pk)
     if request.user != team.admin:
+        messages.error(request, 'Only the admin can add members.')
         return redirect('team_detail')
     existing_member_ids = team.members.values_list('id', flat=True)
     if request.method == 'POST':
@@ -127,6 +130,7 @@ def add_members(request, pk):
             new_members = form.cleaned_data['new_members']
             for member in new_members:
                 if member not in team.members.all():
+                    messages.success(request, 'Invite to join team has been sent.')
                     member.invites.add(team)
             return redirect('team_detail', pk=pk)
     else:
@@ -202,27 +206,6 @@ def team_detail(request, pk):
         'is_admin': is_admin,
     }
     return render(request, 'team_detail.html', context)
-        
-class InvitesView(LoginRequiredMixin, View):
-    def team_invites(request):
-        user_invites = request.user.invites.all()
-        return render(request, 'invites.html', {'user_invites': user_invites})
-    
-    def join_team(request, team):
-        team = Team.objects.get(name=team)
-
-        request.user.teams.add(team)
-        request.user.invites.remove(team)
-        team.members.add(request.user)
-        messages.add_message(request, messages.SUCCESS , f"Joined Team {team} successfully")
-        return InvitesView.team_invites(request)
-        
-
-    def reject_invite(request, team):
-        team = Team.objects.get(name=team)
-        request.user.invites.remove(team)
-        messages.add_message(request, messages.SUCCESS , f"Rejected Team {team} successfully")
-        return InvitesView.team_invites(request)
     
 class TaskCreateView(LoginRequiredMixin, View):
     template_name = 'create_task.html'

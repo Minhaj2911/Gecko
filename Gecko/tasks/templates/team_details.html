@@ -1,23 +1,18 @@
 {% extends 'base_content.html' %}
 {% block content %}
 <div>
-    <h1>{{ team.name }}</h1>
-    <p>Description: {{ team.description }}</p>
-    <p>Admin: {{ team.admin.username }}</p>
+    <h1 style="color:white">{{ team.name }}</h1>
+    <p style="color:white">Description: {{ team.description }}</p>
+    <p style="color:white">Admin: {{ team.admin.username }}</p>
 
-    <h3>Members</h3>
+    <h3 style="color:white">Members</h3>
     <ul>
         {% for member in team.members.all %}
             <li>{{ member.username }}</li>
         {% endfor %}
     </ul>
 
-    <h3>Tasks</h3>
-    <ul>
-        {% for task in tasks %}
-            <li>{{ task.title }} - {{ task.status }}</li>
-        {% endfor %}
-    </ul>
+    
 
     {% if is_admin %}
     <a href="{% url 'assign_new_admin' team.id %}">Transfer Admin Role</a>
@@ -35,3 +30,10 @@
     </form>
 </div>
 {% endblock %}
+
+<!-- <h3>Tasks</h3>
+    <ul>
+        {% for task in tasks %}
+            <li>{{ task.title }} - {{ task.status }}</li>
+        {% endfor %}
+    </ul> -->

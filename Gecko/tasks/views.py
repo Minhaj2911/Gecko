@@ -49,15 +49,13 @@ def task_dashboard(request):
             tasks = tasks.filter(status=form.cleaned_data['status'])
         if form.cleaned_data['due_date']:
             tasks = tasks.filter(due_date=form.cleaned_data['due_date'])
-        if form.cleaned_data['assignee']:
-            tasks = tasks.filter(assignee=form.cleaned_data['assignee'])
         if form.cleaned_data['team_of_task']:
             tasks = tasks.filter(team_of_task=form.cleaned_data['team_of_task'])
         if form.cleaned_data.get('priority'):
             tasks = tasks.filter(priority=form.cleaned_data['priority'])
 
         sort_by = request.GET.get('sort_by', 'due_date')
-        if sort_by in ['title', 'status', 'due_date', 'assignee__username', 'priority', '-priority']:
+        if sort_by in ['title', 'status', 'due_date', 'priority', '-priority']:
             tasks = tasks.order_by(sort_by)
 
     return render(request, 'task_dashboard.html', {'tasks': tasks, 'form': form})

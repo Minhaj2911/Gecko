@@ -110,23 +110,23 @@ def transfer_admin(request, pk):
         form = AssignNewAdminForm(team_members=team.members.exclude(id=request.user.id))
     return render(request, 'assign_new_admin.html', {'form': form, 'team': team})
 
-def invite_team_members(request, pk):
+def add_members(request, pk):
     """ Add new members to the team"""
     team = Team.objects.get(pk=pk)
     if request.user != team.admin:
-        messages.error(request, 'Only the admin can add members.')
         return redirect('team_detail')
     existing_member_ids = team.members.values_list('id', flat=True)
     if request.method == 'POST':
-        form = InviteTeamMembersForm(team)
+        form = AddMembersForm(request.POST, team_members=existing_member_ids)
         if form.is_valid():
             new_members = form.cleaned_data['new_members']
-            team.members.add(*new_members)
-            messages.success(request, 'Members added successfully.')
+            for member in new_members:
+                if member not in team.members.all():
+                    member.invites.add(team)
             return redirect('team_detail', pk=pk)
     else:
-        form = InviteTeamMembersForm(team)
-    return render(request, 'invite_team_members.html', {'invite_form': form, 'team': team})
+        form = AddMembersForm(team_members=existing_member_ids)
+    return render(request, 'add_members.html', {'form': form, 'team': team})
 
 def remove_members(request, pk):
     """ Remove members from a team. """

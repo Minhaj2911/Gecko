@@ -6,7 +6,7 @@
       <div class="card cover-card offset-sm-0 offset-md-0 offset-lg-0 mb-3">
         <h1>Invite Members</h1>
           
-            <form action="{% url 'invite_team_members' team=team %}" method="post">
+            <form action="{% url 'invite_team_members' pk=team %}" method="post">
               {% csrf_token %}
               {% include 'partials/bootstrap_form.html' with form=invite_form %}
               <input type="submit" value="Add" class="btn btn-primary">

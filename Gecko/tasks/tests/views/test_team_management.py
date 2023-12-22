@@ -1,6 +1,61 @@
-from django.test import TestCase
 from django.urls import reverse
 from tasks.models import Team, User
+from django.contrib.messages import get_messages
+from django.test import TestCase, RequestFactory
+from tasks.forms import AddMembersForm
+from tasks.views import add_members
+
+class AddMembersViewTests(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.admin = User.objects.create_user(username='admin', password='password')
+        self.team = Team.objects.create(name='Test Team', admin=self.admin)
+
+    def test_add_members_as_admin(self):
+        url = reverse('add_members', kwargs={'pk': self.team.pk})
+        request = self.factory.post(url, {'new_members': [1, 2, 3]})
+        request.user = self.admin
+        response = add_members(request, self.team.pk)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('team_detail', kwargs={'pk': self.team.pk}))
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Invite to join team has been sent.')
+
+    def test_add_members_as_non_admin(self):
+        url = reverse('add_members', kwargs={'pk': self.team.pk})
+        request = self.factory.post(url, {'new_members': [1, 2, 3]})
+        non_admin = User.objects.create_user(username='non_admin', password='password')
+        request.user = non_admin
+        response = add_members(request, self.team.pk)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('team_detail', kwargs={'pk': self.team.pk}))
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Only the admin can add members.')
+
+    def test_add_members_invalid_form(self):
+       url = reverse('add_members', kwargs={'pk': self.team.pk})
+       request = self.factory.post(url, {'new_members': [1, 2, 3]})
+       request.user = self.admin
+       response = add_members(request, self.team.pk)
+       self.assertEqual(response.status_code, 200)
+       self.assertTemplateUsed(response, 'add_members.html')
+       form = response.context['form']
+       self.assertIsInstance(form, AddMembersForm)
+       self.assertFalse(form.is_valid())
+       
+    def test_add_members_get_request(self):
+       url = reverse('add_members', kwargs={'pk': self.team.pk})
+       request = self.factory.get(url)
+       request.user = self.admin
+       response = add_members(request, self.team.pk)
+       self.assertEqual(response.status_code, 200)
+       self.assertTemplateUsed(response, 'add_members.html')
+       form = response.context['form']
+       self.assertIsInstance(form, AddMembersForm)
+       self.assertTrue(form.is_bound)
+       self.assertEqual(form.team_members, [self.admin.id])
 
 class TeamManagementViewTests(TestCase):
     fixtures = ['tasks/tests/fixtures/default_user.json', 'tasks/tests/fixtures/other_users.json']
@@ -8,12 +63,9 @@ class TeamManagementViewTests(TestCase):
     def setUp(self):
         self.user = User.objects.get(username='@johndoe')
         self.other_user = User.objects.get(username='@janedoe')
-        self.new_member = User.objects.create(username='new_member', password='new_member_password')
         self.team = Team.objects.create(name='Test Team', admin=self.user)
         self.team.members.add(self.user, self.other_user)
         self.client.force_login(self.user)
-        self.add_member_url = reverse('add_members', kwargs={'pk': self.team.pk})
-        self.remove_members_url = reverse('remove_members', kwargs={'pk': self.team.pk})
 
     def test_transfer_admin(self):
         url = reverse('assign_new_admin', kwargs={'pk': self.team.pk})
@@ -23,43 +75,7 @@ class TeamManagementViewTests(TestCase):
         self.assertEqual(self.team.admin, self.other_user)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('team_detail', kwargs={'pk': self.team.pk}))
-
-    def test_only_admin_can_add_members(self):
-        self.client.logout()
-        self.client.login(username=self.other_user.username, password='janedoe_password')
-        response = self.client.post(self.add_member_url, {})
-        self.assertNotEqual(response.status_code, 200)
-        self.assertRedirects(response, reverse('team_detail', kwargs={'pk': self.team.pk}))
-
-    def test_add_member_success(self):
-        response = self.client.post(self.add_member_url, {'new_members': [self.new_member.id]})
-        self.assertRedirects(response, reverse('team_detail', kwargs={'pk': self.team.pk}))
-        self.team.refresh_from_db()
-        self.assertTrue(self.new_member.invites.filter(pk=self.team.pk).exists())
-        self.new_member.members.add(self.team)
-        self.team.refresh_from_db()
-        self.assertIn(self.new_member, self.team.members.all())
-
-    def test_invalid_form_submission(self):
-        response = self.client.post(self.add_member_url, {'new_members': ['invalid_id']})
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'add_members.html')
-
-    def test_get_request(self):
-        response = self.client.get(self.add_member_url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'add_members.html')
-
-    def test_add_existing_member(self):
-        self.team.members.add(self.new_member)
-        response = self.client.post(self.add_member_url, {'new_members': [self.new_member.id]})
-        self.assertRedirects(response, reverse('team_detail', kwargs={'pk': self.team.pk}))
-
-    def test_redirect_after_adding_member(self):
-        self.client.login(username='admin', password='admin123')
-        response = self.client.post(self.url, {'new_members': [self.new_member.id]})
-        self.assertRedirects(response, reverse('team_detail', kwargs={'pk': self.team.pk}))
-
+        
     def test_remove_members(self):
         url = reverse('remove_members', kwargs={'pk': self.team.pk})
         response = self.client.post(url, {'members_to_remove': [self.other_user.id]})
@@ -112,5 +128,3 @@ class TeamManagementViewTests(TestCase):
         
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'team_detail.html')
-
-

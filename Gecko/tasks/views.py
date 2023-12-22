@@ -17,10 +17,11 @@ import random
 def dashboard(request):
     """Display the current user's dashboard."""
 
-    current_user =User.objects.get(username = request.user)
+    current_user = User.objects.get(username = request.user)
+    user_teams = Team.objects.filter(members=request.user)
     context = {
         'user': current_user,
-        'user_teams': current_user.teams.all()
+        'user_teams': user_teams,
     }
 
     return render(request, 'dashboard.html', context)
